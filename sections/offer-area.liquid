@@ -1,0 +1,94 @@
+<section
+  class="offer_area bg-white py-16 md:py-20 bg-cover bg-center bg-no-repeat"
+  style="
+    {% if section.settings.bg_image != blank %}
+      background-image: url({{ section.settings.bg_image | image_url }});
+    {% endif %}
+  "
+>
+  <div class="container mx-auto px-4">
+    <div class="flex justify-end ">
+      <div class="w-full md:w-2/3 lg:w-1/2 text-center rounded-md p-8">
+        <div class="offer_content">
+          {% if section.settings.heading != blank %}
+            <h3 class="uppercase mb-2 text-xs md:text-2xl font-normal text-gray-700 tracking-wide">
+              {{ section.settings.heading }}
+            </h3>
+          {% endif %}
+
+          {% if section.settings.discount_text != blank %}
+            <h2 class="uppercase text-5xl md:text-7xl lg:text-8xl font-bold text-[#2A2A2A] leading-tight">
+              {{ section.settings.discount_text }}
+            </h2>
+          {% endif %}
+
+          {% if section.settings.button_text != blank and section.settings.button_link != blank %}
+            <a
+              href="{{ section.settings.button_link }}"
+              class="inline-block mb-5 mt-5 px-8 py-3 bg-[#71cd13] text-white uppercase font-medium text-xs md:text-sm rounded-md hover:bg-transparent hover:text-[#71cd13] border border-[#71cd13] transition-colors duration-300 no-underline"
+            >
+              {{ section.settings.button_text }}
+            </a>
+          {% endif %}
+
+          {% if section.settings.disclaimer != blank %}
+            <p class="text-xs md:text-sm text-gray-600 font-normal">
+              {{ section.settings.disclaimer }}
+            </p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Offer Area",
+  "tag": "section",
+  "class": "offer_area",
+  "settings": [
+    {
+      "type": "image_picker",
+      "id": "bg_image",
+      "label": "Background Image",
+      "info": "Select a background image for this offer section."
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "all men's collection"
+    },
+    {
+      "type": "text",
+      "id": "discount_text",
+      "label": "Discount Text",
+      "default": "50% off"
+    },
+    {
+      "type": "text",
+      "id": "button_text",
+      "label": "Button Text",
+      "default": "Discover Now"
+    },
+    {
+      "type": "url",
+      "id": "button_link",
+      "label": "Button Link",
+      "default": "/collections/all"
+    },
+    {
+      "type": "text",
+      "id": "disclaimer",
+      "label": "Disclaimer Text",
+      "default": "Limited Time Offer"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Offer Area"
+    }
+  ]
+}
+{% endschema %}

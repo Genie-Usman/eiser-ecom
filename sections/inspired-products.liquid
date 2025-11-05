@@ -1,0 +1,85 @@
+<section class="py-16 md:py-20 px-15">
+  <div class="container mx-auto px-4">
+    <div class="flex justify-center mb-12 md:mb-16">
+      <div class="text-center max-w-2xl px-4 ">
+        <h2 class="text-[18px] md:text-[20px] font-bold mb-3 leading-tight">
+          <span class="text-black uppercase">{{ section.settings.title | default: 'INSPIRED PRODUCTS' }}</span>
+        </h2>
+        <div class="flex justify-center">
+          <div class="border-b border-gray-300 w-55"></div>
+        </div>
+        <p class="text-gray-500 text-xs mt-5 md:text-[14px]">
+          {{ section.settings.description | default: 'Bring called seed first of third give itself now ment' }}
+        </p>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
+      {% if section.blocks.size > 0 %}
+        {% for block in section.blocks %}
+          {% assign b_product = all_products[block.settings.product] %}
+          <div {{ block.shopify_attributes }}>
+            {% if b_product %}
+              {% render 'product-card-small', product: b_product %}
+            {% else %}
+              {% render 'product-card-placeholder' %}
+            {% endif %}
+          </div>
+        {% endfor %}
+      {% else %}
+        {% for i in (1..8) %}
+          {% render 'product-card-placeholder' %}
+        {% endfor %}
+      {% endif %}
+    </div>
+  </div>
+
+  {% schema %}
+    {
+      "name": "Inspired Products",
+      "tag": "section",
+      "class": "inspired_products_area",
+      "max_blocks": 8,
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Title",
+          "default": "INSPIRED PRODUCTS"
+        },
+        {
+          "type": "text",
+          "id": "description",
+          "label": "Description",
+          "default": "Bring called seed first of third give itself now ment"
+        }
+      ],
+      "blocks": [
+        {
+          "type": "small_product",
+          "name": "Product",
+          "settings": [
+            { "type": "product", "id": "product", "label": "Product" }
+          ]
+        }
+      ],
+      "presets": [
+        {
+          "name": "Inspired Products",
+          "blocks": [
+            { "type": "small_product" },
+            { "type": "small_product" },
+            { "type": "small_product" },
+            { "type": "small_product" },
+            { "type": "small_product" },
+            { "type": "small_product" },
+            { "type": "small_product" },
+            { "type": "small_product" }
+          ]
+        }
+      ]
+    }
+  {% endschema %}
+</section>
+
+

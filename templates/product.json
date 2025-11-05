@@ -1,0 +1,16 @@
+{
+  "sections": {
+    "banner": {
+      "type": "product-banner",
+      "settings": {}
+    },
+    "main": {
+      "type": "product",
+      "settings": {}
+    }
+  },
+  "order": [
+     "banner",
+    "main"
+  ]
+}

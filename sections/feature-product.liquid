@@ -1,0 +1,158 @@
+<section class="py-16 md:py-20">
+  <div class="container mx-auto px-4">
+    {% comment %} Title Section {% endcomment %}
+    <div class="flex justify-center mb-12 md:mb-16">
+      <div class="text-center max-w-2xl px-4 ">
+        <h2 class="text-[18px] md:text-[20px] font-bold mb-3 leading-tight">
+          <span class="text-black uppercase">{{ section.settings.title }}</span>
+        </h2>
+        <div class="flex justify-center">
+          <div class="border-b border-gray-300 w-55"></div>
+        </div>
+        <p class="text-gray-500 text-xs mt-5 md:text-[14px]">
+          {{ section.settings.description | default: 'Bring called seed first of third give itself now ment' }}
+        </p>
+      </div>
+    </div>
+
+    {% comment %} Products Grid {% endcomment %}
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 px-15">
+      {% if section.settings.product_list != blank and section.settings.product_list.size > 0 %}
+        {% for product in section.settings.product_list %}
+          <div class="single-product flex flex-col bg-white border border-gray-200 group relative overflow-hidden">
+            <div class="product-img relative overflow-hidden bg-white">
+              {% if product.featured_image %}
+                <img
+                  class="w-full h-auto object-contain transition-transform duration-300 group-hover:scale-105"
+                  src="{{ product.featured_image | image_url: width: 600 }}"
+                  alt="{{ product.featured_image.alt | escape }}"
+                  loading="lazy"
+                  width="600"
+                  height="600" />
+              {% else %}
+                <div class="w-full aspect-square bg-gray-50 flex items-center justify-center">
+                  <span class="text-gray-400">No image</span>
+                </div>
+              {% endif %}
+
+              {% comment %} Hover Icons Bar - Appears over image on hover {% endcomment %}
+              <div class="h-12 absolute bottom-0 left-1/2 -translate-x-1/2 w-[80%] bg-[#BDE399] flex items-center justify-center gap-6 py-3 opacity-0 group-hover:opacity-100 z-10 transform translate-y-full group-hover:translate-y-0 transition-all duration-300">
+                <a
+                  href="{{ product.url }}"
+                  class="w-9 h-9 bg-white rounded-full flex items-center justify-center text-black transition-colors duration-400 hover:bg-[#71cd13]"
+                  aria-label="View {{ product.title }}">
+                  {% render 'icon-eye' %}
+                </a>
+                <a
+                  href="{{ product.url }}"
+                  class="w-9 h-9 bg-white rounded-full flex items-center justify-center text-black transition-colors duration-400 hover:bg-[#71cd13]"
+                  aria-label="Add {{ product.title }} to wishlist">
+                  {% render 'icon-heart' %}
+                </a>
+                <a
+                  href="{{ product.url }}"
+                  class="w-9 h-9 bg-white rounded-full flex items-center justify-center text-black transition-colors duration-400 hover:bg-[#71cd13]"
+                  aria-label="Add {{ product.title }} to cart">
+                  {% render 'icon-cart' %}
+                </a>
+              </div>
+            </div>
+
+            <div class="product-btm p-5">
+              <a href="{{ product.url }}" class="block mb-2">
+                <h4 class="text-[14px] md:text-[13px]  text-[#4A4A4A] group-hover:text-[#71cd13] transition-colors leading-tight">
+                  {{ product.title | upcase }}
+                </h4>
+              </a>
+              <div class="mt-3 flex items-center gap-4">
+                <span class="text-base font-semibold text-black">
+                  {{ product.price | money }}
+                </span>
+                {% if product.compare_at_price > product.price %}
+                  <del class="text-gray-400 text-sm font-normal">
+                    {{ product.compare_at_price | money }}
+                  </del>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      {% else %}
+        {% comment %} Default placeholder products {% endcomment %}
+        {% for i in (1..3) %}
+          <div class="single-product flex flex-col bg-white border border-gray-200 group relative overflow-hidden">
+            <div class="product-img relative overflow-hidden bg-white">
+              <div class="w-full aspect-square bg-gray-50 flex items-center justify-center">
+                <span class="text-gray-400">Product {{ i }}</span>
+              </div>
+              <div class="h-12 absolute bottom-0 left-1/2 -translate-x-1/2 w-[80%] bg-[#BDE399] flex items-center justify-center gap-6 py-3 opacity-0 group-hover:opacity-100 z-10 transform translate-y-full group-hover:translate-y-0 transition-all duration-300">
+                <a
+                  href="{{ product.url }}"
+                  class="w-9 h-9 bg-white rounded-full flex items-center justify-center text-black transition-colors duration-400 hover:bg-[#71cd13]"
+                  aria-label="View {{ product.title }}">
+                  {% render 'icon-eye' %}
+                </a>
+                <a
+                  href="{{ product.url }}"
+                  class="w-9 h-9 bg-white rounded-full flex items-center justify-center text-black transition-colors duration-400 hover:bg-[#71cd13]"
+                  aria-label="Add {{ product.title }} to wishlist">
+                  {% render 'icon-heart' %}
+                </a>
+                <a
+                  href="{{ product.url }}"
+                  class="w-9 h-9 bg-white rounded-full flex items-center justify-center text-black transition-colors duration-400 hover:bg-[#71cd13]"
+                  aria-label="Add {{ product.title }} to cart">
+                  {% render 'icon-cart' %}
+                </a>
+              </div>
+            </div>
+            <div class="product-btm p-5">
+              <a href="#" class="block mb-2">
+                <h4 class="text-[14px] md:text-base font-semibold text-black hover:text-[#71cd13] transition-colors leading-tight">
+                  Product {{ i }}
+                </h4>
+              </a>
+              <div class="mt-3 flex items-center gap-4">
+                <span class="text-base font-semibold text-black">$25.00</span>
+                <del class="text-gray-400 text-sm font-normal">$35.00</del>
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      {% endif %}
+    </div>
+  </div>
+</section>
+
+{% schema %}
+  {
+    "name": "Featured Products",
+    "tag": "section",
+    "class": "feature_product_area",
+    "settings": [
+      {
+        "type": "text",
+        "id": "title",
+        "label": "Title",
+        "info": "Title of the section",
+        "default": "Featured Products"
+      }, {
+        "type": "product_list",
+        "id": "product_list",
+        "label": "Products",
+        "limit": 6,
+        "info": "Select up to 6 products to display as featured products"
+      }, {
+        "type": "text",
+        "id": "description",
+        "label": "Description",
+        "default": "Bring called seed first of third give itself now ment"
+      }
+    ],
+    "presets": [
+      {
+        "name": "Featured Products"
+      }
+    ]
+  }
+{% endschema %}

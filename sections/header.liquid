@@ -1,0 +1,195 @@
+<header class="relative w-full top-0 left-0 z-99 transition-colors duration-300">
+  <!-- Top Bar -->
+  <div class="hidden md:block bg-neutral-100 h-[30px] leading-4">
+    <div class="container mx-auto px-4">
+      <div class="flex items-center justify-between px-25">
+        <div>
+          <div>
+            {% if section.settings.top_phone != blank %}
+              <p class="inline-block leading-[15px] text-[#4a4a4a] text-[11px] font-normal uppercase m-0 border-r border-neutral-400 pr-[19px]">{{ section.settings.top_phone }}</p>
+            {% endif %}
+            {% if section.settings.top_email != blank %}
+              <p class="inline-block leading-[15px] text-[#4a4a4a] text-[11px] font-normal uppercase m-0 px-[19px]">{{ section.settings.top_email }}</p>
+            {% endif %}
+          </div>
+        </div>
+
+        <div>
+          <ul class="flex items-center py-2 space-x-4">
+            {% if section.settings.util_1_label != blank and section.settings.util_1_link != blank %}
+              <li>
+                <a class="text-[11px] text-[#4a4a4a] border-r pr-[19px] border-neutral-400 uppercase hover:text-[#71cd13]" href="{{ section.settings.util_1_link }}">{{ section.settings.util_1_label }}</a>
+              </li>
+            {% endif %}
+            {% if section.settings.util_2_label != blank and section.settings.util_2_link != blank %}
+              <li>
+                <a class="text-[11px] text-[#4a4a4a] border-r pr-[19px] border-neutral-400 uppercase hover:text-[#71cd13]" href="{{ section.settings.util_2_link }}">{{ section.settings.util_2_label }}</a>
+              </li>
+            {% endif %}
+            {% if section.settings.util_3_label != blank and section.settings.util_3_link != blank %}
+              <li>
+                <a class="text-[11px] text-[#4a4a4a] uppercase hover:text-[#71cd13]" href="{{ section.settings.util_3_link }}">{{ section.settings.util_3_label }}</a>
+              </li>
+            {% endif %}
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Menu -->
+  <div class="bg-white sticky left-0 w-full border-t border-[#dddddd61]">
+    <div class="container mx-auto px-4">
+      <div class="flex justify-between items-center py-1 px-25">
+        <!-- Logo -->
+        <a class="flex items-center" href="{{ routes.root_url }}">
+          {% if section.settings.logo != blank %}
+            <img
+              class="max-h-10 w-35"
+              src="{{ section.settings.logo | image_url: width: 2000 }}"
+              alt="{{ shop.name | escape }}"
+              height="50"
+              width="240">
+          {% else %}
+            <span class="text-lg font-semibold">{{ shop.name | escape }}</span>
+          {% endif %}
+        </a>
+
+        <nav class="hidden md:flex space-x-10">
+          {% for link in linklists.main-menu-1.links %}
+            {% if link.links != blank %}
+              <div
+                x-data="{ open: false }"
+                @mouseenter="open = true"
+                @mouseleave="open = false"
+                class="relative">
+                <button type="button" class="inline-flex items-center uppercase text-[13px] text-neutral-900 hover:text-[#71cd13] cursor-pointer">
+                  {{ link.title }}
+                </button>
+
+                <div
+                  x-show="open"
+                  x-transition
+                  class="absolute ml-24 z-10 transform px-2 w-55 max-w-md sm:px-0 lg:left-1/2 lg:-translate-x-1/2">
+                  <div class=" overflow-hidden">
+                    <div class="h-2 bg-white"></div>
+                    {% for child_link in link.links %}
+                      <a href="{{ child_link.url }}" class="border-gray-200 border-b h-12 p-4 flex bg-white items-start hover:text-white hover:bg-[#71cd13]">
+                        <div class="ml-3">
+                          <p class="text-gray-900 text-[13px] uppercase">
+                            {{ child_link.title }}
+                          </p>
+                        </div>
+                      </a>
+                    {% endfor %}
+                  </div>
+                </div>
+              </div>
+            {% else %}
+              <div class="relative">
+                <a href="{{ link.url }}" class="text-[13px] uppercase text-neutral-900 hover:text-[#71cd13]">{{ link.title }}</a>
+              </div>
+            {% endif %}
+          {% endfor %}
+        </nav>
+
+        <!-- Icons -->
+        <ul class="flex items-center space-x-4 [&_svg]:w-[18px] [&_svg]:h-[18px]">
+          <li>
+            <a href="{{ routes.search_url }}" class="p-2 hover:text-[#71cd13]">
+              {% render 'icon-search' %}
+            </a>
+          </li>
+          <li class="relative">
+            <a href="{{ routes.cart_url }}" class="text-base p-2 hover:text-[#71cd13]">
+              {% render 'icon-cart' %}
+              {% if cart.item_count > 0 %}
+                <sup class="absolute -top-2 right-0 bg-[#71cd13] text-white text-xs rounded-full px-1">{{ cart.item_count }}</sup>
+              {% endif %}
+            </a>
+          </li>
+          {% if shop.customer_accounts_enabled %}
+            <li>
+              <a href="{{ routes.account_url }}" class="text-base p-2 hover:text-[#71cd13]">
+                {% render 'icon-account' %}
+              </a>
+            </li>
+          {% endif %}
+          {% comment %} {% if section.settings.wishlist_enabled and section.settings.wishlist_link != blank %} {% endcomment %}
+          <li>
+            <a href="{{ section.settings.wishlist_link }}" class="text-base p-2 hover:text-[#71cd13]">
+              {% render 'icon-heart' %}
+            </a>
+          </li>
+        {% comment %} {% endif %} {% endcomment %}
+        </ul>
+      </div>
+    </div>
+  </div>
+</header>
+
+{% schema %}
+  {
+    "name": "Header",
+    "settings": [
+      {
+        "type": "image_picker",
+        "id": "logo",
+        "label": "Logo"
+      },
+      {
+        "type": "link_list",
+        "id": "menu",
+        "label": "Menu"
+      },
+      {
+        "type": "text",
+        "id": "top_phone",
+        "label": "Phone Number",
+        "default": "Phone: +01 256 25 235"
+      },
+      {
+        "type": "text",
+        "id": "top_email",
+        "label": "Email",
+        "default": "email: info@eiser.com"
+      }, {
+        "type": "text",
+        "id": "util_1_label",
+        "label": "Utility 1",
+        "default": "gift card"
+      }, {
+        "type": "url",
+        "id": "util_1_link",
+        "label": "Utility 1 Link"
+      }, {
+        "type": "text",
+        "id": "util_2_label",
+        "label": "Utility 2",
+        "default": "track order"
+      }, {
+        "type": "url",
+        "id": "util_2_link",
+        "label": "Utility 2 Link"
+      }, {
+        "type": "text",
+        "id": "util_3_label",
+        "label": "Utility 3",
+        "default": "Contact us"
+      }, {
+        "type": "url",
+        "id": "util_3_link",
+        "label": "Utility 3 Link"
+      }, {
+        "type": "checkbox",
+        "id": "wishlist_enabled",
+        "label": "Enable Wishlist",
+        "default": false
+      }, {
+        "type": "url",
+        "id": "wishlist_link",
+        "label": "Wishlist Link"
+      }
+    ]
+  }
+{% endschema %}

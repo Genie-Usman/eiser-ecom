@@ -1,0 +1,92 @@
+<div 
+  class="h-full flex items-center justify-center py-12 px-6 md:px-4 lg:px-8"
+>
+  <!-- Register Form -->
+  <div class="max-w-md w-full space-y-8">
+    <div>
+      <h1 class="text-center text-3xl font-bold mt-6">Create an account</h1>
+    </div>
+
+    <div class="mt-8">
+      {% form 'create_customer' %}
+        {% if form.errors %}
+          <div class="border border-red-400 bg-red-100 text-red-700 px-4 py-3 rounded-md" role="alert">
+            <strong class="font-bold">Login not successful!</strong>
+            <p class="block sm:inline">{{ form.errors | default_errors }}</p>
+          </div>
+        {% endif %}
+
+        <div class="my-2">
+          <label for="first_name" class="sr-only">First Name</label>
+          <input
+            type="text"
+            name="customer[first_name]"
+            id="first_name"
+            autocomplete="given-name"
+            class="block w-full px-3 py-2 border rounded-md focus:outline-none focus:ring focus:ring-gray-400"
+            placeholder="First Name"
+            required
+          >
+        </div>
+        <div class="my-2">
+          <label for="last_name" class="sr-only">Last Name</label>
+          <input
+            type="text"
+            name="customer[last_name]"
+            id="last_name"
+            autocomplete="family-name"
+            class="block w-full px-3 py-2 border rounded-md focus:outline-none focus:ring focus:ring-gray-400"
+            placeholder="Last Name"
+            required
+          >
+        </div>
+        <div class="my-2">
+          <label for="birthday" class="sr-only">Birthday</label>
+          <input
+            type="date"
+            name="customer[note][Birthday]"
+            id="birthday"
+            autocomplete="family-name"
+            class="block w-full px-3 py-2 border rounded-md focus:outline-none focus:ring focus:ring-gray-400"
+            required
+          >
+        </div>
+        <div class="my-2">
+          <label for="email_address" class="sr-only">Email Address</label>
+          <input
+            type="email"
+            name="customer[email]"
+            id="email_address"
+            autocomplete="email"
+            class="block w-full px-3 py-2 border rounded-md focus:outline-none focus:ring focus:ring-gray-400"
+            placeholder="Email Address"
+            required
+          >
+        </div>
+          <div class="my-2">
+            <label for="password" class="sr-only">Password</label>
+            <input
+              type="password"
+              name="customer[password]"
+              id="password"
+              autocomplete="new-password"
+              class="block w-full px-3 py-2 border rounded-md focus:outline-none focus:ring focus:ring-gray-400"
+              placeholder="Password"
+              required
+            >
+          </div>
+
+        <div class="flex justify-between items-center mt-4">
+          <button
+            type="submit"
+            class="cursor-pointer w-full py-2 px-4 text-sm font-medium text-white bg-gray-700 hover:bg-gray-900 rounded-md"
+          >
+            Create Account
+          </button>
+        </div>
+        
+
+      {% endform %}
+    </div>
+  </div>
+</div>

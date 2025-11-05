@@ -1,0 +1,40 @@
+{
+  "sections": {
+    "main": {
+      "type": "home-banner",
+      "settings": {}
+    },
+    "feature-area": {
+      "type": "feature-area",
+      "settings": {},
+      "blocks": {
+        "block1": { "type": "feature", "settings": {} },
+        "block2": { "type": "feature", "settings": {} },
+        "block3": { "type": "feature", "settings": {} },
+        "block4": { "type": "feature", "settings": {} }
+      },
+      "block_order": ["block1", "block2", "block3", "block4"]
+    },
+    "feature-product": {
+      "type": "feature-product",
+      "settings": {}
+    },
+    "offer-area": {
+      "type": "offer-area",
+      "settings": {}
+    },
+    "new-products": {
+      "type": "new-products",
+      "settings": {}
+    },
+    "inspired-products": {
+      "type": "inspired-products",
+      "settings": {}
+    },
+    "latest-blog": {
+      "type": "latest-blog",
+      "settings": {}
+    }
+  },
+  "order": ["main", "feature-area", "feature-product", "offer-area", "new-products", "inspired-products", "latest-blog"]
+}

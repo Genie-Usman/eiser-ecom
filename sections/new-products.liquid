@@ -1,0 +1,149 @@
+<section class="py-16 md:py-20 px-15">
+  <div class="container mx-auto px-4">
+    <div class="flex justify-center">
+      <div class="text-center max-w-2xl px-4">
+        <h2 class="text-[18px] md:text-[20px] font-bold mb-3 leading-tight">
+          <span class="text-black uppercase">{{ section.settings.heading | default: 'new products' }}</span>
+        </h2>
+        <div class="flex justify-center">
+            <div class="border-b border-gray-300 w-55"></div>
+          </div>
+        <p class="text-gray-500 text-xs mt-5 md:text-[14px]">
+          {{ section.settings.subheading | default: 'Bring called seed first of third give itself now ment' }}
+        </p>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-8">
+      {%- comment -%} FEATURED PRODUCT AREA {%- endcomment -%}
+      <div class="bg-[#F0F2F1] border border-gray-200 p-8 flex flex-col items-center">
+        <h5 class="text-lg font-medium tracking-wide text-gray-500 uppercase mt-10">
+          {{ section.settings.collection_label | default: 'collection of 2025' }}
+        </h5>
+
+        {%- assign featured_product = all_products[section.settings.feature_product] -%}
+        <h3 class="text-2xl md:text-3xl font-bold uppercase text-[#2A2A2A] mt-4">
+          {{ featured_product.title | default: section.settings.feature_title | default: "Men’s Summer T-Shirt" }}
+        </h3>
+
+        <div class="w-full mt-20">
+          {% if featured_product.featured_image %}
+            <img
+              class="w-full h-auto object-contain"
+              src="{{ featured_product.featured_image | image_url: width: 900 }}"
+              alt="{{ featured_product.featured_image.alt | escape }}"
+              loading="lazy"
+              width="900"
+              height="600" />
+          {% else %}
+            <div class="w-full aspect-5/3 bg-gray-50"></div>
+          {% endif %}
+        </div>
+
+        <h4 class="text-3xl text-[#2A2A2A] font-medium mt-16">
+          {% if featured_product.price %}
+            {{ featured_product.price | money }}
+          {% else %}
+            {{ 12070 | money }}
+          {% endif %}
+        </h4>
+
+        {% if featured_product %}
+          <a href="{{ featured_product.url }}"
+             class="inline-block mb-5 mt-8 px-7 py-3 bg-[#71cd13] text-white uppercase font-medium text-xs md:text-xs rounded-md hover:bg-transparent hover:text-[#71cd13] border border-[#71cd13] transition-colors duration-300 no-underline">
+            {{ section.settings.feature_cta | default: 'Add to cart' }}
+          </a>
+        {% endif %}
+      </div>
+
+      {%- comment -%} SMALL PRODUCTS AREA {%- endcomment -%}
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+        {% if section.blocks.size > 0 %}
+          {% for block in section.blocks %}
+            {% assign b_product = all_products[block.settings.product] %}
+            <div {{ block.shopify_attributes }}>
+              {% if b_product %}
+                {% render 'product-card-small', product: b_product %}
+              {% else %}
+                {% render 'product-card-placeholder' %}
+              {% endif %}
+            </div>
+          {% endfor %}
+        {% else %}
+          {% for i in (1..4) %}
+            {% render 'product-card-placeholder' %}
+          {% endfor %}
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  {% schema %}
+    {
+      "name": "New Products",
+      "tag": "section",
+      "class": "new_product_area",
+      "max_blocks": 4,
+      "settings": [
+        {
+          "type": "text",
+          "id": "heading",
+          "label": "Heading",
+          "default": "new products"
+        },
+        {
+          "type": "text",
+          "id": "subheading",
+          "label": "Subheading",
+          "default": "Bring called seed first of third give itself now ment"
+        },
+        {
+          "type": "text",
+          "id": "collection_label",
+          "label": "Feature collection label",
+          "default": "collection of 2019"
+        },
+        {
+          "type": "product",
+          "id": "feature_product",
+          "label": "Feature product"
+        },
+        {
+          "type": "text",
+          "id": "feature_title",
+          "label": "(Fallback) Feature title"
+        },
+        {
+          "type": "text",
+          "id": "feature_cta",
+          "label": "Feature button label",
+          "default": "Add to cart"
+        }
+      ],
+      "blocks": [
+        {
+          "type": "small_product",
+          "name": "Small product",
+          "settings": [
+            {
+              "type": "product",
+              "id": "product",
+              "label": "Product"
+            }
+          ]
+        }
+      ],
+      "presets": [
+        {
+          "name": "New Products",
+          "blocks": [
+            { "type": "small_product" },
+            { "type": "small_product" },
+            { "type": "small_product" },
+            { "type": "small_product" }
+          ]
+        }
+      ]
+    }
+  {% endschema %}
+</section>

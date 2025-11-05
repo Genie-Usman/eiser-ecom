@@ -1,0 +1,480 @@
+{% liquid
+  assign current_variant = product.selected_or_first_available_variant
+  assign in_stock = current_variant.available
+%}
+
+<section class="py-10 md:pb-14 md:mt-5">
+  <div class="container mx-auto px-20">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-6">
+      <!-- Gallery -->
+      <div class="lg:col-span-6">
+        <div id="pd-{{ section.id }}" class="relative">
+          {% if product.media.size > 0 %}
+            <div id="carousel-{{ section.id }}" class="relative">
+              <div class="overflow-hidden bg-white relative">
+                <div class="flex transition-transform duration-500 ease-out" data-track>
+                  {% for media in product.media %}
+                    <div class="w-full shrink-0 aspect-4/5 flex items-center justify-center bg-white">
+                      {% if forloop.first %}
+                        {{ media | media_tag: image_size: '1200x', class: 'w-full h-full object-contain', loading: 'eager', widths: '600,900,1200' }}
+                      {% else %}
+                        {{ media | media_tag: image_size: '1200x', class: 'w-full h-full object-contain', loading: 'lazy', widths: '600,900,1200' }}
+                      {% endif %}
+                    </div>
+                  {% endfor %}
+                </div>
+              </div>
+              <!-- Overlaid thumbnails (exclude first media) -->
+              <ol class="absolute right-8 bottom-17 grid grid-flow-col auto-cols-[56px] gap-3" data-thumbs>
+                {% for media in product.media %}
+                  {% unless forloop.first %}
+                    <li>
+                      <button
+                        type="button"
+                        class="group relative overflow-hidden aspect-square bg-white border border-gray-200 focus:outline-none"
+                        data-slide-to="{{ forloop.index0 }}"
+                        data-active="false">
+                        {{ media | media_tag: image_size: '300x', class: 'w-full h-full object-contain pointer-events-none' }}
+                        <span class="absolute inset-0 bg-transparent group-data-[active=true]:bg-red-500/60"></span>
+                      </button>
+                    </li>
+                  {% endunless %}
+                {% endfor %}
+              </ol>
+            </div>
+          {% else %}
+            <div class="aspect-4/5 bg-gray-50 border border-gray-200 rounded"></div>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Info -->
+      <div class="lg:col-span-5 lg:col-start-8 mt-24">
+        <div class="s_product_text">
+          <h1 class="text-[24px] md:text-[26px] font-medium text-gray-900 leading-tight">{{ product.title | escape }}</h1>
+
+          <div class="mt-2 flex items-center gap-4">
+            <p class="text-[#71CD14] text-[22px] font-bold">{{ current_variant.price | money }}</p>
+            {% if current_variant.compare_at_price > current_variant.price %}
+              <p class="text-gray-400 line-through">{{ current_variant.compare_at_price | money }}</p>
+            {% endif %}
+          </div>
+
+          <ul class="mt-3 space-y-2 text-sm">
+            <li class="text-gray-600">
+              <span class="text-[#555555]">Category&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:</span>
+              {% if product.type != blank %}
+                <span class="text-[#7fad39]">{{ product.type | escape }}</span>
+              {% else %}
+                <span class="text-gray-500">—</span>
+              {% endif %}
+            </li>
+
+            <li class="text-gray-600">
+              <span class="text-[#555555]">Availability&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:</span>
+              {% if in_stock %}
+                <span class="text-[#7fad39]">In stock</span>
+              {% else %}
+                <span class="text-rose-600">Out of stock</span>
+              {% endif %}
+            </li>
+          </ul>
+
+          <div class="mt-4 border-b border-dotted border-gray-200"></div>
+
+          {% if product.description != blank %}
+            <div class="my-5 text-sm leading-relaxed text-[#797979] max-w-[640px]">
+              {{ product.description }}
+            </div>
+          {% endif %}
+
+          <div class="mt-6">
+            {% assign form_id = 'product-form-' | append: section.id %}
+            {% form 'product'
+              , product
+              , id: form_id %}
+              {% if product.has_only_default_variant == false %}
+                <label for="variant-id-{{ section.id }}" class="sr-only">Variant</label>
+                <select
+                  id="variant-id-{{ section.id }}"
+                  name="id"
+                  class="w-full border border-gray-300 rounded px-3 py-2 text-sm">
+                  {% for variant in product.variants %}
+                    <option
+                      value="{{ variant.id }}"
+                      {% if variant == current_variant %}
+                      selected{% endif %}
+                      {% if variant.available == false %}
+                      disabled{% endif %}>
+                      {{ variant.title }}{% if variant.available == false %}
+                        — Sold out{% endif %}
+                    </option>
+                  {% endfor %}
+                </select>
+              {% else %}
+                <input
+                  type="hidden"
+                  name="id"
+                  value="{{ current_variant.id }}">
+              {% endif %}
+
+              <div class="mt-4 flex flex-col items-stretch gap-4">
+                <div class="flex items-center gap-6">
+                  <div class="text-[#797979] text-sm leading-none">Quantity:</div>
+                  <div class="relative">
+                    <input
+                      id="qty-{{ section.id }}"
+                      name="quantity"
+                      type="number"
+                      inputmode="numeric"
+                      min="1"
+                      value="1"
+                      class="qty-input w-[80px] h-[30px] rounded-md font-semibold border border-[#e7e7e7] bg-white pl-3 text-[12px] leading-none text-gray-900 text-left outline-none appearance-none">
+                    <div class="absolute inset-y-0 right-2 w-[18px] flex flex-col rounded-r-[14px] overflow-hidden">
+                      <button
+                        type="button"
+                        class="flex-1 grid place-content-center text-[#cfcfcf] hover:text-black transition-colors duration-300 ease-in-out cursor-pointer"
+                        data-qty-plus="qty-{{ section.id }}"
+                        aria-label="Increase quantity">
+                        {% render 'icon-chevron-up' %}
+                      </button>
+                      <button
+                        type="button"
+                        class="flex-1 grid place-content-center text-[#cfcfcf] hover:text-black transition-colors duration-300 ease-in-out cursor-pointer"
+                        data-qty-minus="qty-{{ section.id }}"
+                        aria-label="Decrease quantity">
+                        {% render 'icon-chevron-down' %}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="flex flex-row gap-3 mt-5">
+
+                  <button type="submit" class="inline-flex items-center justify-center h-10 px-7 bg-[#71CD14] hover:bg-transparent border border-[#71CD14] hover:text-[#71CD14] uppercase transition-all duration-400 cursor-pointer ease-in-out text-white text-xs font-medium rounded">
+                    Add to cart
+                  </button>
+                  <div class="flex items-center gap-2">
+                    <button
+                      type="button"
+                      class="w-10 h-10 grid place-content-center bg-[#F6F6F6] cursor-pointer hover:bg-transparent rounded tile-btn"
+                      aria-label="Compare">
+                      {% render 'icon-diamond' %}
+                    </button>
+                    <button
+                      type="button"
+                      class="w-10 h-10 grid place-content-center bg-[#F6F6F6] cursor-pointer hover:bg-transparent  rounded tile-btn"
+                      aria-label="Wishlist">
+                      {% render 'icon-heart' %}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            {% endform %}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="mt-14 border border-[#F6F6F6]">
+      <div class="flex gap-3 overflow-hidden bg-[#F6F6F6] flex-row justify-center py-2.5">
+        {% assign tabs = 'Description|Specification|Comments|Reviews' | split: '|' %}
+        {% for title in tabs %}
+          <button
+            type="button"
+            class="tab-btn px-8 py-3 text-xs border font-medium cursor-pointer bg-[#FFFFFF] border-gray-200 text-[#2A2A2A] hover:text-[#71CD14] data-[active=true]:bg-[#71CD14] data-[active=true]:text-white"
+            data-tab-target="tab-{{ forloop.index }}-{{ section.id }}"
+            aria-pressed="false">
+            {{ title }}
+          </button>
+        {% endfor %}
+      </div>
+
+      <div class="mt-6 px-10 pt-2 pb-8">
+        <!-- Description -->
+        <div id="tab-1-{{ section.id }}" class="tab-pane hidden">
+          <div class="text-sm text-[#797979] leading-7 max-w-[720px]">
+            {{ product.description | default: '—' }}
+          </div>
+        </div>
+
+        <!-- Specification -->
+        <div id="tab-2-{{ section.id }}" class="tab-pane hidden">
+          <div class="overflow-x-auto">
+            <table class="min-w-full text-left text-sm">
+              <tbody class="divide-y divide-gray-200">
+                <tr>
+                  <td class="py-2 pr-6 font-medium text-gray-700">SKU</td>
+                  <td class="py-2 text-gray-600">{{ current_variant.sku | default: '—' }}</td>
+                </tr>
+                <tr>
+                  <td class="py-2 pr-6 font-medium text-gray-700">Barcode</td>
+                  <td class="py-2 text-gray-600">{{ current_variant.barcode | default: '—' }}</td>
+                </tr>
+                <tr>
+                  <td class="py-2 pr-6 font-medium text-gray-700">Vendor</td>
+                  <td class="py-2 text-gray-600">{{ product.vendor | default: '—' }}</td>
+                </tr>
+                <tr>
+                  <td class="py-2 pr-6 font-medium text-gray-700">Type</td>
+                  <td class="py-2 text-gray-600">{{ product.type | default: '—' }}</td>
+                </tr>
+                <tr>
+                  <td class="py-2 pr-6 font-medium text-gray-700">Weight</td>
+                  <td class="py-2 text-gray-600">
+                    {% if current_variant.weight > 0 %}
+                      {{ current_variant.weight | weight_with_unit }}{% else %}—{% endif %}
+                  </td>
+                </tr>
+                <tr>
+                  <td class="py-2 pr-6 font-medium text-gray-700">Width</td>
+                  <td class="py-2 text-gray-600">{{ product.metafields.specs.width | default: '—' }}</td>
+                </tr>
+                <tr>
+                  <td class="py-2 pr-6 font-medium text-gray-700">Height</td>
+                  <td class="py-2 text-gray-600">{{ product.metafields.specs.height | default: '—' }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Comments -->
+        <div id="tab-3-{{ section.id }}" class="tab-pane hidden">
+          <div class="grid md:grid-cols-2 gap-8">
+            <div class="space-y-6">
+              {% for i in (1..3) %}
+                <div class="flex gap-4">
+                  <div class="w-12 h-12 rounded-full bg-gray-200"></div>
+                  <div>
+                    <div class="flex items-center gap-3">
+                      <h4 class="font-medium text-gray-800">Blake Ruiz</h4>
+                      <p class="text-xs text-gray-400">12 Feb, 2017</p>
+                    </div>
+                    <p class="mt-1 text-sm text-gray-600">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna.</p>
+                  </div>
+                </div>
+              {% endfor %}
+            </div>
+
+            <div>
+              <h4 class="text-gray-900 font-semibold mb-4">Post a comment</h4>
+              <form class="grid grid-cols-1 gap-4">
+                <input
+                  type="text"
+                  class="border border-gray-300 rounded px-3 py-2 text-sm"
+                  placeholder="Your full name">
+                <input
+                  type="email"
+                  class="border border-gray-300 rounded px-3 py-2 text-sm"
+                  placeholder="Email address">
+                <input
+                  type="text"
+                  class="border border-gray-300 rounded px-3 py-2 text-sm"
+                  placeholder="Phone number">
+                <textarea
+                  class="border border-gray-300 rounded px-3 py-2 text-sm"
+                  rows="3"
+                  placeholder="Message"></textarea>
+                <div class="text-right">
+                  <button type="button" class="inline-flex h-10 px-5 items-center justify-center bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium rounded">Submit now</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+
+        <!-- Reviews -->
+        <div id="tab-4-{{ section.id }}" class="tab-pane hidden">
+          <div class="grid md:grid-cols-2 gap-8">
+            <div>
+              <div class="grid grid-cols-2 gap-6">
+                <div class="border border-gray-200 rounded p-5 text-center">
+                  <h5 class="text-gray-500">Overall</h5>
+                  <p class="text-3xl font-bold text-gray-900">4.0</p>
+                  <p class="text-xs text-gray-400">(03 reviews)</p>
+                </div>
+                <div>
+                  <h3 class="text-gray-900 font-semibold mb-2">Based on 3 reviews</h3>
+                  <ul class="space-y-2 text-sm text-gray-600">
+                    {% for s in (1..5) %}
+                      <li class="flex items-center gap-2">
+                        <span>{{ 6 | minus: s }} star</span>
+                        <span class="text-[#7fad39]">★★★★★</span>
+                        01
+                      </li>
+                    {% endfor %}
+                  </ul>
+                </div>
+              </div>
+
+              <div class="mt-8 space-y-6">
+                {% for i in (1..3) %}
+                  <div>
+                    <div class="flex items-center gap-3">
+                      <div class="w-10 h-10 rounded-full bg-gray-200"></div>
+                      <div class="flex-1">
+                        <div class="flex items-center justify-between">
+                          <h4 class="font-medium text-gray-800">Blake Ruiz</h4>
+                          <div class="text-[#7fad39]">★★★★★</div>
+                        </div>
+                        <p class="mt-1 text-sm text-gray-600">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna.</p>
+                      </div>
+                    </div>
+                  </div>
+                {% endfor %}
+              </div>
+            </div>
+
+            <div>
+              <h4 class="text-gray-900 font-semibold">Add a review</h4>
+              <p class="mt-2 text-sm text-gray-600">Your rating:</p>
+              <div class="flex gap-2 text-[#7fad39] text-lg" aria-label="Rating">★★★★★</div>
+              <form class="mt-4 grid grid-cols-1 gap-4">
+                <input
+                  type="text"
+                  class="border border-gray-300 rounded px-3 py-2 text-sm"
+                  placeholder="Your full name">
+                <input
+                  type="email"
+                  class="border border-gray-300 rounded px-3 py-2 text-sm"
+                  placeholder="Email address">
+                <input
+                  type="text"
+                  class="border border-gray-300 rounded px-3 py-2 text-sm"
+                  placeholder="Phone number">
+                <textarea
+                  class="border border-gray-300 rounded px-3 py-2 text-sm"
+                  rows="3"
+                  placeholder="Review"></textarea>
+                <div class="text-right">
+                  <button type="button" class="inline-flex h-10 px-5 items-center justify-center bg-[#7fad39] hover:bg-[#6e9a33] text-white text-sm font-medium rounded">Submit now</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <style>
+    /* Hide native number input controls; we use our own chevrons */
+    #qty-{{ section.id }}::-webkit-outer-spin-button,
+    #qty-{{ section.id }}::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+    #qty-{{ section.id }} {
+      -moz-appearance: textfield;
+    }
+    /* Hover shadow for small icon tiles (lower-left) */
+    .tile-btn {
+      transition: box-shadow 220ms ease
+      , transform 220ms ease
+      , background-color 220ms ease;
+      box-shadow: none;
+    }
+    .tile-btn:hover {
+      box-shadow: -20px 20px 30px rgba(0, 0, 0, 0.16);
+    }
+  </style>
+
+  <script>
+    (function() {
+      // Carousel: loop through main images; sync red shade on thumbnails
+      var carousel = document.getElementById('carousel-{{ section.id }}');
+      if (carousel) {
+        var track = carousel.querySelector('[data-track]');
+        var slides = track ? track.children : [];
+        var thumbs = carousel.querySelectorAll('[data-slide-to]');
+        var hover = false;
+        function normalize(i){
+          if (!slides.length) return 0;
+          return (i % slides.length + slides.length) % slides.length;
+        }
+        function setThumbActive(index){
+          // thumbs exclude the first (main) image; map slide index to thumb index (index-1)
+          thumbs.forEach(function(t){ t.dataset.active = 'false'; });
+          if (index > 0 && thumbs[index - 1]) {
+            thumbs[index - 1].dataset.active = 'true';
+          }
+        }
+        var idx = 0;
+        function go(i){
+          if (!track || !slides.length) return;
+          idx = normalize(i);
+          track.style.transform = 'translateX(' + (-idx * 100) + '%)';
+          setThumbActive(idx);
+        }
+        // autoplay (shorter duration)
+        var timer = null;
+        function startTimer(){
+          if (timer) clearInterval(timer);
+          timer = setInterval(function(){ if (!hover) go(idx + 1); }, 2000);
+        }
+        carousel.addEventListener('mouseenter', function(){ hover = true; });
+        carousel.addEventListener('mouseleave', function(){ hover = false; });
+        // clicking thumbs replaces main image and keeps loop running
+        thumbs.forEach(function(t){
+          t.addEventListener('click', function(e){
+            e.preventDefault();
+            var k = parseInt(t.getAttribute('data-slide-to'), 10) || 0;
+            go(k);
+            startTimer();
+          });
+        });
+        go(0);
+        startTimer();
+      }
+    
+      // Quantity controls
+      var minus = document.querySelector('[data-qty-minus="qty-{{ section.id }}"]');
+      var plus = document.querySelector('[data-qty-plus="qty-{{ section.id }}"]');
+      var input = document.getElementById('qty-{{ section.id }}');
+      if (minus && plus && input) {
+        minus.addEventListener('click', function(){
+          var v = parseInt(input.value || '1', 10);
+          input.value = Math.max(1, v - 1);
+        });
+        plus.addEventListener('click', function(){
+          var v = parseInt(input.value || '1', 10);
+          input.value = v + 1;
+        });
+      }
+    
+      // Tabs
+      var tabButtons = document.querySelectorAll('.tab-btn[data-tab-target$="{{ section.id }}"]');
+      var panes = document.querySelectorAll('.tab-pane[id$="{{ section.id }}"]');
+      function activate(targetId) {
+        panes.forEach(function(p){ p.classList.add('hidden'); });
+        tabButtons.forEach(function(b){ b.dataset.active = 'false'; b.setAttribute('aria-pressed', 'false'); });
+        var p = document.getElementById(targetId);
+        var b = Array.prototype.find.call(tabButtons, function(x){ return x.dataset.tabTarget === targetId; });
+        if (p) p.classList.remove('hidden');
+        if (b) { b.dataset.active = 'true'; b.setAttribute('aria-pressed', 'true'); }
+      }
+      if (tabButtons.length) {
+        tabButtons.forEach(function(btn){
+          btn.addEventListener('click', function(){ activate(btn.dataset.tabTarget); });
+        });
+        if (document.getElementById('tab-4-{{ section.id }}')) {
+          activate('tab-4-{{ section.id }}');
+        }
+      }
+    })();
+  </script>
+</section>
+
+{% schema %}
+  {
+    "name": "Product",
+    "tag": "section",
+    "class": "section-product-detail",
+    "settings": [],
+    "disabled_on": {
+      "groups": ["header", "footer"]
+    }
+  }
+{% endschema %}

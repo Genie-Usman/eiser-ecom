@@ -1,0 +1,70 @@
+<section>
+  <div class="container mx-auto px-15">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      {% for block in section.blocks %}
+        <div class="bg-white border border-gray-200 rounded-lg shadow-sm p-8 text-center hover:shadow-md transition-all duration-300">
+          <div class="flex flex-col items-center">
+            <div class="w-10 h-10 text-base mb-3">
+              {{ block.settings.icon }}
+            </div>
+            <h3 class="font-medium uppercase text-base mb-2 text-black">
+              {{ block.settings.title }}
+            </h3>
+            <p class="text-gray-500 text-sm leading-relaxed">
+              {{ block.settings.subtitle }}
+            </p>
+          </div>
+        </div>
+      {% endfor %}
+
+      {% if section.blocks.size == 0 %}
+        <p class="text-center text-gray-400 w-full">No features added yet.</p>
+      {% endif %}
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Feature Area",
+  "settings": [],
+  "blocks": [
+    {
+      "type": "feature",
+      "name": "Feature",
+      "settings": [
+        {
+          "type": "html",
+          "id": "icon",
+          "label": "Icon (SVG or HTML)",
+          "default": "<svg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='currentColor' stroke-width='2' viewBox='0 0 24 24'><path d='M12 8c-3.314 0-6 1.343-6 3s2.686 3 6 3 6-1.343 6-3-2.686-3-6-3Z'/><path d='M12 19c3.314 0 6-1.343 6-3v-5'/><path d='M6 11v5c0 1.657 2.686 3 6 3'/></svg>"
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Title",
+          "default": "Money Back Guarantee"
+        },
+        {
+          "type": "text",
+          "id": "subtitle",
+          "label": "Subtitle",
+          "default": "We ensure 100% satisfaction"
+        }
+      ]
+    }
+  ],
+  "max_blocks": 8,
+  "presets": [
+    {
+      "name": "Feature Area",
+      "blocks": [
+        { "type": "feature" },
+        { "type": "feature" },
+        { "type": "feature" },
+        { "type": "feature" }
+      ]
+    }
+  ]
+}
+{% endschema %}
