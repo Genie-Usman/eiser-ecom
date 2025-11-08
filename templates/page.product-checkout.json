@@ -1,11 +1,16 @@
 {
   "sections": {
+    "banner": {
+      "type": "checkout-banner",
+      "settings": {}
+    },
     "main": {
-      "type": "product-checkout",
+      "type": "checkout-page",
       "settings": {}
     }
   },
   "order": [
+    "banner",
     "main"
   ]
 }

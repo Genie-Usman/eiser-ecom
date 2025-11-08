@@ -1,74 +1,50 @@
-{% liquid
-  assign section_id = 'section-' | append: section.id
-  assign padding_top = section.settings.padding_top | default: 80
-  assign padding_bottom = section.settings.padding_bottom | default: 80
-  assign heading = section.settings.heading | default: 'tracking.heading' | t
-  assign subheading = section.settings.subheading | default: 'tracking.subheading' | t
-  assign instructions = section.settings.instructions | default: 'tracking.instructions' | t
-  assign background_style = ''
-
-  if section.settings.background_color != blank
-    assign background_style = 'background-color:' | append: section.settings.background_color
-  endif
-%}
-
-<section
-  id="{{ section_id }}"
-  class="tracking-page"
-  style="padding-top: {{ padding_top }}px; padding-bottom: {{ padding_bottom }}px; {{ background_style }}"
->
-  <div class="mx-auto flex w-full max-w-4xl flex-col gap-8 px-4 sm:px-6 lg:px-8">
-    <div class="rounded-lg border border-gray-100 bg-white p-6 shadow-sm sm:p-10">
-      <p class="mb-8 text-sm leading-6 text-[#666666]">
-        {{ instructions | escape }}
+<section>
+  <div class="tracking-page py-20">
+    <div class="flex w-full max-w-5xl justify-start flex-col gap-8 px-4 sm:px-6 lg:px-20">
+      <p class="text-sm leading-6 text-[#2A2A2A]">
+        To track your order please enter your Order ID in the box below and press the "Track" button. This was given to you on your receipt and in the confirmation email you should have received.
       </p>
-
+    </div>
+    <div class="flex w-full mt-4 max-w-3xl justify-start flex-col gap-8 px-4 sm:px-6 lg:px-20">
       <form class="space-y-4" data-tracking-form>
         <div>
-          <label class="sr-only" for="order-id">{{ 'tracking.order_id_label' | t }}</label>
+          <label class="sr-only" for="order-id">Order ID</label>
           <input
             id="order-id"
             name="order"
             type="text"
-            class="h-12 w-full rounded border border-gray-200 px-4 text-sm text-[#2A2A2A] placeholder:text-[#A3A3A3] focus:border-[#71cd13] focus:outline-none focus:ring-2 focus:ring-[#71cd13]/20"
-            placeholder="{{ 'tracking.order_id_placeholder' | t }}"
-            required
-          >
+            class="h-12 w-full border border-gray-200 px-4 text-sm text-[#797979] placeholder:text-[#A3A3A3] focus:border-[#71cd13] focus:outline-none focus:ring-2 focus:ring-[#71cd13]/20"
+            placeholder="Order ID"
+            required>
         </div>
-
+  
         <div>
-          <label class="sr-only" for="order-email">{{ 'tracking.billing_email_label' | t }}</label>
+          <label class="sr-only" for="order-email">Billing Email</label>
           <input
             id="order-email"
             name="email"
             type="email"
-            class="h-12 w-full rounded border border-gray-200 px-4 text-sm text-[#2A2A2A] placeholder:text-[#A3A3A3] focus:border-[#71cd13] focus:outline-none focus:ring-2 focus:ring-[#71cd13]/20"
-            placeholder="{{ 'tracking.billing_email_placeholder' | t }}"
-            required
-          >
+            class="h-12 w-full border border-gray-200 px-4 text-sm text-[#797979] placeholder:text-[#A3A3A3] focus:border-[#71cd13] focus:outline-none focus:ring-2 focus:ring-[#71cd13]/20"
+            placeholder="Billing Email Address"
+            required>
         </div>
-
-        <button
-          type="submit"
-          class="inline-flex h-12 w-full items-center justify-center rounded bg-[#71cd13] px-6 text-sm font-semibold uppercase tracking-wide text-white transition-colors duration-200 hover:bg-[#5dac0f]"
-        >
-          {{ 'tracking.submit_label' | t }}
+  
+        <button type="submit" class="inline-flex h-11 w-40 cursor-pointer items-center justify-center bg-[#71cd13] hover:bg-transparent border border-[#71cd13] hover:text-[#71cd13] px-6 text-sm font-semibold uppercase tracking-wide text-white transition-colors duration-200 ease-in">
+          Track Order
         </button>
       </form>
 
-      <div class="tracking-feedback" data-tracking-feedback hidden>
-        <p class="mt-6 rounded-md border border-[#71cd13]/30 bg-[#F6FFF0] px-4 py-3 text-sm text-[#3A6F0C]">
-          {{ 'tracking.feedback_placeholder' | t }}
-        </p>
-      </div>
     </div>
   </div>
+
 </section>
 
 {% javascript %}
   (() => {
     const form = document.querySelector('[data-tracking-form]');
-    if (!form) return;
+    if (! form) return;
+    
+
 
     const feedback = document.querySelector('[data-tracking-feedback]');
 
@@ -78,12 +54,14 @@
       const orderInput = form.querySelector('#order-id');
       const emailInput = form.querySelector('#order-email');
 
-      if (!orderInput || !emailInput) return;
+      if (! orderInput || ! emailInput) return;
+      
+
 
       const orderId = orderInput.value.trim();
       const email = emailInput.value.trim();
 
-      if (!orderId || !email) {
+      if (! orderId || ! email) {
         return;
       }
 
@@ -101,64 +79,11 @@
 {% endjavascript %}
 
 {% schema %}
-{
-  "name": "t:sections.tracking.name",
-  "tag": "section",
-  "class": "section-tracking",
-  "settings": [
-    {
-      "type": "text",
-      "id": "heading",
-      "label": "t:sections.tracking.settings.heading.label",
-      "default": ""
-    },
-    {
-      "type": "text",
-      "id": "subheading",
-      "label": "t:sections.tracking.settings.subheading.label",
-      "default": ""
-    },
-    {
-      "type": "textarea",
-      "id": "instructions",
-      "label": "t:sections.tracking.settings.instructions.label",
-      "default": ""
-    },
-    {
-      "type": "color",
-      "id": "background_color",
-      "label": "t:sections.tracking.settings.background_color.label",
-      "default": "#F8F9FB"
-    },
-    {
-      "type": "range",
-      "id": "padding_top",
-      "max": 180,
-      "min": 0,
-      "step": 4,
-      "unit": "px",
-      "label": "t:sections.tracking.settings.padding_top.label",
-      "default": 96
-    },
-    {
-      "type": "range",
-      "id": "padding_bottom",
-      "max": 180,
-      "min": 0,
-      "step": 4,
-      "unit": "px",
-      "label": "t:sections.tracking.settings.padding_bottom.label",
-      "default": 96
-    }
-  ],
-  "presets": [
-    {
-      "name": "t:sections.tracking.presets.default.name"
-    }
-  ]
-}
+  {
+    "name": "Order Tracking",
+    "settings": []
+  }
 {% endschema %}
-
 {% stylesheet %}
   .tracking-page {
     background: var(--tracking-page-background, inherit);
@@ -169,4 +94,3 @@
     pointer-events: none;
   }
 {% endstylesheet %}
-

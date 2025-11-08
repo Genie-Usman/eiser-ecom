@@ -1,0 +1,770 @@
+{% liquid
+  assign section_id = 'section-' | append: section.id
+%}
+
+<section id="{{ section_id }}" class="bg-white py-20 px-15">
+  <div class="container mx-auto px-4">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+
+      <div class="lg:col-span-12 space-y-6">
+        <!-- Returning Customer Section -->
+        <div>
+          <div class="bg-gray-50 py-3 px-6">
+            <h3 class="text-sm font-normal text-[#2A2A2A]">
+              Returning Customer?
+              <a
+                href="#"
+                class="text-[#71cd13] underline"
+                data-toggle-login>Click here to login</a>
+            </h3>
+          </div>
+          <div class="py-3 px-6">
+            <p class="text-sm text-[#666666] mb-4">
+              If you have shopped with us before, please enter your details in the boxes below. If you are a new customer, please proceed to the Billing & Shipping section.
+            </p>
+          </div>
+          <div class="py-3 px-6">
+            <div id="returning-customer-form" class="space-y-4">
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <label for="login-username" class="sr-only">Username or Email</label>
+                  <input
+                    id="login-username"
+                    type="text"
+                    class="w-full h-10 border border-gray-300 rounded px-3 text-sm text-[#777777] placeholder:text-[#A3A3A3] focus:border-[#71cd13] focus:outline-none focus:ring-2 focus:ring-[#71cd13]/20"
+                    placeholder="Username or Email *"
+                    required>
+                </div>
+                <div>
+                  <label for="login-password" class="sr-only">Password</label>
+                  <input
+                    id="login-password"
+                    type="password"
+                    class="w-full h-10 border border-gray-300 rounded px-3 text-sm text-[#777777] placeholder:text-[#A3A3A3] focus:border-[#71cd13] focus:outline-none focus:ring-2 focus:ring-[#71cd13]/20"
+                    placeholder="Password *"
+                    required>
+                </div>
+              </div>
+              <div class="flex items-center flex-wrap gap-3">
+                <button type="button" class="h-10 px-6 bg-[#71cd13] text-white text-sm font-medium border border-[#71cd13] hover:bg-transparent hover:text-[#71cd13] transition-colors duration-200 ease-in cursor-pointer">
+                  Send Message
+                </button>
+                <div class="flex items-center gap-4">
+                  <div class="flex items-center gap-2">
+                    <input
+                      id="remember-me"
+                      type="checkbox"
+                      class="w-4 h-4 text-[#71cd13] border-gray-300 rounded focus:ring-[#71cd13]">
+                    <label for="remember-me" class="text-sm text-[#A3A3A3]">Remember me</label>
+                  </div>
+                </div>
+              </div>
+              <div>
+                <a href="#" class="text-sm text-[#A3A3A3] hover:text-[#71cd13] transition-colors">Lost your password?</a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Coupon Section -->
+        <div>
+          <div class="bg-gray-50 py-3 px-6">
+            <h3 class="text-sm font-normal text-[#2A2A2A]">
+              Have a coupon?
+              <a
+                href="#"
+                class="text-[#71cd13] underline"
+                data-toggle-coupon>Click here to enter your code</a>
+            </h3>
+          </div>
+          <div class="py-3 px-6 space-y-4">
+            <div id="coupon-form" class="grid grid-cols-1 md:grid-cols-2">
+              <input
+                type="text"
+                class="flex-1 h-10 border border-gray-300 rounded px-3 text-sm text-[#2A2A2A] placeholder:text-[#A3A3A3] focus:border-[#71cd13] focus:outline-none focus:ring-2 focus:ring-[#71cd13]/20"
+                placeholder="Enter coupon code">
+            </div>
+            <button type="button" class="h-10 px-6 bg-transparent border border-gray-200 hover:bg-[#71cd13] hover:text-white hover:border-[#71cd13] text-[#2A2A2A] text-sm font-medium uppercase rounded transition-colors duration-200 ease-in cursor-pointer">
+              APPLY COUPON
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Left Column: Checkout Forms -->
+      <div class="lg:col-span-8 space-y-6">
+        <!-- Billing Details Section -->
+        <div class="p-6">
+          <h2 class="text-xl font-semibold text-[#2A2A2A] mb-2">Billing Details</h2>
+          <div class="border-b border-gray-200 mb-6"></div>
+          <form class="space-y-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <input
+                  id="billing-first-name"
+                  type="text"
+                  class="w-full h-10 border border-gray-300 rounded px-3 text-sm text-[#2A2A2A] placeholder:text-[#A3A3A3] focus:border-[#71cd13] focus:outline-none focus:ring-2 focus:ring-[#71cd13]/20"
+                  placeholder="First name *"
+                  required>
+              </div>
+              <div>
+                <input
+                  id="billing-last-name"
+                  type="text"
+                  class="w-full h-10 border border-gray-300 rounded px-3 text-sm text-[#2A2A2A] placeholder:text-[#A3A3A3] focus:border-[#71cd13] focus:outline-none focus:ring-2 focus:ring-[#71cd13]/20"
+                  placeholder="Last name *"
+                  required>
+              </div>
+            </div>
+
+            <div>
+              <input
+                id="billing-company"
+                type="text"
+                class="w-full h-10 border border-gray-300 rounded px-3 text-sm text-[#2A2A2A] placeholder:text-[#A3A3A3] focus:border-[#71cd13] focus:outline-none focus:ring-2 focus:ring-[#71cd13]/20"
+                placeholder="Company name">
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <input
+                  id="billing-phone"
+                  type="tel"
+                  class="w-full h-10 border border-gray-300 rounded px-3 text-sm text-[#2A2A2A] placeholder:text-[#A3A3A3] focus:border-[#71cd13] focus:outline-none focus:ring-2 focus:ring-[#71cd13]/20"
+                  placeholder="Phone number *"
+                  required>
+              </div>
+              <div>
+                <input
+                  id="billing-email"
+                  type="email"
+                  class="w-full h-10 border border-gray-300 rounded px-3 text-sm text-[#2A2A2A] placeholder:text-[#A3A3A3] focus:border-[#71cd13] focus:outline-none focus:ring-2 focus:ring-[#71cd13]/20"
+                  placeholder="Email Address *"
+                  required>
+              </div>
+            </div>
+
+            <div>
+              <div
+                class="dd dd-compact"
+                data-dd
+                id="billing-country-dd">
+                <button
+                  class="dd-btn"
+                  type="button"
+                  aria-haspopup="listbox"
+                  aria-expanded="false">
+                  <span class="dd-value">Select Country</span>
+                  {% render 'icon-caret'
+                    , class: 'dd-caret' %}
+                </button>
+                <div class="dd-menu" role="listbox">
+                  <button
+                    class="dd-item"
+                    role="option"
+                    data-value="">Select Country</button>
+                  <button
+                    class="dd-item"
+                    role="option"
+                    data-value="us">United States</button>
+                  <button
+                    class="dd-item"
+                    role="option"
+                    data-value="uk">United Kingdom</button>
+                  <button
+                    class="dd-item"
+                    role="option"
+                    data-value="ca">Canada</button>
+                </div>
+              </div>
+              <input
+                type="hidden"
+                id="billing-country"
+                name="billing-country"
+                value="">
+            </div>
+
+            <div>
+              <input
+                id="billing-address-1"
+                type="text"
+                class="w-full h-10 border border-gray-300 rounded px-3 text-sm text-[#2A2A2A] placeholder:text-[#A3A3A3] focus:border-[#71cd13] focus:outline-none focus:ring-2 focus:ring-[#71cd13]/20"
+                placeholder="Address line 01 *"
+                required>
+            </div>
+
+            <div>
+              <input
+                id="billing-address-2"
+                type="text"
+                class="w-full h-10 border border-gray-300 rounded px-3 text-sm text-[#2A2A2A] placeholder:text-[#A3A3A3] focus:border-[#71cd13] focus:outline-none focus:ring-2 focus:ring-[#71cd13]/20"
+                placeholder="Address line 02 *">
+            </div>
+
+            <div>
+              <input
+                id="billing-city"
+                type="text"
+                class="w-full h-10 border border-gray-300 rounded px-3 text-sm text-[#2A2A2A] placeholder:text-[#A3A3A3] focus:border-[#71cd13] focus:outline-none focus:ring-2 focus:ring-[#71cd13]/20"
+                placeholder="Town/City *"
+                required>
+            </div>
+
+            <div>
+              <div
+                class="dd dd-compact"
+                data-dd
+                id="billing-district-dd">
+                <button
+                  class="dd-btn"
+                  type="button"
+                  aria-haspopup="listbox"
+                  aria-expanded="false">
+                  <span class="dd-value">Select District</span>
+                  {% render 'icon-caret'
+                    , class: 'dd-caret' %}
+                </button>
+                <div class="dd-menu" role="listbox">
+                  <button
+                    class="dd-item"
+                    role="option"
+                    data-value="">Select District</button>
+                  <button
+                    class="dd-item"
+                    role="option"
+                    data-value="district1">District 1</button>
+                  <button
+                    class="dd-item"
+                    role="option"
+                    data-value="district2">District 2</button>
+                </div>
+              </div>
+              <input
+                type="hidden"
+                id="billing-district"
+                name="billing-district"
+                value="">
+            </div>
+
+            <div>
+              <input
+                id="billing-postcode"
+                type="text"
+                class="w-full h-10 border border-gray-300 rounded px-3 text-sm text-[#2A2A2A] placeholder:text-[#A3A3A3] focus:border-[#71cd13] focus:outline-none focus:ring-2 focus:ring-[#71cd13]/20"
+                placeholder="Postcode/ZIP *"
+                required>
+            </div>
+
+            <div class="flex items-center gap-2">
+              <input
+                id="create-account"
+                type="checkbox"
+                class="w-4 h-4 text-[#71cd13] border-gray-300 rounded focus:ring-[#71cd13]">
+              <label for="create-account" class="text-sm text-[#A3A3A3]">Create an account?</label>
+            </div>
+          </form>
+        </div>
+        <!-- Shipping Details Section -->
+        <div class="pt-6 pl-6 pr-6">
+          <h2 class="text-xl font-semibold text-[#2A2A2A] mb-2">Shipping Details</h2>
+          <div class="border-b border-gray-200 mb-6"></div>
+          <form class="space-y-4">
+            <div class="flex items-center gap-2">
+              <input
+                id="ship-different-address"
+                type="checkbox"
+                class="w-4 h-4 text-[#71cd13] border-gray-300 rounded focus:ring-[#71cd13]">
+              <label for="ship-different-address" class="text-sm text-[#797979]">Ship to a different address?</label>
+            </div>
+          </form>
+          <div id="shipping-address-form" class="hidden mt-6 space-y-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <input
+                  id="shipping-first-name"
+                  type="text"
+                  class="w-full h-10 border border-gray-300 rounded px-3 text-sm text-[#2A2A2A] placeholder:text-[#A3A3A3] focus:border-[#71cd13] focus:outline-none focus:ring-2 focus:ring-[#71cd13]/20"
+                  placeholder="First name *"
+                  required>
+              </div>
+              <div>
+                <input
+                  id="shipping-last-name"
+                  type="text"
+                  class="w-full h-10 border border-gray-300 rounded px-3 text-sm text-[#2A2A2A] placeholder:text-[#A3A3A3] focus:border-[#71cd13] focus:outline-none focus:ring-2 focus:ring-[#71cd13]/20"
+                  placeholder="Last name *"
+                  required>
+              </div>
+            </div>
+
+            <div>
+              <input
+                id="shipping-company"
+                type="text"
+                class="w-full h-10 border border-gray-300 rounded px-3 text-sm text-[#2A2A2A] placeholder:text-[#A3A3A3] focus:border-[#71cd13] focus:outline-none focus:ring-2 focus:ring-[#71cd13]/20"
+                placeholder="Company name *">
+            </div>
+
+            <div>
+              <div
+                class="dd dd-compact"
+                data-dd
+                id="shipping-country-dd">
+                <button
+                  class="dd-btn"
+                  type="button"
+                  aria-haspopup="listbox"
+                  aria-expanded="false">
+                  <span class="dd-value">Select Country</span>
+                  {% render 'icon-caret'
+                    , class: 'dd-caret' %}
+                </button>
+                <div class="dd-menu" role="listbox">
+                  <button
+                    class="dd-item"
+                    role="option"
+                    data-value="">Select Country</button>
+                  <button
+                    class="dd-item"
+                    role="option"
+                    data-value="us">United States</button>
+                  <button
+                    class="dd-item"
+                    role="option"
+                    data-value="uk">United Kingdom</button>
+                  <button
+                    class="dd-item"
+                    role="option"
+                    data-value="ca">Canada</button>
+                </div>
+              </div>
+              <input
+                type="hidden"
+                id="shipping-country"
+                name="shipping-country"
+                value="">
+            </div>
+
+            <div>
+              <input
+                id="shipping-address-1"
+                type="text"
+                class="w-full h-10 border border-gray-300 rounded px-3 text-sm text-[#2A2A2A] placeholder:text-[#A3A3A3] focus:border-[#71cd13] focus:outline-none focus:ring-2 focus:ring-[#71cd13]/20"
+                placeholder="Address line 01 *"
+                required>
+            </div>
+
+            <div>
+              <input
+                id="shipping-address-2"
+                type="text"
+                class="w-full h-10 border border-gray-300 rounded px-3 text-sm text-[#2A2A2A] placeholder:text-[#A3A3A3] focus:border-[#71cd13] focus:outline-none focus:ring-2 focus:ring-[#71cd13]/20"
+                placeholder="Address line 02 *">
+            </div>
+
+            <div>
+              <input
+                id="shipping-city"
+                type="text"
+                class="w-full h-10 border border-gray-300 rounded px-3 text-sm text-[#2A2A2A] placeholder:text-[#A3A3A3] focus:border-[#71cd13] focus:outline-none focus:ring-2 focus:ring-[#71cd13]/20"
+                placeholder="Town/City *"
+                required>
+            </div>
+
+            <div>
+              <div
+                class="dd dd-compact"
+                data-dd
+                id="shipping-district-dd">
+                <button
+                  class="dd-btn"
+                  type="button"
+                  aria-haspopup="listbox"
+                  aria-expanded="false">
+                  <span class="dd-value">Select District</span>
+                  {% render 'icon-caret'
+                    , class: 'dd-caret' %}
+                </button>
+                <div class="dd-menu" role="listbox">
+                  <button
+                    class="dd-item"
+                    role="option"
+                    data-value="">Select District</button>
+                  <button
+                    class="dd-item"
+                    role="option"
+                    data-value="district1">District 1</button>
+                  <button
+                    class="dd-item"
+                    role="option"
+                    data-value="district2">District 2</button>
+                </div>
+              </div>
+              <input
+                type="hidden"
+                id="shipping-district"
+                name="shipping-district"
+                value="">
+            </div>
+
+            <div>
+              <input
+                id="shipping-postcode"
+                type="text"
+                class="w-full h-10 border border-gray-300 rounded px-3 text-sm text-[#2A2A2A] placeholder:text-[#A3A3A3] focus:border-[#71cd13] focus:outline-none focus:ring-2 focus:ring-[#71cd13]/20"
+                placeholder="Postcode/ZIP *"
+                required>
+            </div>
+          </div>
+        </div>
+
+        <!-- Order Notes Section -->
+        <div class="pl-6 pb-6 pr-6">
+          <form class="space-y-4">
+            <div>
+              <textarea
+                id="order-notes"
+                rows="6"
+                class="w-full border border-gray-300 rounded px-3 py-2 text-sm text-[#2A2A2A] placeholder:text-[#A3A3A3] focus:border-[#71cd13] focus:outline-none focus:ring-2 focus:ring-[#71cd13]/20"
+                placeholder="Order Notes"></textarea>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Right Column: Order Summary -->
+      <div class="lg:col-span-4 mt-10">
+        <div class="p-6 bg-[#F9F9F9]">
+          <h2 class="text-lg font-semibold text-[#2A2A2A] mb-3">Your Order</h2>
+          <div class="border-b border-gray-200 mb-6"></div>
+          <div class="space-y-4 mb-6">
+            <div class="flex justify-between items-center border-b border-gray-200">
+              <span class="text-sm text-[#666666] mb-3">Product</span>
+              <span class="text-sm text-[#666666] mb-3">Total</span>
+            </div>
+            <div class="space-y-3">
+              <div class="flex justify-between items-center border-b border-gray-200">
+                <span class="text-sm text-[#666666] mb-2">Fresh Blackberry</span>
+                <span class="text-sm text-[#2A2A2A] mb-2">x 02</span>
+                <span class="text-sm text-[#666666] mb-2">$720.00</span>
+              </div>
+              <div class="flex justify-between items-center border-b border-gray-200">
+                <span class="text-sm text-[#666666] mb-2">Fresh Tomatoes</span>
+                <span class="text-sm text-[#2A2A2A] mb-2">x 02</span>
+                <span class="text-sm text-[#666666] mb-2">$720.00</span>
+              </div>
+              <div class="flex justify-between items-center">
+                <span class="text-sm text-[#666666]">Fresh Broccoli</span>
+                <span class="text-sm text-[#2A2A2A">x 02</span>
+                <span class="text-sm text-[#666666]">$720.00</span>
+              </div>
+            </div>
+            <div class="pt-3 border-t border-gray-200 space-y-4">
+              <div class="flex justify-between items-center border-b border-gray-200">
+                <span class="text-sm font-semibold text-[#2A2A2A] uppercase mb-3">Subtotal</span>
+                <span class="text-sm text-[#666666] font-medium mb-3">$2160.00</span>
+              </div>
+              <div class="flex justify-between items-center ">
+                <span class="text-sm font-semibold text-[#2A2A2A] uppercase">Shipping</span>
+                <span class="text-sm text-[#666666] font-medium">Flat Rate: $50.00</span>
+              </div>
+              <div class="flex justify-between items-center pt-2 border-b border-t border-gray-200">
+                <span class="text-sm font-semibold text-[#2A2A2A] uppercase mb-3">Total</span>
+                <span class="text-sm font-semibold text-[#2A2A2A] mb-3">$2210.00</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Payment Methods -->
+          <div class="space-y-4 mb-6">
+            <div class="flex items-start gap-3">
+              <input
+                id="payment-check"
+                type="radio"
+                name="payment-method"
+                value="check"
+                class="radio-md mt-1"
+                checked>
+              <div class="flex-1">
+                <label for="payment-check" class="text-sm font-semibold text-[#2A2A2A] uppercase block mb-1 cursor-pointer">
+                  Check Payments
+                </label>
+                <p class="text-sm mt-2 text-[#797979] bg-white py-5 px-5 font-normal">
+                  Please send a check to Store Name, Store Street, Store Town, Store State / County, Store Postcode.
+                </p>
+              </div>
+            </div>
+
+            <div class="flex items-start gap-3">
+              <input
+                id="payment-paypal"
+                type="radio"
+                name="payment-method"
+                value="paypal"
+                class="radio-md mt-1">
+              <div class="flex-1">
+                <div class="flex justify-between gap-2 mb-2">
+                  <label for="payment-paypal" class="text-sm font-semibold text-[#2A2A2A] uppercase block mb-2 cursor-pointer">
+                    PayPal
+                  </label>
+                  <div class="relative right-10">
+                    <img
+                      src="{{ 'img/card.jpg' | asset_url }}"
+                      alt="Payment Cards"
+                      class="h-4"
+                      width="60"
+                      height="69"
+                      loading="lazy">
+                  </div>
+                </div>
+                <p class="text-sm mt-2 text-[#71cd13] bg-white py-5 px-5 font-normal">
+                  Please send a check to Store Name, Store Street, Store Town, Store State / County, Store Postcode.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Terms & Conditions -->
+          <div class="mb-6">
+            <div class="flex items-start gap-2 text-xs text-center">
+              <input
+                id="accept-terms"
+                type="checkbox"
+                class="mt-1 w-4 h-4 text-[#71cd13] border-gray-300 rounded focus:ring-[#71cd13]"
+                required>
+              <label for="accept-terms" class=" text-[#2A2A2A]">
+                I've read and accept the
+                <a href="#" class="text-[#71cd13] text-[14px] hover:underline">terms & conditions</a>
+                <span class="text-[#71cd13]">*</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Proceed Button -->
+          <button type="submit" class="w-full h-10 bg-[#71cd13] border border-[#71cd13] text-white hover:bg-transparent hover:text-[#71cd13] text-sm font-bold uppercase rounded cursor-pointer transition-colors duration-100">
+            PROCEED TO PAYPAL
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% javascript %}
+  (() => {
+
+// Toggle returning customer form
+    const toggleLogin = document.querySelector('[data-toggle-login]');
+    const loginForm = document.getElementById('returning-customer-form');
+
+    if (toggleLogin && loginForm) {
+      toggleLogin.addEventListener('click', (e) => {
+        e.preventDefault();
+        loginForm.classList.toggle('hidden');
+      });
+    }
+
+// Toggle coupon form
+    const toggleCoupon = document.querySelector('[data-toggle-coupon]');
+    const couponForm = document.getElementById('coupon-form');
+
+    if (toggleCoupon && couponForm) {
+      toggleCoupon.addEventListener('click', (e) => {
+        e.preventDefault();
+        couponForm.classList.toggle('hidden');
+      });
+    }
+
+// Toggle shipping address form
+    const shipDifferent = document.getElementById('ship-different-address');
+    const shippingForm = document.getElementById('shipping-address-form');
+
+    if (shipDifferent && shippingForm) {
+      shipDifferent.addEventListener('change', () => {
+        shippingForm.classList.toggle('hidden', ! shipDifferent.checked);
+      });
+    }
+
+// Initialize custom dropdowns
+    function initDropdown(dd) {
+      if (! dd) return;
+      
+
+      const btn = dd.querySelector('.dd-btn');
+      const valueEl = dd.querySelector('.dd-value');
+      const menu = dd.querySelector('.dd-menu');
+      const hiddenInput = dd.nextElementSibling;
+
+      function open() {
+        dd.setAttribute('aria-open', 'true');
+        btn.setAttribute('aria-expanded', 'true');
+      }
+
+      function close() {
+        dd.removeAttribute('aria-open');
+        btn.setAttribute('aria-expanded', 'false');
+      }
+
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (dd.getAttribute('aria-open') === 'true') 
+          close();
+         else 
+          open();
+        
+
+      });
+
+      dd.querySelectorAll('.dd-item').forEach((item) => {
+        item.addEventListener('click', (e) => {
+          e.preventDefault();
+          if (valueEl) 
+            valueEl.textContent = item.textContent.trim();
+          
+
+          if (hiddenInput && item.dataset.value !== undefined) {
+            hiddenInput.value = item.dataset.value;
+          }
+          close();
+        });
+      });
+
+      document.addEventListener('click', (e) => {
+        if (! dd.contains(e.target)) 
+          close();
+        
+
+      });
+
+      btn.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') 
+          close();
+        
+
+      });
+    }
+
+    initDropdown(document.getElementById('billing-country-dd'));
+    initDropdown(document.getElementById('billing-district-dd'));
+    initDropdown(document.getElementById('shipping-country-dd'));
+    initDropdown(document.getElementById('shipping-district-dd'));
+  })();
+{% endjavascript %}
+
+{% stylesheet %}
+  /* Medium custom radio to match the design */
+  .radio-md {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    width: 13px;
+    height: 13px;
+    border: 1px solid #bdbdbd;
+    border-radius: 50%;
+    display: inline-block;
+    position: relative;
+    background-color: transparent;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  /* Checked state: green fill */
+  .radio-md:checked {
+    background-color: #71cd13;
+    border-color: #71cd13;
+  }
+
+  /* White dot at bottom */
+  .radio-md:checked::after {
+    content: '';
+    position: absolute;
+    bottom: 1px;
+    left: 55%;
+    transform: translateX(-50%);
+    width: 4px;
+    height: 4px;
+    background-color: #ffffff;
+    border-radius: 50%;
+  }
+
+  /* Custom dropdown (compact to 39px) */
+  .dd {
+    position: relative;
+    display: inline-block;
+    width: 100%;
+  }
+  .dd.dd-compact .dd-btn {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    width: 100%;
+    height: 39px;
+    padding: 0 18px 0 16px;
+    border-radius: 7px;
+    background: white;
+    cursor: pointer;
+    color: #959595;
+    font-size: 13px;
+    line-height: 1;
+    border: 1px solid #e6e6e6;
+  }
+  .dd .dd-btn:focus {
+    outline: none;
+    border-color: #d0d0d0;
+  }
+  .dd .dd-caret {
+    width: 12px;
+    height: 12px;
+    color: #bdbdbd;
+    transition: transform 180ms ease;
+  }
+  .dd[aria-open="true"] .dd-caret {
+    transform: rotate(180deg);
+  }
+  .dd .dd-menu {
+    position: absolute;
+    left: 0;
+    top: calc(100% + 2px);
+    z-index: 30;
+    min-width: 100%;
+    background: #fff;
+    border: 1px solid #e6e6e6;
+    border-radius: 1px;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+    padding: 6px 0;
+    display: none;
+  }
+  .dd[aria-open="true"] .dd-menu {
+    display: block;
+  }
+  .dd .dd-item {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 10px 16px;
+    font-size: 13px;
+    color: #444;
+    background: none;
+    border: none;
+    cursor: pointer;
+  }
+  .dd .dd-item:hover {
+    background: #f7f7f7;
+    color: #111;
+  }
+{% endstylesheet %}
+
+{% schema %}
+  {
+    "name": "Checkout Page",
+    "tag": "section",
+    "class": "section-checkout-page",
+    "settings": [],
+    "presets": [
+      {
+        "name": "Checkout Page"
+      }
+    ]
+  }
+{% endschema %}
