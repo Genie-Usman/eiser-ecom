@@ -101,10 +101,10 @@
             </a>
           </li>
           <li class="relative">
-            <a href="{{ routes.cart_url }}" class="text-base p-2 hover:text-[#71cd13]">
+            <a href="{{ routes.cart_url }}" class="text-base p-2 hover:text-[#71cd13] relative inline-block">
               {% render 'icon-cart' %}
               {% if cart.item_count > 0 %}
-                <sup class="absolute -top-2 right-0 bg-[#71cd13] text-white text-xs rounded-full px-1">{{ cart.item_count }}</sup>
+                <sup class="absolute -top-1 -right-1 bg-[#71cd13] text-white text-xs rounded-full w-5 h-5 flex items-center justify-center leading-none">{{ cart.item_count }}</sup>
               {% endif %}
             </a>
           </li>

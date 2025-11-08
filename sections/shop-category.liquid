@@ -44,32 +44,40 @@
             {% endif %}
           </div>
 
-          {% comment %} Product Brand (as clickable list) {% endcomment %}
+          {% comment %} Product Brand (as radio buttons like categories) {% endcomment %}
           <div class="p-5 border border-gray-200">
             <h3 class="ml-2 text-lg font-semibold text-gray-900">{{ section.settings.heading_brand | default: 'Product Brand' }}</h3>
             <div class="flex justify-center">
               <div class="border-b border-[#71CD13] w-55 mt-2 mb-2"></div>
             </div>
-            <ul class="list">
-              {% assign default_brands = 'Apple,Asus,Gionee,Micromax,Samsung' | split: ',' %}
-              {% for brand in default_brands %}
-                {% assign is_active = false %}
-                {% for t in current_tags %}
-                  {% if t == brand %}
-                    {% assign is_active = true %}{% endif %}
-                {% endfor %}
-                <li class="py-2 {% if is_active %}font-semibold text-[#71cd13]{% endif %}">
-                  {% if is_active %}
-                    {{ brand | link_to_remove_tag: brand }}
-                  {% else %}
-                    {{ brand | link_to_add_tag: brand }}
-                  {% endif %}
-                </li>
-              {% endfor %}
-            </ul>
+            {% assign default_brands = section.settings.brands_list | default: 'Apple,Asus,Gionee,Micromax,Samsung' | split: ',' %}
+            {% for brand in default_brands %}
+              {% assign brand_trim = brand | strip %}
+              {% if collection %}
+                {% assign brand_url = collection.url | append: '/tagged/' | append: brand_trim | handleize %}
+              {% else %}
+                {% assign brand_url = routes.all_products_collection_url | append: '/tagged/' | append: brand_trim | handleize %}
+              {% endif %}
+              <label class="flex items-center gap-3 py-3 cursor-pointer group">
+                <input
+                  type="radio"
+                  name="brand"
+                  value="{{ brand_trim }}"
+                  class="radio-md"
+                  data-brand-radio
+                  data-href="{{ brand_url }}"
+                  {% assign is_active = false %}
+                  {% for t in current_tags %}
+                    {% if t == brand_trim %}
+                      {% assign is_active = true %}{% endif %}
+                  {% endfor %}
+                  {% if is_active %}checked{% endif %} />
+                <span class="text-[#797979] text-sm group-hover:text-[#71cd13] transition-colors">{{ brand_trim }}</span>
+              </label>
+            {% endfor %}
           </div>
 
-          {% comment %} Color Filter (as clickable list) {% endcomment %}
+          {% comment %} Color Filter (as radio buttons like categories) {% endcomment %}
           <div class="p-5 border border-gray-200">
             <h3 class="ml-2 text-lg font-semibold text-gray-900">{{ section.settings.heading_color | default: 'Color Filter' }}</h3>
             <div class="flex justify-center">
@@ -77,23 +85,30 @@
             </div>
             {% assign colors_source = section.settings.colors_list | default: 'Black,Black Leather,Black with red,Gold,Spacegrey' %}
             {% assign colors = colors_source | split: ',' %}
-            <ul class="list">
-              {% for color in colors %}
-                {% assign color_trim = color | strip %}
-                {% assign is_active = false %}
-                {% for t in current_tags %}
-                  {% if t == color_trim %}
-                    {% assign is_active = true %}{% endif %}
-                {% endfor %}
-                <li class="py-2 {% if is_active %}font-semibold text-[#71cd13]{% endif %}">
-                  {% if is_active %}
-                    {{ color_trim | link_to_remove_tag: color_trim }}
-                  {% else %}
-                    {{ color_trim | link_to_add_tag: color_trim }}
-                  {% endif %}
-                </li>
-              {% endfor %}
-            </ul>
+            {% for color in colors %}
+              {% assign color_trim = color | strip %}
+              {% if collection %}
+                {% assign color_url = collection.url | append: '/tagged/' | append: color_trim | handleize %}
+              {% else %}
+                {% assign color_url = routes.all_products_collection_url | append: '/tagged/' | append: color_trim | handleize %}
+              {% endif %}
+              <label class="flex items-center gap-3 py-3 cursor-pointer group">
+                <input
+                  type="radio"
+                  name="color"
+                  value="{{ color_trim }}"
+                  class="radio-md"
+                  data-color-radio
+                  data-href="{{ color_url }}"
+                  {% assign is_active = false %}
+                  {% for t in current_tags %}
+                    {% if t == color_trim %}
+                      {% assign is_active = true %}{% endif %}
+                  {% endfor %}
+                  {% if is_active %}checked{% endif %} />
+                <span class="text-[#797979] text-sm group-hover:text-[#71cd13] transition-colors">{{ color_trim }}</span>
+              </label>
+            {% endfor %}
           </div>
 
           {% comment %} Price Filter {% endcomment %}
@@ -164,7 +179,11 @@
                 @click.outside="open=false">
                 {% assign sorting_opts = section.settings.sorting_options | default: 'Default sorting|Price: Low to High|Price: High to Low|Newest' | split: '|' %}
                 {% for opt in sorting_opts %}
-                  <button class="dd-item" @click="value='{{ opt | escape }}'; open=false">{{ opt }}</button>
+                  <button 
+                    type="button"
+                    class="dd-item" 
+                    data-sort-option="{{ opt | escape }}"
+                    @click="value='{{ opt | escape }}'; open=false; setTimeout(() => handleSortChange('{{ opt | escape }}'), 0)">{{ opt }}</button>
                 {% endfor %}
               </div>
             </div>
@@ -189,7 +208,11 @@
                 @click.outside="open=false">
                 {% assign show_opts = section.settings.show_options | default: 'Show 12|Show 24|Show 36|Show All' | split: '|' %}
                 {% for opt in show_opts %}
-                  <button class="dd-item" @click="value='{{ opt | escape }}'; open=false">{{ opt }}</button>
+                  <button 
+                    type="button"
+                    class="dd-item" 
+                    data-show-option="{{ opt | escape }}"
+                    @click="value='{{ opt | escape }}'; open=false; setTimeout(() => handleShowChange('{{ opt | escape }}'), 0)">{{ opt }}</button>
                 {% endfor %}
               </div>
             </div>
@@ -464,6 +487,24 @@
       });
     });
 
+// Brand change → navigate to tagged URL
+    document.querySelectorAll('[data-brand-radio]').forEach(function(el) {
+      el.addEventListener('change', function() {
+        if (el.checked && el.dataset.href) {
+          window.location.href = el.dataset.href;
+        }
+      });
+    });
+
+// Color change → navigate to tagged URL
+    document.querySelectorAll('[data-color-radio]').forEach(function(el) {
+      el.addEventListener('change', function() {
+        if (el.checked && el.dataset.href) {
+          window.location.href = el.dataset.href;
+        }
+      });
+    });
+
 // Tag radios/checkboxes → navigate using tag URLs
     function navigateWithTags() {
       var activeRadios = Array.from(document.querySelectorAll('[data-tag-radio]:checked')).map(function(i) {
@@ -592,23 +633,39 @@
       'Price: High to Low': 'price-descending',
       'Newest': 'created-descending'
     };
+    
+    // Global functions for Alpine.js to call
+    window.handleSortChange = function(label) {
+      var code = sortMap[label] || null;
+      setSearchParams({'sort_by': code});
+    };
+    
+    window.handleShowChange = function(label) {
+      var m = label.match(/(\d+)/);
+      var size = m ? m[1] : 'all';
+      setSearchParams({'page_size': size});
+    };
+    
+    // Fallback for non-Alpine.js environments
     document.querySelectorAll('.dd.select-wide .dd-item').forEach(function(it) {
-      it.addEventListener('click', function() {
-        var label = it.textContent.trim();
-        var code = sortMap[label] || null;
-        setSearchParams({'sort_by': code});
+      it.addEventListener('click', function(e) {
+        if (!window.Alpine) {
+          var label = it.textContent.trim();
+          var code = sortMap[label] || null;
+          setSearchParams({'sort_by': code});
+        }
       });
     });
 
 // Page size menu → update page_size param
     document.querySelectorAll('.dd.select-narrow .dd-item').forEach(function(it) {
-      it.addEventListener('click', function() {
-        var label = it.textContent.trim();
-        var m = label.match(/(\d+)/);
-        var size = m
-          ? m[1]
-          : 'all';
-        setSearchParams({'page_size': size});
+      it.addEventListener('click', function(e) {
+        if (!window.Alpine) {
+          var label = it.textContent.trim();
+          var m = label.match(/(\d+)/);
+          var size = m ? m[1] : 'all';
+          setSearchParams({'page_size': size});
+        }
       });
     });
 
@@ -688,6 +745,11 @@
         "id": "heading_price",
         "label": "Price heading",
         "default": "Price Filter"
+      }, {
+        "type": "textarea",
+        "id": "brands_list",
+        "label": "Brands (comma separated)",
+        "default": "Apple,Asus,Gionee,Micromax,Samsung"
       }, {
         "type": "textarea",
         "id": "colors_list",

@@ -17,7 +17,8 @@
 
       <aside class="lg:col-span-4">
         {% render 'blog-widgets'
-          , blog: blog %}
+          , blog: blog
+          , section: section %}
       </aside>
     </div>
   </div>
@@ -37,7 +38,76 @@
     "name": "Article",
     "tag": "section",
     "class": "article-details",
-    "settings": [],
+    "settings": [
+      {
+        "type": "header",
+        "content": "Blog Widget Images"
+      },
+      {
+        "type": "image_picker",
+        "id": "recent_post_image_1",
+        "label": "Recent Post Image 1"
+      },
+      {
+        "type": "image_picker",
+        "id": "recent_post_image_2",
+        "label": "Recent Post Image 2"
+      },
+      {
+        "type": "image_picker",
+        "id": "recent_post_image_3",
+        "label": "Recent Post Image 3"
+      },
+      {
+        "type": "image_picker",
+        "id": "recent_post_image_4",
+        "label": "Recent Post Image 4"
+      },
+      {
+        "type": "image_picker",
+        "id": "recent_post_image_5",
+        "label": "Recent Post Image 5"
+      },
+      {
+        "type": "image_picker",
+        "id": "recent_post_image_6",
+        "label": "Recent Post Image 6"
+      },
+      {
+        "type": "header",
+        "content": "Instagram Feed Images"
+      },
+      {
+        "type": "image_picker",
+        "id": "instagram_image_1",
+        "label": "Instagram Image 1"
+      },
+      {
+        "type": "image_picker",
+        "id": "instagram_image_2",
+        "label": "Instagram Image 2"
+      },
+      {
+        "type": "image_picker",
+        "id": "instagram_image_3",
+        "label": "Instagram Image 3"
+      },
+      {
+        "type": "image_picker",
+        "id": "instagram_image_4",
+        "label": "Instagram Image 4"
+      },
+      {
+        "type": "image_picker",
+        "id": "instagram_image_5",
+        "label": "Instagram Image 5"
+      },
+      {
+        "type": "image_picker",
+        "id": "instagram_image_6",
+        "label": "Instagram Image 6"
+      }
+    ],
     "presets": [
       {
         "name": "Article"

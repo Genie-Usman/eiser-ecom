@@ -52,19 +52,40 @@
     <h3 class="text-lg font-semibold text-[#2A2A2A] mb-4">Recent post</h3>
     <div class=" border-b border-[#e7e6e8] mt-5"></div>
     <div class="grid grid-cols-3 gap-2 mt-4">
-      {% assign recent_post_images = 'cat-post/cat-post-1.jpg|cat-post/cat-post-2.jpg|cat-post/cat-post-3.jpg|popular-post/post1.jpg|popular-post/post2.jpg|popular-post/post3.jpg' | split: '|' %}
-      {% for image_path in recent_post_images limit: 6 %}
+      {% if section and section.settings %}
+        {% assign recent_images = section.settings.recent_post_image_1 | append: '|' | append: section.settings.recent_post_image_2 | append: '|' | append: section.settings.recent_post_image_3 | append: '|' | append: section.settings.recent_post_image_4 | append: '|' | append: section.settings.recent_post_image_5 | append: '|' | append: section.settings.recent_post_image_6 | split: '|' %}
+      {% else %}
+        {% assign recent_images = '' | split: '|' %}
+      {% endif %}
+      {% assign fallback_images = 'cat-post/cat-post-1.jpg|cat-post/cat-post-2.jpg|cat-post/cat-post-3.jpg|popular-post/post1.jpg|popular-post/post2.jpg|popular-post/post3.jpg' | split: '|' %}
+      {% for i in (0..5) %}
+        {% if section and section.settings %}
+          {% assign custom_image = recent_images[i] %}
+        {% else %}
+          {% assign custom_image = blank %}
+        {% endif %}
+        {% assign fallback_path = fallback_images[i] %}
         <a
           href="#"
           class="block w-full aspect-square overflow-hidden bg-white group"
           aria-label="Recent post">
-          <img
-            src="{{ 'blog/' | append: image_path | asset_url }}"
-            alt="Recent post"
-            class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 ease-in-out"
-            loading="lazy"
-            width="100"
-            height="100">
+          {% if custom_image != blank %}
+            <img
+              src="{{ custom_image | image_url: width: 200 }}"
+              alt="Recent post"
+              class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 ease-in-out"
+              loading="lazy"
+              width="100"
+              height="100">
+          {% else %}
+            <img
+              src="{{ 'blog/' | append: fallback_path | asset_url }}"
+              alt="Recent post"
+              class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 ease-in-out"
+              loading="lazy"
+              width="100"
+              height="100">
+          {% endif %}
         </a>
       {% endfor %}
     </div>
@@ -85,22 +106,42 @@
   <div class="py-5 px-6 bg-[#F7F7FF]">
     <h3 class="text-lg font-semibold text-[#2A2A2A] mb-4">Instagram Feeds</h3>
     <div class=" border-b border-[#e7e6e8] mt-5"></div>
-    {% assign feed_files_param = feed_files | default: 'widget-i1.png|widget-i2.png|widget-i3.png|widget-i4.png|widget-i5.png|widget-i6.png' %}
-    {% assign feed_files = feed_files_param | split: '|' %}
+    {% if section and section.settings %}
+      {% assign instagram_images = section.settings.instagram_image_1 | append: '|' | append: section.settings.instagram_image_2 | append: '|' | append: section.settings.instagram_image_3 | append: '|' | append: section.settings.instagram_image_4 | append: '|' | append: section.settings.instagram_image_5 | append: '|' | append: section.settings.instagram_image_6 | split: '|' %}
+    {% else %}
+      {% assign instagram_images = '' | split: '|' %}
+    {% endif %}
+    {% assign fallback_instagram = 'widget-i1.png|widget-i2.png|widget-i3.png|widget-i4.png|widget-i5.png|widget-i6.png' | split: '|' %}
 
     <div class="grid grid-cols-3 gap-2 mt-4">
-      {% for name in feed_files %}
+      {% for i in (0..5) %}
+        {% if section and section.settings %}
+          {% assign custom_image = instagram_images[i] %}
+        {% else %}
+          {% assign custom_image = blank %}
+        {% endif %}
+        {% assign fallback_name = fallback_instagram[i] %}
         <a
           href="#"
           class="block w-20 h-20 overflow-hidden bg-white group"
           aria-label="Instagram image">
-          <img
-            src="{{ 'instagram/' | append: name | asset_url }}"
-            alt="instagram"
-            class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 ease-in-out"
-            loading="lazy"
-            width="80"
-            height="80" />
+          {% if custom_image != blank %}
+            <img
+              src="{{ custom_image | image_url: width: 160 }}"
+              alt="instagram"
+              class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 ease-in-out"
+              loading="lazy"
+              width="80"
+              height="80" />
+          {% else %}
+            <img
+              src="{{ 'instagram/' | append: fallback_name | asset_url }}"
+              alt="instagram"
+              class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 ease-in-out"
+              loading="lazy"
+              width="80"
+              height="80" />
+          {% endif %}
         </a>
       {% endfor %}
     </div>

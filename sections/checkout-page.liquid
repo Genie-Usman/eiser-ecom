@@ -508,13 +508,23 @@
                     PayPal
                   </label>
                   <div class="relative right-10">
-                    <img
-                      src="{{ 'img/card.jpg' | asset_url }}"
-                      alt="Payment Cards"
-                      class="h-4"
-                      width="60"
-                      height="69"
-                      loading="lazy">
+                    {% if section.settings.payment_card_image != blank %}
+                      <img
+                        src="{{ section.settings.payment_card_image | image_url: width: 120 }}"
+                        alt="Payment Cards"
+                        class="h-4"
+                        width="60"
+                        height="69"
+                        loading="lazy">
+                    {% else %}
+                      <img
+                        src="{{ 'img/card.jpg' | asset_url }}"
+                        alt="Payment Cards"
+                        class="h-4"
+                        width="60"
+                        height="69"
+                        loading="lazy">
+                    {% endif %}
                   </div>
                 </div>
                 <p class="text-sm mt-2 text-[#71cd13] bg-white py-5 px-5 font-normal">
@@ -760,7 +770,14 @@
     "name": "Checkout Page",
     "tag": "section",
     "class": "section-checkout-page",
-    "settings": [],
+    "settings": [
+      {
+        "type": "image_picker",
+        "id": "payment_card_image",
+        "label": "Payment Card Image",
+        "info": "Image showing payment card logos (PayPal, Visa, etc.)"
+      }
+    ],
     "presets": [
       {
         "name": "Checkout Page"
