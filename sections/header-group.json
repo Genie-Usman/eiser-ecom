@@ -13,10 +13,23 @@
   "sections": {
     "header": {
       "type": "header",
-      "settings": {}
+      "settings": {
+        "logo": "shopify://shop_images/logo.png",
+        "menu": "",
+        "top_phone": "Phone: +01 256 25 235",
+        "top_email": "email: info@eiser.com",
+        "util_1_label": "gift card",
+        "util_1_link": "shopify://policies/privacy-policy",
+        "util_2_label": "track order",
+        "util_2_link": "shopify://pages/order-tracking",
+        "util_3_label": "Contact us",
+        "util_3_link": "shopify://pages/contact",
+        "wishlist_enabled": false,
+        "wishlist_link": ""
+      }
     }
   },
   "order": [
     "header"
-  ],
+  ]
 }
