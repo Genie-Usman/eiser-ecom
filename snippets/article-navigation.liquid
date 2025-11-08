@@ -1,0 +1,83 @@
+{% assign current_article = article %}
+{% assign nav_blog = blog | default: current_article.blog %}
+{% assign previous_article = current_article.previous %}
+{% assign next_article = current_article.next %}
+
+{% assign needs_prev = false %}
+{% assign needs_next = false %}
+{% if previous_article == blank %}
+  {% assign needs_prev = true %}
+{% endif %}
+{% if next_article == blank %}
+  {% assign needs_next = true %}
+{% endif %}
+
+{% assign needs_neighbors = false %}
+{% if needs_prev or needs_next %}
+  {% assign needs_neighbors = true %}
+{% endif %}
+
+{% if nav_blog and needs_neighbors %}
+  {% assign articles_collection = nav_blog.articles %}
+  {% for loop_article in articles_collection %}
+    {% if loop_article.id == current_article.id %}
+      {% assign prev_index = forloop.index0 | minus: 1 %}
+      {% assign next_index = forloop.index0 | plus: 1 %}
+      {% if previous_article == blank and prev_index >= 0 %}
+        {% assign previous_article = articles_collection[prev_index] %}
+      {% endif %}
+      {% if next_article == blank and next_index < articles_collection.size %}
+        {% assign next_article = articles_collection[next_index] %}
+      {% endif %}
+      {% break %}
+    {% endif %}
+  {% endfor %}
+{% endif %}
+
+{% if previous_article or next_article %}
+  <nav class="mt-10 grid gap-6 border-b border-gray-200 py-8 md:grid-cols-2">
+    {% if previous_article %}
+      <a href="{{ previous_article.url }}" class="group flex items-center gap-4 text-left">
+        <div class="relative h-16 w-16 overflow-hidden bg-[#F7F7FF]">
+          {% if previous_article.image %}
+            {{ previous_article.image | image_url: width: 120 | image_tag: class: 'h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]', loading: 'lazy' }}
+          {% else %}
+            <div class="flex h-full w-full items-center justify-center text-xs capitalize text-[#9B9B9B]">No Image</div>
+          {% endif %}
+          <div class="absolute inset-0 flex items-center justify-center bg-black/60 text-white opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+            <span class="-translate-x-1 text-xl">
+              &larr;
+            </span>
+          </div>
+        </div>
+        <div>
+          <span class="text-sm capitalize text-[#9B9B9B]">Prev Post</span>
+          <h3 class="mt-2 text-sm font-semibold text-[#2A2A2A] transition-colors duration-200 group-hover:text-[#71cd13]">{{ previous_article.title }}</h3>
+        </div>
+      </a>
+    {% else %}
+      <span></span>
+    {% endif %}
+
+    {% if next_article %}
+      <a href="{{ next_article.url }}" class="group flex flex-row-reverse items-center gap-4 text-right">
+        <div class="relative h-16 w-16 overflow-hidden bg-[#F7F7FF]">
+          {% if next_article.image %}
+            {{ next_article.image | image_url: width: 120 | image_tag: class: 'h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]', loading: 'lazy' }}
+          {% else %}
+            <div class="flex h-full w-full items-center justify-center text-xs capitalize text-[#9B9B9B]">No Image</div>
+          {% endif %}
+          <div class="absolute inset-0 flex items-center justify-center bg-black/60 text-white opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+            <span class="translate-x-1 text-xl">
+              &rarr;
+            </span>
+          </div>
+        </div>
+        <div>
+          <span class="text-sm capitalize text-[#9B9B9B]">Next Post</span>
+          <h3 class="mt-2 text-sm font-semibold text-[#2A2A2A] transition-colors duration-200 group-hover:text-[#71cd13]">{{ next_article.title }}</h3>
+        </div>
+      </a>
+    {% endif %}
+  </nav>
+{% endif %}

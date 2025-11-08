@@ -1,0 +1,33 @@
+{% assign a = article %}
+<header class="space-y-5">
+  {% if a.image %}
+    <div class="article-hero overflow-hidden">
+      {{ a.image | image_url: width: 1600 | image_tag: class: 'w-full h-auto object-cover', loading: 'lazy' }}
+    </div>
+  {% endif %}
+  <h1 class="text-[22px] md:text-[24px] font-semibold text-[#2A2A2A]">{{ a.title | escape }}</h1>
+  <div class="text-xs text-[#797979] flex items-center gap-2">
+    <span class="flex items-center gap-2">
+      <span class="opacity-70">🏷</span>
+      {% if a.tags != blank %}
+        {% for t in a.tags %}
+          <a href="{{ blog.url }}/tagged/{{ t | handleize }}" class="hover:text-[#71cd13] font-medium capitalize transition-colors">{{ t }}</a>
+          {% unless forloop.last %},
+          {% endunless %}
+        {% endfor %}
+      {% else %}
+        <span>Uncategorized</span>
+      {% endif %}
+    </span>
+    <span class="px-2">|</span>
+    {% assign cc = a.comments_count | default: 0 %}
+    {% if cc < 10 %}
+      {% assign cc_str = cc | prepend: '0' %}
+    {% else %}
+      {% assign cc_str = cc %}
+    {% endif %}
+    <span class="flex items-center gap-2 font-medium">
+      <span class="opacity-70">💬</span>
+      {{ cc_str }} {{ a.comments_count | pluralize: 'Comment', 'Comments' }}</span>
+  </div>
+</header>

@@ -1,0 +1,98 @@
+{% assign a = article %}
+{% assign quote_text = '' %}
+{% if a.metafields.custom.quote and a.metafields.custom.quote.value != blank %}
+  {% assign quote_text = a.metafields.custom.quote.value %}
+{% endif %}
+{% assign likes_text = 'Lily and 4 people like this' %}
+{% if a.metafields.custom.likes_text and a.metafields.custom.likes_text.value != blank %}
+  {% assign likes_text = a.metafields.custom.likes_text.value %}
+{% endif %}
+{% assign comment_count = a.comments_count | default: 0 %}
+{% assign comment_display = comment_count %}
+{% if comment_count < 10 %}
+  {% assign comment_display = comment_count | prepend: '0' %}
+{% endif %}
+{% assign comment_word = comment_count | pluralize: 'Comment', 'Comments' %}
+{% assign share_url = request.origin | append: a.url %}
+{% assign share_title = a.title | strip | url_encode %}
+{% assign share_url_encoded = share_url | url_encode %}
+<div class="article-body">
+  {% if a.content %}
+    {% assign content_segments = a.content | split: '</p>' %}
+    {% assign paragraph_total = 0 %}
+    {% for segment in content_segments %}
+      {% assign segment_clean = segment | strip %}
+      {% if segment_clean == '' %}
+        {% continue %}
+      {% endif %}
+      {% assign paragraph_total = paragraph_total | plus: 1 %}
+    {% endfor %}
+
+    {% assign excerpt_insert_index = paragraph_total | divided_by: 2 %}
+    {% assign paragraph_is_odd = paragraph_total | modulo: 2 %}
+    {% if paragraph_total > 0 and paragraph_is_odd != 0 %}
+      {% assign excerpt_insert_index = excerpt_insert_index | plus: 1 %}
+    {% endif %}
+
+    {% assign rendered_count = 0 %}
+    <div class="space-y-5 text-[14px] leading-7 text-[#797979]">
+      {% for segment in content_segments %}
+        {% assign segment_clean = segment | strip %}
+        {% if segment_clean == '' %}
+          {% continue %}
+        {% endif %}
+        {% assign rendered_count = rendered_count | plus: 1 %}
+        {{ segment_clean }}{% raw %}</p>{% endraw %}
+        {% if quote_text != '' and rendered_count == excerpt_insert_index %}
+          <div class="bg-[#F2F3F7] p-7">
+
+            <div class=" border border-[#EDE7FF] border-l-[3px] border-l-[#71cd13] bg-white px-6 py-5 text-[13px] italic text-[#666666]">
+              {{ quote_text }}
+              </div>
+              </div>
+        {% endif %}
+      {% endfor %}
+    </div>
+  {% elsif quote_text != '' %}
+    <div class="space-y-5 text-[14px] leading-7 text-[#797979]">
+      <div class="mb-7 border border-[#EDE7FF] border-l-[3px] border-l-[#71cd13] bg-white px-6 py-5 text-[13px] italic text-[#666666]">
+        {{ quote_text }}
+      </div>
+    </div>
+  {% endif %}
+
+  <div class="mt-6 border-t border-gray-200 pt-4 text-xs text-[#797979]">
+    <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+      <div class="flex flex-wrap items-center gap-4">
+        <span class="flex items-center gap-2">
+          <span class="flex h-6 w-6 items-center justify-center text-[13px] font-semibold text-[#7F7F7F]" aria-hidden="true">{% render 'icon-heart' %}</span>
+          <span class="text-[14px]">{{ likes_text }}</span>
+        </span>
+        </div>
+        <div class="flex items-center gap-2">
+        <a href="#comments" class="flex items-center gap-2 transition-colors duration-200 hover:text-[#71cd13]">
+          <span class="flex h-6 w-6 items-center justify-center text-[13px] font-semibold text-[#71cd13]" aria-hidden="true">💬</span>
+          <span class="text-[14px]">{{ comment_display }} {{ comment_word }}</span>
+        </a>
+        </div>
+      <div class="flex items-center ">
+        <div class="flex items-center gap-2">
+          <a class="flex h-5 w-5 items-center justify-center text-[#797979] transition-colors duration-200 hover:text-[#71cd13]" href="https://www.facebook.com/sharer/sharer.php?u={{ share_url_encoded }}" target="_blank" rel="noopener" aria-label="Share on Facebook">
+            {% render 'icon-facebook' %}
+          </a>
+          <a class="flex h-5 w-5 items-center justify-center text-[#797979] transition-colors duration-200 hover:text-[#71cd13]" href="https://twitter.com/intent/tweet?url={{ share_url_encoded }}&text={{ share_title }}" target="_blank" rel="noopener" aria-label="Share on Twitter">
+            {% render 'icon-twitter' %}
+          </a>
+          <a class="flex h-5 w-5 items-center justify-center text-[#797979] transition-colors duration-200 hover:text-[#71cd13]" href="https://www.pinterest.com/pin/create/button/?url={{ share_url_encoded }}&description={{ share_title }}" target="_blank" rel="noopener" aria-label="Share on Pinterest">
+            {% render 'icon-dribble' %}
+          </a>
+          <a class="flex h-5 w-5 items-center justify-center text-[#797979] transition-colors duration-200 hover:text-[#71cd13]" href="https://www.linkedin.com/sharing/share-offsite/?url={{ share_url_encoded }}" target="_blank" rel="noopener" aria-label="Share on LinkedIn">
+            {% render 'icon-wordpress' %}
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+

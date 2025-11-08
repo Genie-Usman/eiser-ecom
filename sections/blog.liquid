@@ -1,35 +1,102 @@
-{% comment %}
-  This section is used in the blog template to render the blog page listing all
-  articles within a blog.
+<section class="py-10 md:py-14 px-25">
+  <div class="container mx-auto">
 
-  https://shopify.dev/docs/storefronts/themes/architecture/templates/blog
-{% endcomment %}
+    <div class="mt-8 grid grid-cols-1 lg:grid-cols-12 gap-8 px-10">
+      <div class="lg:col-span-8 space-y-12">
+        {% paginate blog.articles by 5 %}
+          {% for article in blog.articles %}
+            {% render 'blog-card-2'
+              , article: article %}
+          {% endfor %}
 
-<h1>{{ blog.title }}</h1>
-
-{% paginate blog.articles by 5 %}
-  {% for article in blog.articles %}
-    <div>
-      {% if article.image %}
-        {{ article.image | image_url: width: 1000 | image_tag }}
-      {% endif %}
-      <h2>
-        {{ article.title | link_to: article.url }}
-      </h2>
-      {% assign date = article.published_at | time_tag: format: 'date' %}
-      <p>{{ 'blog.article_metadata_html' | t: date: date, author: article.author }}</p>
-      <p>{{ article.excerpt }}</p>
+          {% if paginate.pages > 1 %}
+            <div class="mt-6 flex justify-center gap-2 blog-pagination">
+              {{ paginate | default_pagination }}
+            </div>
+          {% endif %}
+        {% endpaginate %}
+      </div>
+      <div class="lg:col-span-4">
+        {% render 'blog-widgets'
+          , blog: blog %}
+      </div>
     </div>
-  {% endfor %}
+  </div>
+</section>
 
-  {%- if paginate.pages > 1 -%}
-    {{- paginate | default_pagination -}}
-  {%- endif -%}
-{% endpaginate %}
+{% stylesheet %}
+  /* Blog layout fine-tuning */
+  .blog-card {
+    box-shadow: 0 1px 0 #eee;
+  }
+  .blog-card h3 a {
+    text-decoration: none;
+  }
+  .blog-card h3 a:hover {
+    color: #71cd13;
+  }
+
+  /* Pagination styling */
+  .blog-pagination nav,
+  .blog-pagination .pagination,
+  .blog-pagination ol,
+  .blog-pagination ul {
+    display: flex;
+  }
+  .blog-pagination a,
+  .blog-pagination span {
+    display: grid;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    border: 1px solid #EDE7FF;
+    /* light lilac */
+    background: #FFFFFF;
+    color: #7a7a7a;
+    font-size: 16px;
+    line-height: 1;
+  }
+  /* Current page (varies by theme markup) */
+  .blog-pagination .current,
+  .blog-pagination .pagination__item--current > a,
+  .blog-pagination .pagination__item--current > span {
+    background: #F7F4FF;
+    border-color: #EDE7FF;
+  }
+  /* Prev/Next arrows: hide text and show arrows */
+  .blog-pagination a[rel="prev"],
+  .blog-pagination a[aria-label="Previous"],
+  .blog-pagination .prev a {
+    font-size: 0;
+    position: relative;
+  }
+  .blog-pagination a[rel="prev"]::before,
+  .blog-pagination a[aria-label="Previous"]::before,
+  .blog-pagination .prev a::before {
+    content: "\2190";
+    /* ← */
+    font-size: 18px;
+    color: #7a7a7a;
+  }
+  .blog-pagination a[rel="next"],
+  .blog-pagination a[aria-label="Next"],
+  .blog-pagination .next a {
+    font-size: 0;
+    position: relative;
+  }
+  .blog-pagination a[rel="next"]::before,
+  .blog-pagination a[aria-label="Next"]::before,
+  .blog-pagination .next a::before {
+    content: "\2192";
+    /* → */
+    font-size: 18px;
+    color: #7a7a7a;
+  }
+{% endstylesheet %}
 
 {% schema %}
-{
-  "name": "t:general.blog",
-  "settings": []
-}
+  {
+    "name": "t:general.blog",
+    "settings": []
+  }
 {% endschema %}

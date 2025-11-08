@@ -1,0 +1,123 @@
+<aside class="space-y-8">
+  <!-- Search -->
+  <div class="p-5 bg-[#FBF9FF]">
+    <form
+      action="{{ routes.search_url }}"
+      method="get"
+      role="search"
+      class="space-y-2">
+      <input
+        type="hidden"
+        name="type"
+        value="article" />
+      <input
+        class="w-full h-10 border border-gray-200 bg-white text-[#999999] px-5 text-xs font-medium"
+        name="q"
+        placeholder="Search keyword" />
+      <button class="w-full h-9 bg-[#71cd13] text-white text-xs font-medium border border-[#71cd13] hover:text-[#71cd13] hover:bg-transparent cursor-pointer transition-colors duration-300 ease-in uppercase" type="submit">Search</button>
+    </form>
+  </div>
+
+  <!-- Categories (using tags as categories with usage counts) -->
+  <div class="p-6 bg-[#F7F7FF]">
+    <h3 class="text-lg font-semibold text-[#2A2A2A] mb-4">Category</h3>
+    <div class=" border-b border-[#e7e6e8] mt-5"></div>
+
+    {% assign category_tags = blog.all_tags | slice: 0, 10 %}
+    {% assign source_articles = blogs[blog.handle].articles %}
+    <ul class="divide-y divide-[#e7e6e8]">
+      {% for t in category_tags %}
+        {% assign tag_count = 0 %}
+        {% for a in source_articles %}
+          {% if a.tags contains t %}
+            {% assign tag_count = tag_count | plus: 1 %}
+          {% endif %}
+        {% endfor %}
+        {% assign is_active = false %}
+        {% if current_tags contains t %}
+          {% assign is_active = true %}
+        {% endif %}
+        <li>
+          <a href="{{ blog.url }}/tagged/{{ t | handleize }}" class="flex items-center font-medium hover:text-[#71cd13] gap-[2px] py-4 text-xs transition-colors duration-200 ease-in {% if is_active %}text-[#71cd13] font-medium{% else %}text-[#797979]{% endif %}">
+            <span class="capitalize">{{ t }}</span>
+            <span class="text-[#9d9db5]">({{ tag_count }})</span>
+          </a>
+        </li>
+      {% endfor %}
+    </ul>
+  </div>
+
+  <!-- Recent posts -->
+  <div class="py-5 px-6 bg-[#F7F7FF]">
+    <h3 class="text-lg font-semibold text-[#2A2A2A] mb-4">Recent post</h3>
+    <div class=" border-b border-[#e7e6e8] mt-5"></div>
+    <ul class="space-y-4 mt-4">
+      {% for a in blog.articles limit: 4 %}
+        <li class="flex gap-3 items-center">
+          {% if a.image %}
+            <a href="{{ a.url }}" class="block w-18 h-16 overflow-hidden">
+              {{ a.image | image_url: width: 120 | image_tag: class: 'w-full h-full object-cover' }}
+            </a>
+          {% endif %}
+          <div>
+            <a href="{{ a.url }}" class="text-sm font-semibold text-[#2A2A2A] hover:text-[#71cd13] leading-5">{{ a.title | truncate: 25 }}</a>
+            <div class="text-xs text-[#797979] font-medium mt-1">{{ a.published_at | date: "%b %d, %Y" }}</div>
+          </div>
+        </li>
+      {% endfor %}
+    </ul>
+  </div>
+
+  <!-- Tag cloud -->
+  <div class="py-5 px-6 bg-[#F7F7FF]">
+    <h3 class="text-lg font-semibold text-[#2A2A2A] mb-4">Tag clouds</h3>
+    <div class=" border-b border-[#e7e6e8] mt-5"></div>
+    <div class="flex flex-wrap gap-2 mt-4">
+      {% for t in blog.all_tags limit: 20 %}
+        <a href="{{ blog.url }}/tagged/{{ t | handleize }}" class="px-3 py-1 text-[#797979] text-xs bg-white border border-gray-200 transition-colors duration-200 ease-in hover:bg-[#71cd13] hover:text-white">{{ t }}</a>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Instagram feeds (use asset images) -->
+  <div class="py-5 px-6 bg-[#F7F7FF]">
+    <h3 class="text-lg font-semibold text-[#2A2A2A] mb-4">Instagram Feeds</h3>
+    <div class=" border-b border-[#e7e6e8] mt-5"></div>
+    {% assign feed_files_param = feed_files | default: 'widget-i1.png|widget-i2.png|widget-i3.png|widget-i4.png|widget-i5.png|widget-i6.png' %}
+    {% assign feed_files = feed_files_param | split: '|' %}
+
+    <div class="grid grid-cols-3 gap-2 mt-4">
+      {% for name in feed_files %}
+        <a
+          href="#"
+          class="block w-20 h-20 overflow-hidden bg-white group"
+          aria-label="Instagram image">
+          <img
+            src="{{ 'instagram/' | append: name | asset_url }}"
+            alt="instagram"
+            class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 ease-in-out"
+            loading="lazy"
+            width="80"
+            height="80" />
+        </a>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Newsletter -->
+  <div class="py-5 px-6 bg-[#F7F7FF]">
+    <h3 class="text-lg font-semibold text-[#2A2A2A] mb-4">Newsletter</h3>
+    <div class=" border-b border-[#e7e6e8] mt-5"></div>
+    <form
+      action="/contact#newsletter"
+      method="post"
+      class="space-y-2">
+      <input
+        class="w-full h-10 border border-gray-200 bg-white text-[#999999] px-5 text-xs font-medium focus:outline-none"
+        placeholder="Enter email"
+        type="email"
+        required>
+      <button class="w-full h-9 bg-[#71cd13] text-white text-xs font-medium border border-[#71cd13] hover:text-[#71cd13] hover:bg-transparent cursor-pointer transition-colors duration-200 ease-in uppercase" type="submit">Subscribe</button>
+    </form>
+  </div>
+</aside>

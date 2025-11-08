@@ -72,5 +72,35 @@
       "subtitle": "Subtitle",
       "normal": "Normal text"
     },
+  },
+  "sections": {
+    "tracking": {
+      "name": "Order tracking",
+      "settings": {
+        "heading": {
+          "label": "Heading"
+        },
+        "subheading": {
+          "label": "Subheading"
+        },
+        "instructions": {
+          "label": "Instructions"
+        },
+        "background_color": {
+          "label": "Background color"
+        },
+        "padding_top": {
+          "label": "Padding top"
+        },
+        "padding_bottom": {
+          "label": "Padding bottom"
+        }
+      },
+      "presets": {
+        "default": {
+          "name": "Order tracking"
+        }
+      }
+    }
   }
 }

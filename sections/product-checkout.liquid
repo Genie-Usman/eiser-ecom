@@ -1,0 +1,114 @@
+{% liquid
+  assign selected_variant_id = request.params.variant | default: ''
+  assign initial_qty = request.params.qty | default: 1
+%}
+
+<section class="py-10 md:py-14">
+  <div class="container mx-auto px-20">
+    <h1 class="text-2xl font-semibold text-gray-900">Checkout</h1>
+    <p class="mt-1 text-sm text-[#797979]">Review your item then continue to Shopify checkout.</p>
+
+    <div class="mt-8 grid lg:grid-cols-12 gap-8">
+      <!-- Order summary -->
+      <div class="lg:col-span-7">
+        <div class="border border-gray-200 rounded">
+          <div class="p-5 flex items-center gap-4">
+            <div class="w-20 h-20 bg-gray-100 rounded"></div>
+            <div class="flex-1">
+              <h2 class="text-gray-900 font-medium">{{ product.title | default: 'Selected product' }}</h2>
+              <div class="mt-1 text-sm text-[#71CD14] font-semibold" data-price>—</div>
+              <div class="mt-3 flex items-center gap-3">
+                <label for="pc-qty" class="text-sm text-[#797979]">Quantity</label>
+                <div class="relative">
+                  <input
+                    id="pc-qty"
+                    type="number"
+                    min="1"
+                    value="{{ initial_qty }}"
+                    class="w-20 h-9 text-sm text-center border border-gray-300 rounded outline-none" />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="lg:col-span-5">
+        <div class="border border-gray-200 rounded p-5">
+          <h3 class="text-gray-900 font-medium">Contact</h3>
+          <input
+            id="pc-email"
+            type="email"
+            class="mt-3 w-full h-10 border border-gray-300 rounded px-3 text-sm"
+            placeholder="Email (optional)" />
+          <button
+            id="pc-checkout"
+            type="button"
+            class="mt-4 w-full h-11 inline-flex items-center justify-center bg-[#71CD14] hover:bg-[#6e9a33] text-white text-sm font-medium rounded">Checkout now</button>
+          <p class="mt-2 text-xs text-[#797979]">We’ll add the item to your cart and take you to the secure Shopify checkout.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function(){
+      var variantId = '{{ selected_variant_id }}';
+      var qtyInput = document.getElementById('pc-qty');
+      var checkoutBtn = document.getElementById('pc-checkout');
+      var emailInput = document.getElementById('pc-email');
+    
+      function toInt(v, d){ v = parseInt(v, 10); return isNaN(v) ? (d||0) : v; }
+    
+      async function post(url, data){
+        var res = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data||{}) });
+        return res.ok;
+      }
+    
+      async function clearCart(){
+        try { await post('/cart/clear.js', {}); } catch(e) {}
+      }
+    
+      async function addToCart(vId, quantity){
+        return await post('/cart/add.js', { id: vId, quantity: quantity });
+      }
+    
+      function goCheckout(){
+        var email = (emailInput && emailInput.value) || '';
+        var q = email ? ('?checkout[email]='+ encodeURIComponent(email)) : '';
+        window.location.href = '/checkout' + q;
+      }
+    
+      if (checkoutBtn) {
+        checkoutBtn.addEventListener('click', async function(){
+          var quantity = toInt(qtyInput && qtyInput.value, 1);
+          if (!variantId) {
+            alert('Missing variant. Open this page with ?variant=VARIANT_ID');
+            return;
+          }
+          checkoutBtn.disabled = true;
+          try {
+            await clearCart();
+            var ok = await addToCart(variantId, Math.max(1, quantity));
+            if (ok) goCheckout(); else checkoutBtn.disabled = false;
+          } catch(e) {
+            checkoutBtn.disabled = false;
+          }
+        });
+      }
+    })();
+  </script>
+</section>
+
+{% schema %}
+  {
+    "name": "Product checkout",
+    "tag": "section",
+    "class": "section-product-checkout",
+    "settings": [],
+    "disabled_on": {
+      "groups": ["header", "footer"]
+    }
+  }
+{% endschema %}

@@ -1,11 +1,11 @@
 {
   "sections": {
     "banner": {
-      "type": "cart-banner",
+      "type": "tracking-banner",
       "settings": {}
     },
     "main": {
-      "type": "cart",
+      "type": "tracking-page",
       "settings": {}
     }
   },
@@ -14,3 +14,4 @@
     "main"
   ]
 }
+

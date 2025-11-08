@@ -42,6 +42,17 @@
     "password": "Password",
     "enter": "Enter"
   },
+  "tracking": {
+    "heading": "Order tracking",
+    "subheading": "Very us move be blessed multiply night",
+    "instructions": "To track your order, enter the order ID you received at checkout along with the billing email address used during purchase, then select Track order.",
+    "order_id_label": "Order ID",
+    "order_id_placeholder": "Order ID",
+    "billing_email_label": "Billing email address",
+    "billing_email_placeholder": "Billing email address",
+    "submit_label": "Track order",
+    "feedback_placeholder": "We will send the latest tracking details to the email provided."
+  },
   "search": {
     "title": "Search",
     "placeholder": "Search articles, pages, or products",

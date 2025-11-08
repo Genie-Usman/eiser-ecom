@@ -1,0 +1,151 @@
+<section id="comments" class="mt-8">
+  {% if article.comments_count > 0 %}
+    {% assign cc = article.comments_count | default: 0 %}
+    {% if cc < 10 %}
+      {% assign cc_str = cc | prepend: '0' %}
+    {% else %}
+      {% assign cc_str = cc %}
+    {% endif %}
+    <h3 class="mb-6 text-lg font-semibold text-[#2A2A2A]">{{ cc_str }} {{ cc | pluralize: 'Comment', 'Comments' }}</h3>
+    <div class="divide-y divide-gray-100">
+      {% assign avatars = article.metafields.custom.avatars.value | parse_json %}
+
+      {% for c in article.comments %}
+        {% assign comment_id = c.id | append: '' %}
+        {% assign avatar_url = avatars[comment_id] %}
+        <div class="flex gap-4 py-6">
+          <div class="h-14 w-14 shrink-0 overflow-hidden rounded-full bg-[#EEF2FF]">
+            {% if avatar_url %}
+              <img
+                src="{{ avatar_url }}"
+                alt="{{ c.author | escape }}"
+                class="h-full w-full object-cover"
+                loading="lazy"
+                width="56"
+                height="56">
+            {% elsif customer and c.email == customer.email and customer.metafields.custom.image %}
+              {% if customer.metafields.custom.image.value %}
+                <img
+                  src="{{ customer.metafields.custom.image.value | image_url: width: 112 }}"
+                  alt="{{ c.author | escape }}"
+                  class="h-full w-full object-cover"
+                  loading="lazy"
+                  width="56"
+                  height="56">
+              {% else %}
+                <img
+                  src="{{ customer.metafields.custom.image | image_url: width: 112 }}"
+                  alt="{{ c.author | escape }}"
+                  class="h-full w-full object-cover"
+                  loading="lazy"
+                  width="56"
+                  height="56">
+              {% endif %}
+            {% else %}
+              <div class="grid h-full w-full place-items-center text-sm font-semibold text-[#2A2A2A]">
+                {{ c.author | slice: 0, 1 | upcase }}
+              </div>
+            {% endif %}
+          </div>
+
+          <div class="flex-1">
+            <p class="text-sm leading-6 text-[#666666]">{{ c.content }}</p>
+            <div class="mt-2 flex items-center justify-between">
+              <div class="text-xs text-[#9a9a9a]">
+                <span class="mr-3 text-sm font-semibold text-[#2A2A2A]">{{ c.author }}</span>
+                {{ c.created_at | date: "%B %d, %Y at %I:%M %p" }}
+              </div>
+              <button
+                type="button"
+                class="reply-link text-xs uppercase tracking-wider text-[#2A2A2A] transition-colors duration-200 hover:text-[#71cd13]"
+                data-author="{{ c.author | escape }}">Reply</button>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+
+    </div>
+  {% endif %}
+
+  {% if article.comments_enabled? %}
+    {% form 'new_comment'
+      , article %}
+      {% if form.posted_successfully? %}
+        <p class="mt-6 rounded border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700">Thanks! Your comment was submitted. It will appear once approved.</p>
+      {% endif %}
+
+      {% if form.errors %}
+        <div class="mt-6 rounded border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          {{ form.errors | default_errors }}
+        </div>
+      {% endif %}
+
+      <div id="comment-form" class="mt-6 space-y-3">
+        {% if customer and customer.metafields.custom.image %}
+          <div class="flex items-center gap-3">
+            <div class="h-10 w-10 overflow-hidden rounded-full">
+              {% if customer.metafields.custom.image.value %}
+                <img
+                  src="{{ customer.metafields.custom.image.value | image_url: width: 80 }}"
+                  alt="{{ customer.email | escape }}"
+                  class="h-full w-full object-cover"
+                  loading="lazy"
+                  width="40"
+                  height="40">
+              {% else %}
+                <img
+                  src="{{ customer.metafields.custom.image | image_url: width: 80 }}"
+                  alt="{{ customer.email | escape }}"
+                  class="h-full w-full object-cover"
+                  loading="lazy"
+                  width="40"
+                  height="40">
+              {% endif %}
+            </div>
+            <div class="text-xs text-[#9a9a9a]">Commenting as {{ customer.email }}</div>
+          </div>
+        {% endif %}
+        <textarea
+          id="comment-body"
+          name="comment[body]"
+          class="h-32 w-full border border-gray-200 px-3 py-2 text-sm"
+          placeholder="Write comment"
+          required>{{ form.body }}</textarea>
+        <div class="grid grid-cols-1 gap-3 md:grid-cols-3">
+          <input
+            class="h-10 border border-gray-200 px-3 text-sm"
+            name="comment[author]"
+            placeholder="Name"
+            value="{{ form.author }}"
+            required>
+          <input
+            class="h-10 border border-gray-200 px-3 text-sm"
+            name="comment[email]"
+            type="email"
+            placeholder="Email"
+            value="{{ form.email }}"
+            required>
+          <input
+            class="h-10 border border-gray-200 px-3 text-sm"
+            name="comment[website]"
+            placeholder="Website">
+        </div>
+        <button class="h-9 cursor-pointer border border-[#71cd13] bg-[#71cd13] px-4 text-xs font-medium text-white transition-colors duration-200 ease-in hover:bg-transparent hover:text-[#71cd13]">Send message</button>
+      </div>
+    {% endform %}
+  {% endif %}
+  <script>
+    document.addEventListener('click',function(e){
+      var btn=e.target.closest('.reply-link');
+      if(!btn) return;
+      var name=btn.getAttribute('data-author')||'';
+      var field=document.getElementById('comment-body');
+      if(field){
+        var mention='@'+name+' ';
+        if(!field.value||field.value.indexOf(mention)!==0){field.value=mention+field.value;}
+        document.getElementById('comment-form').scrollIntoView({behavior:'smooth',block:'center'});
+        field.focus();
+      }
+    });
+  </script>
+</section>

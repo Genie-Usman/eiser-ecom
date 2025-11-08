@@ -12,9 +12,14 @@
     "main": {
       "type": "blog",
       "settings": {}
+    },
+    "banner": {
+      "type": "blog-banner",
+      "settings": {}
     }
   },
   "order": [
+    "banner",
     "main"
   ]
 }

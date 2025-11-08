@@ -1,0 +1,25 @@
+{% assign author_image = article.metafields.custom.author_image %}
+<section class="mt-12 flex items-center gap-6 rounded-md border border-[#F5F5FF] bg-[#FBF9FF] px-8 py-6">
+  <div class="h-20 w-20 shrink-0 overflow-hidden rounded-full bg-[#EAEAFF]">
+    {% if author_image %}
+      {{ author_image | image_url: width: 160 | image_tag: class: 'h-full w-full object-cover' }}
+    {% elsif article.user and article.user.image %}
+      {{ article.user.image | image_url: width: 160 | image_tag: class: 'h-full w-full object-cover' }}
+    {% else %}
+      <div class="grid h-full w-full place-items-center text-sm font-semibold uppercase text-[#9B9B9B]">
+        {{ article.author | slice: 0,1 }}
+      </div>
+    {% endif %}
+  </div>
+  <div>
+    <h4 class="text-base font-semibold text-[#2A2A2A]">{{ article.author }}</h4>
+    {% assign author_bio = article.metafields.custom.bio | default: article.excerpt %}
+    {% if author_bio != blank %}
+      <p class="mt-2 text-sm leading-6 text-[#797979]">{{ author_bio | strip_html }}</p>
+    {% endif %}
+  </div>
+</section>
+
+
+
+

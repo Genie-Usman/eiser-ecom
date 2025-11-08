@@ -1,37 +1,482 @@
-{% comment %}
-  This section is used in the cart template to render /cart page with an
-  overview of the items in customer's cart.
+<section class="py-10 md:py-14">
+  <div class="container mx-auto px-20">
+    {% if cart.item_count == 0 %}
+      <p class="mt-6 text-[#797979]">Your cart is currently empty.</p>
+      <div class="mt-4">
+        <a href="{{ routes.all_products_collection_url }}" class="inline-flex h-10 px-6 items-center justify-center border border-gray-300 text-[#2A2A2A] rounded hover:border-gray-400">Continue shopping</a>
+      </div>
+    {% else %}
+      <form
+        action="{{ routes.cart_url }}"
+        method="post"
+        class="mt-6 grid lg:grid-cols-12 gap-8">
+        <!-- Items list -->
+        <div class="lg:col-span-12">
+          <!-- Header -->
+          <div class="hidden md:grid grid-cols-12 text-xs font-medium border-b border-gray-200 uppercase tracking-wide text-[#797979] px-5 py-3">
+            <div class="col-span-7">Product</div>
+            <div class="col-span-2 text-center">Price</div>
+            <div class="col-span-1 text-center">Quantity</div>
+            <div class="col-span-2 text-right">Total</div>
+          </div>
 
-  https://shopify.dev/docs/storefronts/themes/architecture/templates/cart
-{% endcomment %}
+          <div class="divide-y divide-gray-200 md:border-t-0">
+            {% for item in cart.items %}
+              <div class="p-5 grid grid-cols-12 items-center gap-5">
+                <a href="{{ item.url }}" class="col-span-2 block w-24 h-24 bg-white border border-gray-200 rounded overflow-hidden shrink-0 ml-3">
+                  {% if item.image %}
+                    {{ item.image | image_url: width: 200 | image_tag: class: 'w-full h-full object-contain' }}
+                  {% endif %}
+                </a>
+                <div class="col-span-5 min-w-0">
+                  <a href="{{ item.url }}" class="text-[#797979] text-sm  line-clamp-2">{{ item.product.title }}</a>
+                  {% if item.variant.title != 'Default Title' %}
+                    <p class="mt-0.5 text-xs text-[#797979]">{{ item.variant.title }}</p>
+                  {% endif %}
+                  <div class="mt-3 flex items-center gap-4 md:hidden">
+                    <!-- Mobile quantity -->
+                    <div class="flex items-center border border-gray-300 rounded overflow-hidden">
+                      <button
+                        type="button"
+                        class="w-9 h-9 grid place-content-center text-gray-600"
+                        data-qty-minus-idx="{{ forloop.index0 }}">−</button>
+                      <input
+                        class="w-12 h-9 text-center text-sm outline-none border-x border-gray-300"
+                        type="number"
+                        min="0"
+                        value="{{ item.quantity }}"
+                        data-qty-input-idx="{{ forloop.index0 }}">
+                      <button
+                        type="button"
+                        class="w-9 h-9 grid place-content-center text-gray-600"
+                        data-qty-plus-idx="{{ forloop.index0 }}">+</button>
+                    </div>
+                    <a href="{{ item.url_to_remove }}" class="text-sm text-rose-600 hover:underline">{{ 'cart.remove' | t | default: 'Remove' }}</a>
+                  </div>
+                </div>
+                <div class="hidden md:block col-span-2 font-medium text-sm text-center text-[#2A2A2A]">{{ item.final_price | money }}</div>
+                <div class="hidden md:flex col-span-1 items-center justify-center">
+                  <div class="relative">
+                    <input
+                      id="qty-{{ section.id }}"
+                      type="number"
+                      min="0"
+                      value="{{ item.quantity }}"
+                      data-qty-input-idx="{{ forloop.index0 }}"
+                      class="qty-input w-[80px] h-[40px] rounded-md font-semibold border border-[#e7e7e7] bg-white pl-3 text-[12px] leading-none text-gray-900 text-left outline-none appearance-none">
+                    <div class="absolute inset-y-0 right-0 w-[21px] flex flex-col rounded-r-[14px] overflow-hidden">
+                      <button
+                        type="button"
+                        class="flex-1 grid place-content-center border-l border-[#e7e7e7] text-[#cfcfcf] hover:text-black transition-colors duration-300 ease-in-out cursor-pointer"
+                        data-qty-plus-idx="{{ forloop.index0 }}"
+                        aria-label="Increase quantity">
+                        {% render 'icon-chevron-up' %}
+                      </button>
+                      <button
+                        type="button"
+                        class="flex-1 grid place-content-center border-l border-t border-[#e7e7e7] text-[#cfcfcf] hover:text-black transition-colors duration-300 ease-in-out cursor-pointer"
+                        data-qty-minus-idx="{{ forloop.index0 }}"
+                        aria-label="Decrease quantity">
+                        {% render 'icon-chevron-down' %}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-span-2 text-right text-gray-900 font-medium">{{ item.final_line_price | money }}</div>
+                <!-- Hidden submit input bound to this row -->
+                <input
+                  type="hidden"
+                  name="updates[{{ item.key }}]"
+                  value="{{ item.quantity }}"
+                  data-qty-submit-idx="{{ forloop.index0 }}">
+              </div>
+            {% endfor %}
+          </div>
 
-<h1>{{ 'cart.title' | t }}</h1>
+          <!-- Controls row -->
+          <div class="mt-4 border-t border-b py-3 border-gray-300 ">
+            <div class="my-5 grid px-5 md:grid-cols-2 gap-3 items-center">
+              <div>
+                <input
+                  type="submit"
+                  class="inline-flex uppercase bg-[#F6F6F6] text-sm font-medium h-10 px-10 items-center justify-center cursor-pointer text-[#2A2A2A] rounded hover:border-gray-400"
+                  value="Update Cart">
+              </div>
+              <div class="flex items-center justify-start md:justify-end gap-1">
+                <input class="h-10 w-50 border border-[#CCCCCC] rounded text-[#CCCCCC] px-3 text-sm" placeholder="Coupon Code">
+                <button type="button" class="h-10 cursor-pointer uppercase font-medium px-10 bg-[#71CD14] text-white rounded text-xs">Apply</button>
+                <button type="button" class="h-10 cursor-pointer uppercase font-medium px-5 bg-[#F6F6F6] text-gray-900 rounded text-xs">Close Coupon</button>
+              </div>
+            </div>
+          </div>
+          <!-- Subtotal row -->
+          <div class="flex items-center justify-end gap-28 text-sm px-5 py-3 mt-4 ">
+            <span class="text-gray-900 font-semibold">Subtotal</span>
+            <span class="text-gray-900 font-semibold">{{ cart.total_price | money }}</span>
+          </div>
+          <!-- Shipping options (UI only) -->
+          <div class="mt-7 border-t border-gray-300 pt-5 px-5">
+            <div class="flex gap-[45px] justify-end">
+              <h4 class="text-gray-900 font-semibold text-sm">Shipping</h4>
+              <ul class="space-y-2 text-sm">
+                <li>
+                  <label for="ship-flat5" class="ship-option">
+                    <span class="ship-label text-[#797979]">Flat Rate: $5.00</span>
+                    <input
+                      id="ship-flat5"
+                      type="radio"
+                      name="ship">
+                    <span class="ship-radio" aria-hidden="true"></span>
+                  </label>
+                </li>
+                <li>
+                  <label for="ship-free" class="ship-option">
+                    <span class="ship-label text-[#797979]">Free Shipping</span>
+                    <input
+                      id="ship-free"
+                      type="radio"
+                      name="ship">
+                    <span class="ship-radio" aria-hidden="true"></span>
+                  </label>
+                </li>
+                <li>
+                  <label for="ship-flat10" class="ship-option">
+                    <span class="ship-label text-[#797979]">Flat Rate: $10.00</span>
+                    <input
+                      id="ship-flat10"
+                      type="radio"
+                      name="ship">
+                    <span class="ship-radio" aria-hidden="true"></span>
+                  </label>
+                </li>
+                <li>
+                  <label for="ship-local2" class="ship-option">
+                    <span class="ship-label text-[#797979]">Local Delivery: $2.00</span>
+                    <input
+                      id="ship-local2"
+                      type="radio"
+                      name="ship"
+                      checked>
+                    <span class="ship-radio" aria-hidden="true"></span>
+                  </label>
+                </li>
+              </ul>
+            </div>
 
-<form action="{{ routes.cart_url }}" method="post">
-  <table>
-    {% for item in cart.items %}
-      <tr>
-        <td>
-          {% render 'image', image: item.image, url: item.url %}
-        </td>
-        <td>
-          <p>{{ item.product.title }}</p>
-          {{ 'cart.remove' | t | link_to: item.url_to_remove }}
-        </td>
-        <td>
-          <input type="text" name="updates[]" value="{{ item.quantity }}">
-          <input type="submit" value="{{ 'cart.update' | t }}">
-        </td>
-      </tr>
-    {% endfor %}
-  </table>
+            <!-- Calculate shipping (UI only) -->
+            <div class="flex justify-end">
+              <div class="mt-4 flex flex-col w-[310px]">
+                <div class="flex items-center justify-end mb-3 mt-1 gap-2 text-xs font-medium text-[#2A2A2A]">
+                  <span>Calculate Shipping</span>
+                  {% render 'icon-caret' %}
+                </div>
+                <div class="mt-2 space-y-4">
+                  <!-- Country dropdown -->
+                  <div
+                    class="dd dd-compact"
+                    data-dd
+                    id="dd-country">
+                    <button
+                      class="dd-btn"
+                      type="button"
+                      aria-haspopup="listbox"
+                      aria-expanded="false">
+                      <span class="dd-value">Bangladesh</span>
+                      {% render 'icon-caret'
+                        , class: 'dd-caret' %}
+                    </button>
+                    <div class="dd-menu" role="listbox">
+                      <button class="dd-item" role="option">Bangladesh</button>
+                      <button class="dd-item" role="option">India</button>
+                      <button class="dd-item" role="option">Pakistan</button>
+                    </div>
+                  </div>
 
-  <input type="submit" name="checkout" value="{{ 'cart.checkout' | t }}">
-</form>
+                  <!-- State dropdown -->
+                  <div
+                    class="dd dd-compact"
+                    data-dd
+                    id="dd-state">
+                    <button
+                      class="dd-btn"
+                      type="button"
+                      aria-haspopup="listbox"
+                      aria-expanded="false">
+                      <span class="dd-value">Select a State</span>
+                      {% render 'icon-caret'
+                        , class: 'dd-caret' %}
+                    </button>
+                    <div class="dd-menu" role="listbox">
+                      <button class="dd-item" role="option">Select a State</button>
+                      <button class="dd-item" role="option">State 1</button>
+                      <button class="dd-item" role="option">State 2</button>
+                      <button class="dd-item" role="option">State 3</button>
+                    </div>
+                  </div>
+                  <input class="custom-input" placeholder="Postcode/Zipcode">
+                  <div class="flex items-center justify-end">
+                    <button type="button" class="h-[44px] bg-[#F6F6F6] hover:text-[#0056B3] text-[#2A2A2A] text-sm font-medium rounded-sm cursor-pointer py-2 px-10">Update Details</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+          <div class="mt-6 px-5 border-t border-gray-300 pt-5 pb-20">
+            <div class="flex justify-end px-5 gap-3">
+              <div>
+                <a href="{{ routes.all_products_collection_url }}" class="bg-[#F6F6F6] hover:text-[#0056B3] text-[#2A2A2A] text-sm font-medium rounded-sm cursor-pointer py-3 px-10">Continue Shopping</a>
+                <button
+                  type="submit"
+                  name="checkout"
+                  class="h-[44px] bg-[#71cd13] text-white hover:text-[#71cd13] hover:bg-transparent border border-[#71cd13] transition-colors duration-300 ease-in text-sm font-medium rounded-sm cursor-pointer py-2 px-10">Proceed to Checkout</button>
+
+              </div>
+            </div>
+          </div>
+        </div>
+      </form>
+
+      <style>
+        /* Hide native number input controls; we use our own chevrons */
+        #qty-{{ section.id }}::-webkit-outer-spin-button,
+        #qty-{{ section.id }}::-webkit-inner-spin-button {
+          -webkit-appearance: none;
+          margin: 0;
+        }
+        #qty-{{ section.id }} {
+          -moz-appearance: textfield;
+        }
+        /* Hover shadow for small icon tiles (lower-left) */
+        .tile-btn {
+          transition: box-shadow 220ms ease
+          , transform 220ms ease
+          , background-color 220ms ease;
+          box-shadow: none;
+        }
+        .tile-btn:hover {
+          box-shadow: -20px 20px 30px rgba(0, 0, 0, 0.16);
+        }
+        /* Custom shipping radios */
+        .ship-option {
+          display: flex;
+          align-items: center;
+          justify-content: end;
+          gap: 5px;
+          cursor: pointer;
+          user-select: none;
+        }
+
+        .ship-option input[type="radio"] {
+          position: absolute;
+          opacity: 0;
+          width: 0;
+          height: 0;
+          pointer-events: none;
+        }
+
+        .ship-option .ship-radio {
+          width: 12px;
+          height: 12px;
+          border: 1px solid #dcdcdc;
+          /* light gray ring like reference */
+          border-radius: 9999px;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          background: #fff;
+          box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.02);
+        }
+
+        .ship-option input[type="radio"]:checked + .ship-radio {
+          border-color: #71CD14;
+          /* green ring */
+        }
+
+        .ship-option input[type="radio"]:checked + .ship-radio::after {
+          content: "";
+          width: 6px;
+          height: 6px;
+          border-radius: 9999px;
+          background: #71CD14;
+          /* green dot */
+          display: block;
+        }
+
+        /* Custom dropdown (compact to 34px) */
+        .dd {
+          position: relative;
+          display: inline-block;
+          width: 100%;
+        }
+        .dd.dd-compact .dd-btn {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 16px;
+          width: 100%;
+          height: 39px;
+          padding: 0 18px 0 16px;
+          border-radius: 7px;
+          background: #F6F6F6;
+          color: #959595;
+          font-size: 13px;
+          line-height: 1;
+          border: 1px solid #e6e6e6;
+        }
+        .dd .dd-btn:focus {
+          outline: none;
+          border-color: #d0d0d0;
+        }
+        .dd .dd-caret {
+          width: 12px;
+          height: 12px;
+          color: #bdbdbd;
+          transition: transform 180ms ease;
+        }
+        .dd[aria-open="true"] .dd-caret {
+          transform: rotate(180deg);
+        }
+        .dd .dd-menu {
+          position: absolute;
+          left: 0;
+          top: calc(100% + 2px);
+          z-index: 30;
+          min-width: 100%;
+          background: #fff;
+          border: 1px solid #e6e6e6;
+          border-radius: 6px;
+          box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+          padding: 6px 0;
+          display: none;
+        }
+        .dd[aria-open="true"] .dd-menu {
+          display: block;
+        }
+        .dd .dd-item {
+          display: block;
+          width: 100%;
+          text-align: left;
+          padding: 10px 16px;
+          font-size: 13px;
+          color: #444;
+        }
+        .dd .dd-item:hover {
+          background: #f7f7f7;
+          color: #111;
+        }
+
+        /* Calculate shipping controls */
+        .select-wrap {
+          position: relative;
+        }
+        .custom-select,
+        .custom-input {
+          height: 34px;
+          width: 100%;
+          cursor: pointer;
+          border: 1px solid #e6e6e6;
+          padding: 0 36px 0 16px;
+          font-size: 13px;
+          color: #959595;
+          background: #F6F6F6;
+          transition: border-color 150ms ease;
+        }
+        .custom-input {
+          padding-right: 12px;
+        }
+        .custom-select {
+          -webkit-appearance: none;
+          appearance: none;
+          background-image: url("data:image/svg+xml;charset=UTF-8, %3csvg width='12' height='8' viewBox='0 0 12 8' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='M1 1.5l5 5 5-5' stroke='%23bdbdbd' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3e%3c/svg%3e");
+          background-repeat: no-repeat;
+          background-position: right 12px center;
+          background-size: 12px 8px;
+        }
+        .custom-input::placeholder {
+          color: #999;
+        }
+        .custom-select:focus,
+        .custom-input:focus {
+          outline: none;
+          border-color: #d0d0d0;
+        }
+        .custom-select:hover,
+        .custom-input:hover {
+          border-color: #d8d8d8;
+        }
+      </style>
+
+
+      <script>
+        (function(){
+          function $all(sel){ return document.querySelectorAll(sel); }
+          // Lightweight dropdown initialization (no external deps)
+          function initDropdown(dd){
+            if (!dd) return;
+            var btn = dd.querySelector('.dd-btn');
+            var valueEl = dd.querySelector('.dd-value');
+            var menu = dd.querySelector('.dd-menu');
+            function open(){ dd.setAttribute('aria-open', 'true'); btn.setAttribute('aria-expanded','true'); }
+            function close(){ dd.removeAttribute('aria-open'); btn.setAttribute('aria-expanded','false'); }
+            btn.addEventListener('click', function(e){
+              e.stopPropagation();
+              if (dd.getAttribute('aria-open') === 'true') close(); else open();
+            });
+            dd.querySelectorAll('.dd-item').forEach(function(item){
+              item.addEventListener('click', function(e){
+                e.preventDefault();
+                if (valueEl) valueEl.textContent = item.textContent.trim();
+                close();
+              });
+            });
+            document.addEventListener('click', function(e){
+              if (!dd.contains(e.target)) close();
+            });
+            // keyboard
+            btn.addEventListener('keydown', function(e){ if (e.key === 'Escape') close(); });
+          }
+          initDropdown(document.getElementById('dd-country'));
+          initDropdown(document.getElementById('dd-state'));
+          function syncInputs(idx, newVal){
+            var inputs = document.querySelectorAll('[data-qty-input-idx="'+idx+'"]');
+            inputs.forEach(function(i){ i.value = newVal; });
+            var hidden = document.querySelector('[data-qty-submit-idx="'+idx+'"]');
+            if (hidden) hidden.value = newVal;
+          }
+          $all('[data-qty-minus-idx]').forEach(function(btn){
+            btn.addEventListener('click', function(){
+              var idx = btn.getAttribute('data-qty-minus-idx');
+              var input = document.querySelector('[data-qty-input-idx="'+idx+'"]');
+              if (!input) return; var v = parseInt(input.value||'1',10);
+              v = Math.max(0, v-1); syncInputs(idx, v);
+            });
+          });
+          $all('[data-qty-plus-idx]').forEach(function(btn){
+            btn.addEventListener('click', function(){
+              var idx = btn.getAttribute('data-qty-plus-idx');
+              var input = document.querySelector('[data-qty-input-idx="'+idx+'"]');
+              if (!input) return; var v = parseInt(input.value||'1',10);
+              v = Math.max(0, v+1); syncInputs(idx, v);
+            });
+          });
+          // Sync when user types
+          $all('[data-qty-input-idx]').forEach(function(input){
+            input.addEventListener('input', function(){
+              var idx = input.getAttribute('data-qty-input-idx');
+              var v = parseInt(input.value||'0',10); if (isNaN(v) || v < 0) v = 0;
+              syncInputs(idx, v);
+            });
+          });
+        })();
+      </script>
+    {% endif %}
+  </div>
+</section>
 
 {% schema %}
-{
-  "name": "t:general.cart",
-  "settings": []
-}
+  {
+    "name": "Cart",
+    "settings": []
+  }
 {% endschema %}

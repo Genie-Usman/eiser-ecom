@@ -1,0 +1,12 @@
+{
+  "sections": {
+    "main": {
+      "type": "product-checkout",
+      "settings": {}
+    }
+  },
+  "order": [
+    "main"
+  ]
+}
+
