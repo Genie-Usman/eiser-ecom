@@ -1,0 +1,144 @@
+<div id="quickview-overlay" class="fixed inset-0 bg-black/50 hidden z-40"></div>
+<div id="quickview-modal" class="fixed inset-0 hidden z-50 items-start justify-center overflow-y-auto">
+  <div class="mt-16 w-full max-w-4xl bg-white shadow-2xl border border-gray-200">
+    <div class="flex justify-between items-center px-5 py-3 border-b border-gray-200">
+      <h3 id="qv-title" class="text-lg font-semibold text-[#2A2A2A]">Product</h3>
+      <button
+        type="button"
+        class="text-gray-500 hover:text-black"
+        data-qv-close
+        aria-label="Close">✕</button>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 p-5">
+      <div id="qv-media" class="w-full">
+        <img
+          id="qv-image"
+          class="w-full h-auto object-contain"
+          src="{{ 'quick-view-placeholder.svg' | asset_url }}"
+          alt=""
+          width="600"
+          height="600">
+      </div>
+      <div id="qv-info" class="space-y-3">
+        <p id="qv-price" class="text-2xl font-bold text-[#71CD14]"></p>
+        <div id="qv-compare" class="text-gray-400"></div>
+        <p id="qv-desc" class="text-sm leading-relaxed text-[#797979]"></p>
+        <div class="flex gap-3 pt-3">
+          <a
+            id="qv-view"
+            href="#"
+            class="inline-flex h-10 px-6 items-center justify-center bg-[#71cd13] text-white text-sm font-semibold uppercase tracking-wide rounded transition-colors duration-200 hover:bg-[#5dac0f]">View details</a>
+          <button
+            id="qv-add"
+            type="button"
+            class="inline-flex h-10 px-6 items-center justify-center border border-[#71cd13] text-[#71cd13] text-sm font-semibold uppercase tracking-wide rounded transition-colors duration-200 hover:bg-[#71cd13] hover:text-white">Add to cart</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  (function(){
+    var overlay = document.getElementById('quickview-overlay');
+    var modal = document.getElementById('quickview-modal');
+    var titleEl = document.getElementById('qv-title');
+    var imgEl = document.getElementById('qv-image');
+    var priceEl = document.getElementById('qv-price');
+    var compareEl = document.getElementById('qv-compare');
+    var descEl = document.getElementById('qv-desc');
+    var viewEl = document.getElementById('qv-view');
+    var addEl = document.getElementById('qv-add');
+    var currentVariantId = null;
+  
+    function money(cents){
+      try { return new Intl.NumberFormat('{{ localization.country.iso_code | default: "US" }}-{{ localization.language.iso_code | default: "en" }}', { style: 'currency', currency: '{{ cart.currency.iso_code }}' }).format(cents/100); }
+      catch(e){ return 'Rs.' + (cents/100).toFixed(2); }
+    }
+  
+    function openModal(){
+      overlay.classList.remove('hidden');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      document.body.style.overflow = 'hidden';
+    }
+    function closeModal(){
+      overlay.classList.add('hidden');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+      document.body.style.overflow = '';
+    }
+    [overlay, modal.querySelector('[data-qv-close]')].forEach(function(el){
+      if (el) el.addEventListener('click', function(e){
+        if (e.target === overlay || e.currentTarget.hasAttribute('data-qv-close')) closeModal();
+      });
+    });
+  
+    async function fetchProduct(handle){
+      var res = await fetch('/products/' + handle + '.js', { credentials: 'same-origin' });
+      if (!res.ok) throw new Error('Failed to load product');
+      return await res.json();
+    }
+  
+    async function onQuickView(handle){
+      try{
+        var p = await fetchProduct(handle);
+        titleEl.textContent = p.title;
+        var img = (p.images && p.images.length) ? p.images[0] : null;
+        imgEl.src = img || '';
+        imgEl.alt = p.title;
+        if (p.variants && p.variants.length){
+          var v = p.variants.find(function(x){ return x.available; }) || p.variants[0];
+          currentVariantId = v.id;
+          priceEl.textContent = money(v.price);
+          compareEl.innerHTML = (v.compare_at_price && v.compare_at_price > v.price) ? '<del>'+ money(v.compare_at_price) +'</del>' : '';
+        } else {
+          currentVariantId = null;
+          priceEl.textContent = '';
+          compareEl.textContent = '';
+        }
+        descEl.textContent = (p.description || '').replace(/<[^>]*>?/gm,'').substring(0, 240);
+        viewEl.href = p.url || ('/products/' + handle);
+        addEl.onclick = function(){
+          if (!currentVariantId) return;
+          fetch('/cart/add.js', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ id: currentVariantId, quantity: 1 }) })
+            .then(function(r){ return r.ok ? r.json() : Promise.reject(); })
+            .then(function(){ closeModal(); window.dispatchEvent(new CustomEvent('cart:updated')); })
+            .catch(function(){ /* swallow */ });
+        };
+        openModal();
+      }catch(e){}
+    }
+  
+    document.addEventListener('click', function(e){
+      var btn = e.target.closest('[data-quickview]');
+      if (btn){
+        e.preventDefault();
+        var handle = btn.getAttribute('data-product-handle');
+        if (handle) onQuickView(handle);
+      }
+      var wish = e.target.closest('[data-wishlist]');
+      if (wish){
+        e.preventDefault();
+        var h = wish.getAttribute('data-product-handle');
+        try{
+          var list = JSON.parse(localStorage.getItem('wishlist_handles') || '[]');
+          if (list.indexOf(h) === -1) list.push(h);
+          localStorage.setItem('wishlist_handles', JSON.stringify(list));
+          wish.classList.add('text-[#71cd13]');
+        }catch(err){}
+      }
+      var add = e.target.closest('[data-quick-add]');
+      if (add){
+        e.preventDefault();
+        var vid = add.getAttribute('data-variant-id');
+        if (vid){
+          fetch('/cart/add.js', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ id: Number(vid), quantity: 1 }) })
+            .then(function(r){ return r.ok ? r.json() : Promise.reject(); })
+            .then(function(){ window.dispatchEvent(new CustomEvent('cart:updated')); })
+            .catch(function(){});
+        }
+      }
+    }, true);
+  })();
+</script>

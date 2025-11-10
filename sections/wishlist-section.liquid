@@ -1,0 +1,127 @@
+<section class="py-16 md:py-20">
+  <div class="container mx-auto px-4">
+    <div class="flex justify-center mb-10">
+      <h2 class="text-[18px] md:text-[20px] font-bold leading-tight text-black uppercase">{{ section.settings.title | default: 'Wishlist' }}</h2>
+    </div>
+
+    <div id="wishlist-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+
+    <div id="wishlist-empty" class="text-center text-[#797979]">{{ section.settings.empty_text | default: 'Your wishlist is empty.' }}</div>
+  </div>
+
+  {% javascript %}
+    (function() {
+      var grid = document.getElementById('wishlist-grid');
+      var empty = document.getElementById('wishlist-empty');
+      function money(cents) {
+        try {
+          return new Intl.NumberFormat('{{ localization.country.iso_code | default: "US" }}-{{ localization.language.iso_code | default: "en" }}', {
+            style: 'currency',
+            currency: '{{ cart.currency.iso_code }}'
+          }).format(cents / 100);
+        } catch (e) {
+          return 'Rs.' + (
+            cents / 100
+          ).toFixed(2);
+        }
+      }
+      function tpl(p) {
+        var img = (p.images && p.images.length)
+          ? p.images[0]
+          : '';
+        var v = p.variants && p.variants[0];
+        var compare = (v && v.compare_at_price && v.compare_at_price > v.price)
+          ? '<del class="text-gray-400 text-sm font-normal">' + money(v.compare_at_price) + '</del>'
+          : '';
+        return '\
+<div class="flex flex-col bg-white border border-gray-200 group relative overflow-hidden">\
+  <div class="relative overflow-hidden bg-white">\
+    ' + (
+          img
+            ? '<img class="w-full h-auto object-contain" src="' + img + '" alt="' + p.title + '">'
+            : '<div class="w-full aspect-square bg-gray-50"></div>'
+        ) + '\
+    <div class="h-12 absolute bottom-0 left-1/2 -translate-x-1/2 w-[80%] bg-[#BDE399] flex items-center justify-center gap-6 py-3 opacity-0 group-hover:opacity-100 z-10 transform translate-y-full group-hover:translate-y-0 transition-all duration-300">\
+      <button type="button" class="w-9 h-9 bg-white rounded-full flex items-center justify-center text-black hover:bg-[#71cd13]" data-quickview data-product-handle="' + p.handle + '">{% render "icon-eye" %} </button>\
+      <button type="button" class="w-9 h-9 bg-white rounded-full flex items-center justify-center text-black hover:bg-[#71cd13]" data-wishlist-remove data-product-handle="' + p.handle + '">{% render "icon-heart" %} </button>\
+      ' + (
+          v
+            ? '<button type="button" class="w-9 h-9 bg-white rounded-full flex items-center justify-center text-black hover:bg-[#71cd13]" data-quick-add data-variant-id="' + v.id + '">{% render "icon-cart" %} </button>'
+            : ''
+        ) + '\
+    </div>\
+  </div>\
+  <div class="product-btm p-5">\
+    <a href="' + p.url + '" class="block"><h4 class="text-[14px] md:text-[13px] text-[#4A4A4A] group-hover:text-[#71cd13] transition-colors leading-tight">' + p.title.toUpperCase() + '</h4></a>\
+    <div class="mt-3 flex items-center gap-4">\
+      <span class="text-base font-semibold text-black">' + (
+          v
+            ? money(v.price)
+            : ''
+        ) + '</span>' + compare + '\
+    </div>\
+  </div>\
+</div>';
+      }
+      function load() {
+        var handles = [];
+        try {
+          handles = JSON.parse(localStorage.getItem('wishlist_handles') || '[]');
+        } catch (e) {}if (! handles.length) {
+          empty.style.display = '';
+          grid.innerHTML = '';
+          return;
+        }
+        empty.style.display = 'none';
+        grid.innerHTML = '';
+        Promise.all(handles.map(function(h) {
+          return fetch('/products/' + h + '.js').then(function(r) {
+            return r.json();
+          });
+        })).then(function(list) {
+          grid.innerHTML = list.map(tpl).join('');
+        });
+      }
+      document.addEventListener('click', function(e) {
+        var rm = e.target.closest('[data-wishlist-remove]');
+        if (rm) {
+          var h = rm.getAttribute('data-product-handle');
+          try {
+            var arr = JSON.parse(localStorage.getItem('wishlist_handles') || '[]').filter(function(x) {
+              return x !== h;
+            });
+            localStorage.setItem('wishlist_handles', JSON.stringify(arr));
+            load();
+          } catch (err) {}
+        }
+      });
+      load();
+    })();
+  {% endjavascript %}
+
+  {% schema %}
+    {
+      "name": "Wishlist",
+      "tag": "section",
+      "class": "wishlist-section",
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Title",
+          "default": "Wishlist"
+        }, {
+          "type": "text",
+          "id": "empty_text",
+          "label": "Empty text",
+          "default": "Your wishlist is empty."
+        }
+      ],
+      "presets": [
+        {
+          "name": "Wishlist"
+        }
+      ]
+    }
+  {% endschema %}
+</section>

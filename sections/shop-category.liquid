@@ -68,10 +68,12 @@
                   data-href="{{ brand_url }}"
                   {% assign is_active = false %}
                   {% for t in current_tags %}
-                    {% if t == brand_trim %}
-                      {% assign is_active = true %}{% endif %}
+                  {% if t == brand_trim %}
+                  {% assign is_active = true %}
+                  {% endif %}
                   {% endfor %}
-                  {% if is_active %}checked{% endif %} />
+                  {% if is_active %}
+                  checked{% endif %} />
                 <span class="text-[#797979] text-sm group-hover:text-[#71cd13] transition-colors">{{ brand_trim }}</span>
               </label>
             {% endfor %}
@@ -102,10 +104,12 @@
                   data-href="{{ color_url }}"
                   {% assign is_active = false %}
                   {% for t in current_tags %}
-                    {% if t == color_trim %}
-                      {% assign is_active = true %}{% endif %}
+                  {% if t == color_trim %}
+                  {% assign is_active = true %}
+                  {% endif %}
                   {% endfor %}
-                  {% if is_active %}checked{% endif %} />
+                  {% if is_active %}
+                  checked{% endif %} />
                 <span class="text-[#797979] text-sm group-hover:text-[#71cd13] transition-colors">{{ color_trim }}</span>
               </label>
             {% endfor %}
@@ -179,9 +183,9 @@
                 @click.outside="open=false">
                 {% assign sorting_opts = section.settings.sorting_options | default: 'Default sorting|Price: Low to High|Price: High to Low|Newest' | split: '|' %}
                 {% for opt in sorting_opts %}
-                  <button 
+                  <button
                     type="button"
-                    class="dd-item" 
+                    class="dd-item"
                     data-sort-option="{{ opt | escape }}"
                     @click="value='{{ opt | escape }}'; open=false; setTimeout(() => handleSortChange('{{ opt | escape }}'), 0)">{{ opt }}</button>
                 {% endfor %}
@@ -208,9 +212,9 @@
                 @click.outside="open=false">
                 {% assign show_opts = section.settings.show_options | default: 'Show 12|Show 24|Show 36|Show All' | split: '|' %}
                 {% for opt in show_opts %}
-                  <button 
+                  <button
                     type="button"
-                    class="dd-item" 
+                    class="dd-item"
                     data-show-option="{{ opt | escape }}"
                     @click="value='{{ opt | escape }}'; open=false; setTimeout(() => handleShowChange('{{ opt | escape }}'), 0)">{{ opt }}</button>
                 {% endfor %}
@@ -532,7 +536,6 @@
       if (! box) return;
       
 
-
       var maxAllowed = parseInt(box.dataset.max || '1000', 10);
       var minInput = document.getElementById('price-min');
       var maxInput = document.getElementById('price-max');
@@ -548,12 +551,9 @@
           minInput.value = Math.max(0, Math.min(maxAllowed, gte));
         
 
-
         if (!isNaN(lte)) 
           maxInput.value = Math.max(0, Math.min(maxAllowed, lte));
         
-
-
       }
 
       function updateUI() {
@@ -620,8 +620,6 @@
           if (span) 
             span.textContent = label;
           
-
-
         });
       });
     });
@@ -633,20 +631,22 @@
       'Price: High to Low': 'price-descending',
       'Newest': 'created-descending'
     };
-    
-    // Global functions for Alpine.js to call
+
+// Global functions for Alpine.js to call
     window.handleSortChange = function(label) {
       var code = sortMap[label] || null;
       setSearchParams({'sort_by': code});
     };
-    
+
     window.handleShowChange = function(label) {
       var m = label.match(/(\d+)/);
-      var size = m ? m[1] : 'all';
+      var size = m
+        ? m[1]
+        : 'all';
       setSearchParams({'page_size': size});
     };
-    
-    // Fallback for non-Alpine.js environments
+
+// Fallback for non-Alpine.js environments
     document.querySelectorAll('.dd.select-wide .dd-item').forEach(function(it) {
       it.addEventListener('click', function(e) {
         if (!window.Alpine) {
@@ -663,7 +663,9 @@
         if (!window.Alpine) {
           var label = it.textContent.trim();
           var m = label.match(/(\d+)/);
-          var size = m ? m[1] : 'all';
+          var size = m
+            ? m[1]
+            : 'all';
           setSearchParams({'page_size': size});
         }
       });
