@@ -120,12 +120,17 @@
       var wish = e.target.closest('[data-wishlist]');
       if (wish){
         e.preventDefault();
-        var h = wish.getAttribute('data-product-handle');
+        var h = (wish.getAttribute('data-product-handle') || '').trim().toLowerCase();
         try{
-          var list = JSON.parse(localStorage.getItem('wishlist_handles') || '[]');
-          if (list.indexOf(h) === -1) list.push(h);
+          var raw = localStorage.getItem('wishlist_handles') || '[]';
+          var list = Array.isArray(raw) ? raw : JSON.parse(raw);
+          // normalize + de-duplicate
+          list = list.map(function(x){ return (x || '').toString().trim().toLowerCase(); }).filter(Boolean);
+          if (h && list.indexOf(h) === -1) list.push(h);
           localStorage.setItem('wishlist_handles', JSON.stringify(list));
-          wish.classList.add('text-[#71cd13]');
+          if (wish.classList) wish.classList.add('text-[#71cd13]');
+          try { window.dispatchEvent(new CustomEvent('wishlist:updated', { detail: { handle: h, list: list } })); } catch(err) {}
+          try { window.dispatchEvent(new CustomEvent('toast:show', { detail: { message: 'Added to wishlist' } })); } catch(err) {}
         }catch(err){}
       }
       var add = e.target.closest('[data-quick-add]');
@@ -135,7 +140,10 @@
         if (vid){
           fetch('/cart/add.js', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ id: Number(vid), quantity: 1 }) })
             .then(function(r){ return r.ok ? r.json() : Promise.reject(); })
-            .then(function(){ window.dispatchEvent(new CustomEvent('cart:updated')); })
+            .then(function(){ 
+              try { window.dispatchEvent(new CustomEvent('cart:updated')); } catch(err) {}
+              try { window.dispatchEvent(new CustomEvent('toast:show', { detail: { message: 'Added to cart' } })); } catch(err) {}
+            })
             .catch(function(){});
         }
       }
