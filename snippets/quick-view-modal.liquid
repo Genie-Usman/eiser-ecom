@@ -27,11 +27,11 @@
           <a
             id="qv-view"
             href="#"
-            class="inline-flex h-10 px-6 items-center justify-center bg-[#71cd13] text-white text-sm font-semibold uppercase tracking-wide rounded transition-colors duration-200 hover:bg-[#5dac0f]">View details</a>
+            class="inline-flex h-10 px-6 items-center justify-center border border-[#71cd13] bg-[#71cd13] hover:bg-transparent text-sm font-semibold uppercase tracking-wide rounded transition-colors duration-200 text-white hover:text-[#71cd13]">View details</a>
           <button
             id="qv-add"
             type="button"
-            class="inline-flex h-10 px-6 items-center justify-center border border-[#71cd13] text-[#71cd13] text-sm font-semibold uppercase tracking-wide rounded transition-colors duration-200 hover:bg-[#71cd13] hover:text-white">Add to cart</button>
+            class="inline-flex h-10 px-6 items-center justify-center border border-[#71cd13] cursor-pointer text-[#71cd13] text-sm font-semibold uppercase tracking-wide rounded transition-colors duration-200 hover:bg-[#71cd13] hover:text-white">Add to cart</button>
         </div>
       </div>
     </div>
@@ -40,6 +40,27 @@
 
 <script>
   (function(){
+    function getWishlist(){
+      try{
+        var raw = localStorage.getItem('wishlist_handles') || '[]';
+        var list = Array.isArray(raw) ? raw : JSON.parse(raw);
+        return list.map(function(x){ return (x||'').toString().trim().toLowerCase(); });
+      }catch(e){ return []; }
+    }
+    function setWishlist(list){
+      try{ localStorage.setItem('wishlist_handles', JSON.stringify(list || [])); }catch(e){}
+    }
+    function refreshWishlistButtons(){
+      var list = getWishlist();
+      document.querySelectorAll('[data-wishlist]').forEach(function(btn){
+        var h = (btn.getAttribute('data-product-handle') || '').trim().toLowerCase();
+        var inList = h && list.indexOf(h) !== -1;
+        btn.disabled = inList;
+        btn.setAttribute('aria-pressed', inList ? 'true' : 'false');
+        btn.classList.toggle('opacity-60', inList);
+        btn.classList.toggle('pointer-events-none', inList);
+      });
+    }
     var overlay = document.getElementById('quickview-overlay');
     var modal = document.getElementById('quickview-modal');
     var titleEl = document.getElementById('qv-title');
@@ -122,15 +143,15 @@
         e.preventDefault();
         var h = (wish.getAttribute('data-product-handle') || '').trim().toLowerCase();
         try{
-          var raw = localStorage.getItem('wishlist_handles') || '[]';
-          var list = Array.isArray(raw) ? raw : JSON.parse(raw);
+          var list = getWishlist();
           // normalize + de-duplicate
-          list = list.map(function(x){ return (x || '').toString().trim().toLowerCase(); }).filter(Boolean);
+          list = list.filter(Boolean);
           if (h && list.indexOf(h) === -1) list.push(h);
-          localStorage.setItem('wishlist_handles', JSON.stringify(list));
+          setWishlist(list);
           if (wish.classList) wish.classList.add('text-[#71cd13]');
           try { window.dispatchEvent(new CustomEvent('wishlist:updated', { detail: { handle: h, list: list } })); } catch(err) {}
           try { window.dispatchEvent(new CustomEvent('toast:show', { detail: { message: 'Added to wishlist' } })); } catch(err) {}
+          refreshWishlistButtons();
         }catch(err){}
       }
       var add = e.target.closest('[data-quick-add]');
@@ -148,5 +169,9 @@
         }
       }
     }, true);
+
+    // initialize button states
+    document.addEventListener('DOMContentLoaded', refreshWishlistButtons);
+    window.addEventListener('wishlist:updated', refreshWishlistButtons);
   })();
 </script>

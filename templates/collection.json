@@ -15,7 +15,25 @@
     },
     "main": {
       "type": "shop-category",
-      "settings": {}
+      "settings": {},
+      "blocks": {
+        "sidebar-categories": { "type": "sidebar_categories", "settings": {} },
+        "sidebar-brand": { "type": "sidebar_brand", "settings": {} },
+        "sidebar-color": { "type": "sidebar_color", "settings": {} },
+        "sidebar-price": { "type": "sidebar_price", "settings": {} },
+        "toolbar": { "type": "toolbar", "settings": {} },
+        "grid": { "type": "grid", "settings": {} },
+        "pagination": { "type": "pagination", "settings": {} }
+      },
+      "block_order": [
+        "sidebar-categories",
+        "sidebar-brand",
+        "sidebar-color",
+        "sidebar-price",
+        "toolbar",
+        "grid",
+        "pagination"
+      ]
     }
   },
   "order": [

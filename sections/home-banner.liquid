@@ -6,20 +6,27 @@
           <p class="text-[14px] font-medium text-white mb-[10px] uppercase">{{ section.settings.subtitle }}</p>
         {% endif %}
 
-        {% if section.settings.heading_line1 != blank or section.settings.heading_line2 != blank %}
+        {% if section.settings.heading != blank %}
+          {% liquid
+            assign heading_text = section.settings.heading
+            assign break_after = section.settings.heading_break_after | default: 2
+            assign highlight_words = section.settings.heading_highlight_words | downcase | split: ','
+            assign words = heading_text | split: ' '
+          %}
           <h3 class="text-[36px] md:text-[52px] font-bold leading-[44px] md:leading-[60px] mb-[15px] text-white">
-            {% if section.settings.heading_highlight_start != blank %}
-              <span class="text-[#71cd13]">{{ section.settings.heading_highlight_start }}</span>
-            {% endif %}
-            {% if section.settings.heading_line1 != blank %}
-              {{ section.settings.heading_line1 }}
-            {% endif %}
-            {% if section.settings.heading_line2 != blank %}
-              <br/>{{ section.settings.heading_line2 }}
-            {% endif %}
-            {% if section.settings.heading_highlight_end != blank %}
-              <span class="text-[#71cd13]">{{ section.settings.heading_highlight_end }}</span>
-            {% endif %}
+            {% for w in words %}
+              {% assign wl = w | downcase %}
+              {% if highlight_words contains wl %}
+                <span class="text-[#71cd13]">{{ w }}</span>
+              {% else %}
+                {{ w }}
+              {% endif %}
+              {% if forloop.index == break_after %}
+                <br/>
+              {% else %}
+                {% unless forloop.last %} {% endunless %}
+              {% endif %}
+            {% endfor %}
           </h3>
         {% endif %}
 
@@ -57,26 +64,26 @@
       },
       {
         "type": "text",
-        "id": "heading_highlight_start",
-        "label": "Heading Highlight (Start)",
-        "default": "Show"
+        "id": "heading",
+        "label": "Heading",
+        "default": "Show Your Personal Style"
       },
       {
         "type": "text",
-        "id": "heading_line1",
-        "label": "Heading Line 1",
-        "default": "Your"
-      }, {
-        "type": "text",
-        "id": "heading_line2",
-        "label": "Heading Line 2",
-        "default": "Personal "
-      }, {
-        "type": "text",
-        "id": "heading_highlight_end",
-        "label": "Heading Highlight (End)",
-        "default": "Style"
-      }, {
+        "id": "heading_highlight_words",
+        "label": "Highlight words (comma-separated, optional)",
+        "default": "Show,Style"
+      },
+      {
+        "type": "range",
+        "id": "heading_break_after",
+        "label": "Insert line break after word #",
+        "min": 0,
+        "max": 6,
+        "step": 1,
+        "default": 2
+      },
+      {
         "type": "text",
         "id": "description",
         "label": "Description",

@@ -5,7 +5,15 @@
         <div class="bg-white border border-gray-200 rounded-lg shadow-sm p-8 text-center hover:shadow-md transition-all duration-300">
           <div class="flex flex-col items-center">
             <div class="w-10 h-10 text-base mb-3">
-              {{ block.settings.icon }}
+              {% if block.settings.icon_image != blank %}
+                <img
+                  src="{{ block.settings.icon_image | image_url: width: 64 }}"
+                  alt="{{ block.settings.title | escape }}"
+                  class="w-10 h-10 object-contain"
+                  loading="lazy"
+                  width="40"
+                  height="40">
+              {% endif %}
             </div>
             <h3 class="font-medium uppercase text-base mb-2 text-black">
               {{ block.settings.title }}
@@ -34,11 +42,12 @@
       "name": "Feature",
       "settings": [
         {
-          "type": "html",
-          "id": "icon",
-          "label": "Icon (SVG or HTML)",
-          "default": "<svg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='currentColor' stroke-width='2' viewBox='0 0 24 24'><path d='M12 8c-3.314 0-6 1.343-6 3s2.686 3 6 3 6-1.343 6-3-2.686-3-6-3Z'/><path d='M12 19c3.314 0 6-1.343 6-3v-5'/><path d='M6 11v5c0 1.657 2.686 3 6 3'/></svg>"
+          "type": "image_picker",
+          "id": "icon_image",
+          "label": "Icon image (PNG/JPG preferred)",
+          "info": "If set, this image will be used instead of the SVG/html icon."
         },
+
         {
           "type": "text",
           "id": "title",

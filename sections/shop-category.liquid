@@ -4,275 +4,312 @@
   data-collection-url="{{ collection.url }}">
   <div class="container mx-auto px-20 mt-24">
     <div class="flex flex-col md:flex-row gap-8">
-      {% comment %} Left Sidebar - Filters {% endcomment %}
       <aside class="w-full md:w-1/4 bg-white p-">
         <div class="space-y-8">
-          {% comment %} Browse Categories {% endcomment %}
-          <div class="p-5 border border-gray-200">
-            <h3 class="ml-2 text-lg font-semibold text-gray-900">{{ section.settings.heading_categories | default: 'Browse Categories' }}</h3>
-            <div class="flex justify-center">
-              <div class="border-b border-[#71CD13] w-55 mt-2 mb-2"></div>
-            </div>
-            {% if collection %}
-              {% for sub_collection in collections %}
-                <label class="flex items-center gap-3 py-3 cursor-pointer group">
-                  <input
-                    type="radio"
-                    name="category"
-                    value="{{ sub_collection.handle }}"
-                    class="radio-md"
-                    data-category-radio
-                    data-href="{{ sub_collection.url }}"
-                    {% if sub_collection.handle == collection.handle %}
-                    checked{% endif %} />
-                  <span class="text-[#797979] text-sm group-hover:text-[#71cd13] transition-colors">{{ sub_collection.title }}</span>
-                </label>
-              {% endfor %}
-            {% else %}
-              {% for sub_collection in collections limit: 10 %}
-                <label class="flex items-center gap-3 py-3 cursor-pointer group">
-                  <input
-                    type="radio"
-                    name="category"
-                    value="{{ sub_collection.handle }}"
-                    class="radio-md"
-                    data-category-radio
-                    data-href="{{ sub_collection.url }}" />
-                  <span class="text-[#797979] text-sm group-hover:text-[#71cd13] transition-colors">{{ sub_collection.title }}</span>
-                </label>
-              {% endfor %}
-            {% endif %}
-          </div>
-
-          {% comment %} Product Brand (as radio buttons like categories) {% endcomment %}
-          <div class="p-5 border border-gray-200">
-            <h3 class="ml-2 text-lg font-semibold text-gray-900">{{ section.settings.heading_brand | default: 'Product Brand' }}</h3>
-            <div class="flex justify-center">
-              <div class="border-b border-[#71CD13] w-55 mt-2 mb-2"></div>
-            </div>
-            {% assign default_brands = section.settings.brands_list | default: 'Apple,Asus,Gionee,Micromax,Samsung' | split: ',' %}
-            {% for brand in default_brands %}
-              {% assign brand_trim = brand | strip %}
-              {% if collection %}
-                {% assign brand_url = collection.url | append: '/tagged/' | append: brand_trim | handleize %}
-              {% else %}
-                {% assign brand_url = routes.all_products_collection_url | append: '/tagged/' | append: brand_trim | handleize %}
-              {% endif %}
-              <label class="flex items-center gap-3 py-3 cursor-pointer group">
-                <input
-                  type="radio"
-                  name="brand"
-                  value="{{ brand_trim }}"
-                  class="radio-md"
-                  data-brand-radio
-                  data-href="{{ brand_url }}"
-                  {% assign is_active = false %}
-                  {% for t in current_tags %}
-                  {% if t == brand_trim %}
-                  {% assign is_active = true %}
+          {% if section.blocks.size > 0 %}
+            {% for block in section.blocks %}
+            {% case block.type %}
+              {% when 'sidebar_categories' %}
+                <div class="p-5 border border-gray-200" {{ block.shopify_attributes }}>
+                  <h3 class="ml-2 text-lg font-semibold text-gray-900">{{ section.settings.heading_categories | default: 'Browse Categories' }}</h3>
+                  <div class="flex justify-center">
+                    <div class="border-b border-[#71CD13] w-55 mt-2 mb-2"></div>
+                  </div>
+                  {% if collection %}
+                    {% for sub_collection in collections %}
+                      <label class="flex items-center gap-3 py-3 cursor-pointer group">
+                        <input type="radio" name="category" value="{{ sub_collection.handle }}" class="radio-md" data-category-radio data-href="{{ sub_collection.url }}" {% if sub_collection.handle == collection.handle %}checked{% endif %} />
+                        <span class="text-[#797979] text-sm group-hover:text-[#71cd13] transition-colors">{{ sub_collection.title }}</span>
+                      </label>
+                    {% endfor %}
+                  {% else %}
+                    {% for sub_collection in collections limit: 10 %}
+                      <label class="flex items-center gap-3 py-3 cursor-pointer group">
+                        <input type="radio" name="category" value="{{ sub_collection.handle }}" class="radio-md" data-category-radio data-href="{{ sub_collection.url }}" />
+                        <span class="text-[#797979] text-sm group-hover:text-[#71cd13] transition-colors">{{ sub_collection.title }}</span>
+                      </label>
+                    {% endfor %}
                   {% endif %}
+                </div>
+
+              {% when 'sidebar_brand' %}
+                <div class="p-5 border border-gray-200" {{ block.shopify_attributes }}>
+                  <h3 class="ml-2 text-lg font-semibold text-gray-900">{{ section.settings.heading_brand | default: 'Product Brand' }}</h3>
+                  <div class="flex justify-center"><div class="border-b border-[#71CD13] w-55 mt-2 mb-2"></div></div>
+                  {% assign default_brands = section.settings.brands_list | default: 'Apple,Asus,Gionee,Micromax,Samsung' | split: ',' %}
+                  {% for brand in default_brands %}
+                    {% assign brand_trim = brand | strip %}
+                    <label class="flex items-center gap-3 py-3 cursor-pointer group">
+                      <input type="radio" name="brand" value="{{ brand_trim }}" class="radio-md" data-filter-name="filter.p.m.custom.brand" data-filter-value="{{ brand_trim | escape }}" />
+                      <span class="text-[#797979] text-sm group-hover:text-[#71cd13] transition-colors">{{ brand_trim }}</span>
+                    </label>
                   {% endfor %}
-                  {% if is_active %}
-                  checked{% endif %} />
-                <span class="text-[#797979] text-sm group-hover:text-[#71cd13] transition-colors">{{ brand_trim }}</span>
-              </label>
-            {% endfor %}
-          </div>
+                </div>
 
-          {% comment %} Color Filter (as radio buttons like categories) {% endcomment %}
-          <div class="p-5 border border-gray-200">
-            <h3 class="ml-2 text-lg font-semibold text-gray-900">{{ section.settings.heading_color | default: 'Color Filter' }}</h3>
-            <div class="flex justify-center">
-              <div class="border-b border-[#71CD13] w-55 mt-2 mb-2"></div>
-            </div>
-            {% assign colors_source = section.settings.colors_list | default: 'Black,Black Leather,Black with red,Gold,Spacegrey' %}
-            {% assign colors = colors_source | split: ',' %}
-            {% for color in colors %}
-              {% assign color_trim = color | strip %}
-              {% if collection %}
-                {% assign color_url = collection.url | append: '/tagged/' | append: color_trim | handleize %}
-              {% else %}
-                {% assign color_url = routes.all_products_collection_url | append: '/tagged/' | append: color_trim | handleize %}
-              {% endif %}
-              <label class="flex items-center gap-3 py-3 cursor-pointer group">
-                <input
-                  type="radio"
-                  name="color"
-                  value="{{ color_trim }}"
-                  class="radio-md"
-                  data-color-radio
-                  data-href="{{ color_url }}"
-                  {% assign is_active = false %}
-                  {% for t in current_tags %}
-                  {% if t == color_trim %}
-                  {% assign is_active = true %}
-                  {% endif %}
+              {% when 'sidebar_color' %}
+                <div class="p-5 border border-gray-200" {{ block.shopify_attributes }}>
+                  <h3 class="ml-2 text-lg font-semibold text-gray-900">{{ section.settings.heading_color | default: 'Color Filter' }}</h3>
+                  <div class="flex justify-center"><div class="border-b border-[#71CD13] w-55 mt-2 mb-2"></div></div>
+                  {% assign colors_source = section.settings.colors_list | default: 'Black,Black Leather,Black with red,Gold,Spacegrey' %}
+                  {% assign colors = colors_source | split: ',' %}
+                  {% for color in colors %}
+                    {% assign color_trim = color | strip %}
+                    <label class="flex items-center gap-3 py-3 cursor-pointer group">
+                      <input type="radio" name="color" value="{{ color_trim }}" class="radio-md" data-filter-name="filter.v.option.color" data-filter-value="{{ color_trim | escape }}" />
+                      <span class="text-[#797979] text-sm group-hover:text-[#71cd13] transition-colors">{{ color_trim }}</span>
+                    </label>
                   {% endfor %}
-                  {% if is_active %}
-                  checked{% endif %} />
-                <span class="text-[#797979] text-sm group-hover:text-[#71cd13] transition-colors">{{ color_trim }}</span>
-              </label>
-            {% endfor %}
-          </div>
+                </div>
 
-          {% comment %} Price Filter {% endcomment %}
-          <div class="p-5 border border-gray-200">
-            <h3 class="ml-2 text-lg font-semibold text-gray-900">{{ section.settings.heading_price | default: 'Price Filter' }}</h3>
-            <div class="flex justify-center">
-              <div class="border-b border-[#71CD13] w-55 mt-2 mb-2"></div>
-            </div>
-            <div
-              id="price-box"
-              class="range-box"
-              data-max="{{ section.settings.price_max | default: 5000 }}">
-              <div class="range-wrap relative h-2 bg-white rounded">
-                <div class="absolute left-0 right-0 top-0 h-[7px] bg-[#E8F0F2] rounded"></div>
-                <div
-                  id="price-progress"
-                  class="range-progress absolute top-0 h-[7px] bg-transparent rounded"
-                  style="left:0%; width:100%"></div>
-                <input
-                  type="range"
-                  id="price-min"
-                  min="0"
-                  max="{{ section.settings.price_max | default: 5000 }}"
-                  step="10"
-                  value="0"
-                  class="range-input min z-99">
-                <input
-                  type="range"
-                  id="price-max"
-                  min="0"
-                  max="{{ section.settings.price_max | default: 5000 }}"
-                  step="10"
-                  value="{{ section.settings.price_max | default: 5000 }}"
-                  class="range-input max">
-              </div>
-              <p class="mt-4 text-gray-700 text-base">Price :
-                <span id="price-min-label">Rs 0</span>
-                -
-                <span id="price-max-label">Rs {{ section.settings.price_max | default: 5000 }}</span>
-              </p>
-            </div>
-          </div>
-        </div>
-      </aside>
-
-      {% comment %} Main Product Grid {% endcomment %}
-      <main class="flex-1">
-        {% comment %} Toolbar {% endcomment %}
-        <div class="bg-[#f0f2f1] p-4 mb-6 flex flex-col md:flex-row justify-between items-center gap-4">
-          <div class="flex gap-4">
-            <!-- Custom dropdown: Sorting -->
-            <div
-              class="dd select-wide"
-              x-data="{open:false, value: '{{ section.settings.sorting_label | default: 'Default sorting' }}'}"
-              @keydown.escape.window="open=false">
-              <button
-                class="dd-btn"
-                @click="open=!open"
-                :aria-expanded="open.toString()">
-                <span x-text="value"></span>
-                {% render 'icon-caret'
-                  , class: 'dd-caret' %}
-              </button>
-              <div
-                class="dd-menu"
-                x-show="open"
-                x-transition.opacity.scale.origin.top.left
-                @click.outside="open=false">
-                {% assign sorting_opts = section.settings.sorting_options | default: 'Default sorting|Price: Low to High|Price: High to Low|Newest' | split: '|' %}
-                {% for opt in sorting_opts %}
-                  <button
-                    type="button"
-                    class="dd-item"
-                    data-sort-option="{{ opt | escape }}"
-                    @click="value='{{ opt | escape }}'; open=false; setTimeout(() => handleSortChange('{{ opt | escape }}'), 0)">{{ opt }}</button>
-                {% endfor %}
-              </div>
-            </div>
-
-            <!-- Custom dropdown: Page size -->
-            <div
-              class="dd select-narrow"
-              x-data="{open:false, value: '{{ section.settings.show_label | default: 'Show 12' }}'}"
-              @keydown.escape.window="open=false">
-              <button
-                class="dd-btn"
-                @click="open=!open"
-                :aria-expanded="open.toString()">
-                <span x-text="value"></span>
-                {% render 'icon-caret'
-                  , class: 'dd-caret' %}
-              </button>
-              <div
-                class="dd-menu"
-                x-show="open"
-                x-transition.opacity.scale.origin.top.left
-                @click.outside="open=false">
-                {% assign show_opts = section.settings.show_options | default: 'Show 12|Show 24|Show 36|Show All' | split: '|' %}
-                {% for opt in show_opts %}
-                  <button
-                    type="button"
-                    class="dd-item"
-                    data-show-option="{{ opt | escape }}"
-                    @click="value='{{ opt | escape }}'; open=false; setTimeout(() => handleShowChange('{{ opt | escape }}'), 0)">{{ opt }}</button>
-                {% endfor %}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {% comment %} Products Grid {% endcomment %}
-        {% assign requested_size = request.params.page_size | default: '12' %}
-        {% if requested_size == 'all' %}
-          {% assign page_size = collection.products_count %}
-        {% else %}
-          {% assign page_size = requested_size | plus: 0 %}
-          {% if page_size <= 0 %}
-            {% assign page_size = 12 %}{% endif %}
-        {% endif %}
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {% if collection and collection.products.size > 0 %}
-            {% for product in collection.products limit: 12 %}
-              {% render 'product-card-small'
-                , product: product %}
-            {% endfor %}
-          {% elsif collections.size > 0 %}
-            {% for product in collections.first.products limit: 12 %}
-              {% render 'product-card-small'
-                , product: product %}
+              {% when 'sidebar_price' %}
+                <div class="p-5 border border-gray-200" {{ block.shopify_attributes }}>
+                  <h3 class="ml-2 text-lg font-semibold text-gray-900">{{ section.settings.heading_price | default: 'Price Filter' }}</h3>
+                  <div class="flex justify-center"><div class="border-b border-[#71CD13] w-55 mt-2 mb-2"></div></div>
+                  <div id="price-box" class="range-box" data-max="{{ section.settings.price_max | default: 5000 }}">
+                    <div class="range-wrap relative h-2 bg-white rounded">
+                      <div class="absolute left-0 right-0 top-0 h-[7px] bg-[#E8F0F2] rounded"></div>
+                      <div id="price-progress" class="range-progress absolute top-0 h-[7px] bg-transparent rounded" style="left:0%; width:100%"></div>
+                      <input type="range" id="price-min" min="0" max="{{ section.settings.price_max | default: 5000 }}" step="10" value="0" class="range-input min z-99">
+                      <input type="range" id="price-max" min="0" max="{{ section.settings.price_max | default: 5000 }}" step="10" value="{{ section.settings.price_max | default: 5000 }}" class="range-input max">
+                    </div>
+                    <p class="mt-4 text-gray-700 text-base">Price :
+                      <span id="price-min-label">Rs 0</span>
+                      -
+                      <span id="price-max-label">Rs {{ section.settings.price_max | default: 5000 }}</span>
+                    </p>
+                  </div>
+                </div>
+            {% endcase %}
             {% endfor %}
           {% else %}
-            {% for i in (1..9) %}
-              {% render 'product-card-placeholder' %}
+            {% comment %} Fallback: render default sidebar parts {% endcomment %}
+            {% assign sidebar_defaults = 'sidebar_categories|sidebar_brand|sidebar_color|sidebar_price' | split: '|' %}
+            {% for _t in sidebar_defaults %}
+              {% case _t %}
+                {% when 'sidebar_categories' %}
+                  <div class="p-5 border border-gray-200">
+                    <h3 class="ml-2 text-lg font-semibold text-gray-900">{{ section.settings.heading_categories | default: 'Browse Categories' }}</h3>
+                    <div class="flex justify-center"><div class="border-b border-[#71CD13] w-55 mt-2 mb-2"></div></div>
+                    {% if collection %}
+                      {% for sub_collection in collections %}
+                        <label class="flex items-center gap-3 py-3 cursor-pointer group">
+                          <input type="radio" name="category" value="{{ sub_collection.handle }}" class="radio-md" data-category-radio data-href="{{ sub_collection.url }}" {% if sub_collection.handle == collection.handle %}checked{% endif %} />
+                          <span class="text-[#797979] text-sm group-hover:text-[#71cd13] transition-colors">{{ sub_collection.title }}</span>
+                        </label>
+                      {% endfor %}
+                    {% else %}
+                      {% for sub_collection in collections limit: 10 %}
+                        <label class="flex items-center gap-3 py-3 cursor-pointer group">
+                          <input type="radio" name="category" value="{{ sub_collection.handle }}" class="radio-md" data-category-radio data-href="{{ sub_collection.url }}" />
+                          <span class="text-[#797979] text-sm group-hover:text-[#71cd13] transition-colors">{{ sub_collection.title }}</span>
+                        </label>
+                      {% endfor %}
+                    {% endif %}
+                  </div>
+                {% when 'sidebar_brand' %}
+                  <div class="p-5 border border-gray-200">
+                    <h3 class="ml-2 text-lg font-semibold text-gray-900">{{ section.settings.heading_brand | default: 'Product Brand' }}</h3>
+                    <div class="flex justify-center"><div class="border-b border-[#71CD13] w-55 mt-2 mb-2"></div></div>
+                    {% assign default_brands = section.settings.brands_list | default: 'Apple,Asus,Gionee,Micromax,Samsung' | split: ',' %}
+                    {% for brand in default_brands %}
+                      {% assign brand_trim = brand | strip %}
+                      <label class="flex items-center gap-3 py-3 cursor-pointer group">
+                        <input type="radio" name="brand" value="{{ brand_trim }}" class="radio-md" data-filter-name="filter.p.m.custom.brand" data-filter-value="{{ brand_trim | escape }}" />
+                        <span class="text-[#797979] text-sm group-hover:text-[#71cd13] transition-colors">{{ brand_trim }}</span>
+                      </label>
+                    {% endfor %}
+                  </div>
+                {% when 'sidebar_color' %}
+                  <div class="p-5 border border-gray-200">
+                    <h3 class="ml-2 text-lg font-semibold text-gray-900">{{ section.settings.heading_color | default: 'Color Filter' }}</h3>
+                    <div class="flex justify-center"><div class="border-b border-[#71CD13] w-55 mt-2 mb-2"></div></div>
+                    {% assign colors_source = section.settings.colors_list | default: 'Black,Black Leather,Black with red,Gold,Spacegrey' %}
+                    {% assign colors = colors_source | split: ',' %}
+                    {% for color in colors %}
+                      {% assign color_trim = color | strip %}
+                      <label class="flex items-center gap-3 py-3 cursor-pointer group">
+                        <input type="radio" name="color" value="{{ color_trim }}" class="radio-md" data-filter-name="filter.v.option.color" data-filter-value="{{ color_trim | escape }}" />
+                        <span class="text-[#797979] text-sm group-hover:text-[#71cd13] transition-colors">{{ color_trim }}</span>
+                      </label>
+                    {% endfor %}
+                  </div>
+                {% when 'sidebar_price' %}
+                  <div class="p-5 border border-gray-200">
+                    <h3 class="ml-2 text-lg font-semibold text-gray-900">{{ section.settings.heading_price | default: 'Price Filter' }}</h3>
+                    <div class="flex justify-center"><div class="border-b border-[#71CD13] w-55 mt-2 mb-2"></div></div>
+                    <div id="price-box" class="range-box" data-max="{{ section.settings.price_max | default: 5000 }}">
+                      <div class="range-wrap relative h-2 bg-white rounded">
+                        <div class="absolute left-0 right-0 top-0 h-[7px] bg-[#E8F0F2] rounded"></div>
+                        <div id="price-progress" class="range-progress absolute top-0 h-[7px] bg-transparent rounded" style="left:0%; width:100%"></div>
+                        <input type="range" id="price-min" min="0" max="{{ section.settings.price_max | default: 5000 }}" step="10" value="0" class="range-input min z-99">
+                        <input type="range" id="price-max" min="0" max="{{ section.settings.price_max | default: 5000 }}" step="10" value="{{ section.settings.price_max | default: 5000 }}" class="range-input max">
+                      </div>
+                      <p class="mt-4 text-gray-700 text-base">Price :
+                        <span id="price-min-label">Rs 0</span>
+                        -
+                        <span id="price-max-label">Rs {{ section.settings.price_max | default: 5000 }}</span>
+                      </p>
+                    </div>
+                  </div>
+              {% endcase %}
             {% endfor %}
           {% endif %}
         </div>
+      </aside>
 
-        {% comment %} Pagination {% endcomment %}
-        {% if collection %}
-          {% paginate collection.products by page_size %}
-            {% if paginate.pages > 1 %}
-              <div class="mt-8 flex justify-center gap-2">
-                {% if paginate.previous %}
-                  <a href="{{ paginate.previous.url }}" class="px-4 py-2 border border-gray-300 rounded hover:bg-[#71cd13] hover:text-white transition">Previous</a>
-                {% endif %}
+      <main class="flex-1">
+        {% if section.blocks.size > 0 %}
+          {% for block in section.blocks %}
+          {% case block.type %}
+            {% when 'toolbar' %}
+              <div class="bg-[#f0f2f1] p-4 mb-6 flex flex-col md:flex-row justify-between items-center gap-4" {{ block.shopify_attributes }}>
+                <div class="flex gap-4">
+                  <div class="dd select-wide" aria-open="false">
+                    <button class="dd-btn" type="button">
+                      <span>{{ section.settings.sorting_label | default: 'Default sorting' }}</span>
+                      {% render 'icon-caret', class: 'dd-caret' %}
+                    </button>
+                    <div class="dd-menu">
+                      {% assign sorting_opts = section.settings.sorting_options | default: 'Default sorting|Price: Low to High|Price: High to Low|Newest' | split: '|' %}
+                      {% for opt in sorting_opts %}
+                        <button type="button" class="dd-item" data-sort-option="{{ opt | escape }}">{{ opt }}</button>
+                      {% endfor %}
+                    </div>
+                  </div>
+                  <div class="dd select-narrow" aria-open="false">
+                    <button class="dd-btn" type="button">
+                      <span>{{ section.settings.show_label | default: 'Show 12' }}</span>
+                      {% render 'icon-caret', class: 'dd-caret' %}
+                    </button>
+                    <div class="dd-menu">
+                      {% assign show_opts = section.settings.show_options | default: 'Show 12|Show 24|Show 36|Show All' | split: '|' %}
+                      {% for opt in show_opts %}
+                        <button type="button" class="dd-item" data-show-option="{{ opt | escape }}">{{ opt }}</button>
+                      {% endfor %}
+                    </div>
+                  </div>
+                </div>
+              </div>
 
-                {% for part in paginate.parts %}
-                  {% if part.is_link %}
-                    <a href="{{ part.url }}" class="px-4 py-2 border border-gray-300 rounded hover:bg-[#71cd13] hover:text-white transition">{{ part.title }}</a>
-                  {% else %}
-                    <span class="px-4 py-2 border border-gray-300 rounded {% if part.title == paginate.current_page %}bg-[#71cd13] text-white{% endif %}">{{ part.title }}</span>
-                  {% endif %}
-                {% endfor %}
-
-                {% if paginate.next %}
-                  <a href="{{ paginate.next.url }}" class="px-4 py-2 border border-gray-300 rounded hover:bg-[#71cd13] hover:text-white transition">Next</a>
+            {% when 'grid' %}
+              {% assign requested_size = request.params.page_size | default: '12' %}
+              {% if requested_size == 'all' %}
+                {% assign page_size = collection.products_count %}
+              {% else %}
+                {% assign page_size = requested_size | plus: 0 %}
+                {% if page_size <= 0 %}{% assign page_size = 12 %}{% endif %}
+              {% endif %}
+              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" {{ block.shopify_attributes }}>
+                {% if collection and collection.products.size > 0 %}
+                  {% for product in collection.products limit: 12 %}
+                    {% render 'product-card-small', product: product, wrap_link: true %}
+                  {% endfor %}
+                {% else %}
+                  <div class="col-span-3">
+                    <div class="p-8 border border-gray-200 bg-white text-center">
+                      <h3 class="text-lg font-semibold text-[#2A2A2A]">No products found</h3>
+                      <p class="mt-2 text-sm text-[#797979]">Try adjusting your filters or clearing them.</p>
+                    </div>
+                  </div>
                 {% endif %}
               </div>
+
+            {% when 'pagination' %}
+              {% if collection %}
+                {% paginate collection.products by page_size %}
+                  {% if paginate.pages > 1 %}
+                    <div class="mt-8 flex justify-center gap-2" {{ block.shopify_attributes }}>
+                      {% if paginate.previous %}
+                        <a href="{{ paginate.previous.url }}" class="px-4 py-2 border border-gray-300 rounded hover:bg-[#71cd13] hover:text-white transition">Previous</a>
+                      {% endif %}
+                      {% for part in paginate.parts %}
+                        {% if part.is_link %}
+                          <a href="{{ part.url }}" class="px-4 py-2 border border-gray-300 rounded hover:bg-[#71cd13] hover:text-white transition">{{ part.title }}</a>
+                        {% else %}
+                          <span class="px-4 py-2 border border-gray-300 rounded {% if part.title == paginate.current_page %}bg-[#71cd13] text-white{% endif %}">{{ part.title }}</span>
+                        {% endif %}
+                      {% endfor %}
+                      {% if paginate.next %}
+                        <a href="{{ paginate.next.url }}" class="px-4 py-2 border border-gray-300 rounded hover:bg-[#71cd13] hover:text-white transition">Next</a>
+                      {% endif %}
+                    </div>
+                  {% endif %}
+                {% endpaginate %}
+              {% endif %}
+          {% endcase %}
+          {% endfor %}
+        {% else %}
+          {% comment %} Fallback: toolbar + grid + pagination {% endcomment %}
+          <div class="bg-[#f0f2f1] p-4 mb-6 flex flex-col md:flex-row justify-between items-center gap-4">
+            <div class="flex gap-4">
+              <div class="dd select-wide" aria-open="false">
+                <button class="dd-btn" type="button">
+                  <span>{{ section.settings.sorting_label | default: 'Default sorting' }}</span>
+                  {% render 'icon-caret', class: 'dd-caret' %}
+                </button>
+                <div class="dd-menu">
+                  {% assign sorting_opts = section.settings.sorting_options | default: 'Default sorting|Price: Low to High|Price: High to Low|Newest' | split: '|' %}
+                  {% for opt in sorting_opts %}
+                    <button type="button" class="dd-item" data-sort-option="{{ opt | escape }}">{{ opt }}</button>
+                  {% endfor %}
+                </div>
+              </div>
+              <div class="dd select-narrow" aria-open="false">
+                <button class="dd-btn" type="button">
+                  <span>{{ section.settings.show_label | default: 'Show 12' }}</span>
+                  {% render 'icon-caret', class: 'dd-caret' %}
+                </button>
+                <div class="dd-menu">
+                  {% assign show_opts = section.settings.show_options | default: 'Show 12|Show 24|Show 36|Show All' | split: '|' %}
+                  {% for opt in show_opts %}
+                    <button type="button" class="dd-item" data-show-option="{{ opt | escape }}">{{ opt }}</button>
+                  {% endfor %}
+                </div>
+              </div>
+            </div>
+          </div>
+          {% assign requested_size = request.params.page_size | default: '12' %}
+          {% if requested_size == 'all' %}
+            {% assign page_size = collection.products_count %}
+          {% else %}
+            {% assign page_size = requested_size | plus: 0 %}
+            {% if page_size <= 0 %}{% assign page_size = 12 %}{% endif %}
+          {% endif %}
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% if collection and collection.products.size > 0 %}
+              {% for product in collection.products limit: 12 %}
+                {% render 'product-card-small', product: product, wrap_link: true %}
+              {% endfor %}
+            {% else %}
+              <div class="col-span-3">
+                <div class="p-8 border border-gray-200 bg-white text-center">
+                  <h3 class="text-lg font-semibold text-[#2A2A2A]">No products found</h3>
+                  <p class="mt-2 text-sm text-[#797979]">Try adjusting your filters or clearing them.</p>
+                </div>
+              </div>
             {% endif %}
-          {% endpaginate %}
+          </div>
+          {% if collection %}
+            {% paginate collection.products by page_size %}
+              {% if paginate.pages > 1 %}
+                <div class="mt-8 flex justify-center gap-2">
+                  {% if paginate.previous %}
+                    <a href="{{ paginate.previous.url }}" class="px-4 py-2 border border-gray-300 rounded hover:bg-[#71cd13] hover:text-white transition">Previous</a>
+                  {% endif %}
+                  {% for part in paginate.parts %}
+                    {% if part.is_link %}
+                      <a href="{{ part.url }}" class="px-4 py-2 border border-gray-300 rounded hover:bg-[#71cd13] hover:text-white transition">{{ part.title }}</a>
+                    {% else %}
+                      <span class="px-4 py-2 border border-gray-300 rounded {% if part.title == paginate.current_page %}bg-[#71cd13] text-white{% endif %}">{{ part.title }}</span>
+                    {% endif %}
+                  {% endfor %}
+                  {% if paginate.next %}
+                    <a href="{{ paginate.next.url }}" class="px-4 py-2 border border-gray-300 rounded hover:bg-[#71cd13] hover:text-white transition">Next</a>
+                  {% endif %}
+                </div>
+              {% endif %}
+            {% endpaginate %}
+          {% endif %}
         {% endif %}
       </main>
     </div>
@@ -388,7 +425,9 @@
     box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
     padding: 6px 0;
     transform-origin: top left;
+    display: none;
   }
+  .dd[aria-open="true"] .dd-menu { display: block; }
   .dd .dd-item {
     display: block;
     width: 100%;
@@ -481,6 +520,14 @@
       });
       window.location.href = url.toString();
     }
+      // helper to set or clear a single-value filter param
+      function setSingleFilterParam(name, value){
+        var url = new URL(window.location.href);
+        // clear existing value for single filter
+        url.searchParams.delete(name);
+        if (value) url.searchParams.set(name, value);
+        window.location.href = url.toString();
+      }
 
 // Category change → navigate to collection URL
     document.querySelectorAll('[data-category-radio]').forEach(function(el) {
@@ -529,6 +576,28 @@
     document.querySelectorAll('[data-tag-checkbox]').forEach(function(el) {
       el.addEventListener('change', navigateWithTags);
     });
+
+// Brand/color filter radios using official filter params
+    document.querySelectorAll('input[data-filter-name]').forEach(function(el){
+      el.addEventListener('change', function(){
+        if (!el.checked) return;
+        var name = el.getAttribute('data-filter-name');
+        var value = el.getAttribute('data-filter-value');
+        setSingleFilterParam(name, value);
+      });
+    });
+
+// Pre-check radios from URL
+    (function presetFilterRadios(){
+      var url = new URL(window.location.href);
+      document.querySelectorAll('input[data-filter-name]').forEach(function(el){
+        var name = el.getAttribute('data-filter-name');
+        var val = url.searchParams.get(name);
+        if (val && el.getAttribute('data-filter-value') === val){
+          el.checked = true;
+        }
+      });
+    })();
 
 // Price filter: dual range (min & max)
     (function initDualRange() {
@@ -603,26 +672,30 @@
       maxInput.addEventListener('change', submitParams);
     })();
 
-// Highlight selected menu items and handle sort/show
-    document.querySelectorAll('.dd').forEach(function(dd) {
-      var btn = dd.querySelector('.dd-btn');
-      var items = dd.querySelectorAll('.dd-item');
-      items.forEach(function(it) {
-        it.addEventListener('click', function() {
-          items.forEach(function(i) {
-            i.classList.remove('is-active');
+// Initialize dropdowns (no Alpine)
+    (function initCustomDropdowns(){
+      document.querySelectorAll('.dd').forEach(function(dd){
+        var btn = dd.querySelector('.dd-btn');
+        var menu = dd.querySelector('.dd-menu');
+        if (!btn || !menu) return;
+        btn.addEventListener('click', function(e){
+          e.stopPropagation();
+          var open = dd.getAttribute('aria-open') === 'true';
+          dd.setAttribute('aria-open', open ? 'false' : 'true');
+        });
+        document.addEventListener('click', function(e){
+          if (!dd.contains(e.target)) dd.setAttribute('aria-open', 'false');
+        });
+        dd.querySelectorAll('.dd-item').forEach(function(item){
+          item.addEventListener('click', function(){
+            var label = item.textContent.trim();
+            var span = dd.querySelector('.dd-btn span');
+            if (span) span.textContent = label;
+            dd.setAttribute('aria-open', 'false');
           });
-          it.classList.add('is-active');
-
-// Update button label immediately
-          var label = it.textContent.trim();
-          var span = btn.querySelector('span');
-          if (span) 
-            span.textContent = label;
-          
         });
       });
-    });
+    })();
 
 // Map sort labels → Shopify sort codes
     var sortMap = {
@@ -779,9 +852,27 @@
         "default": "Show 12|Show 24|Show 36|Show All"
       }
     ],
+    "blocks": [
+      { "type": "sidebar_categories", "name": "Sidebar - Categories" },
+      { "type": "sidebar_brand", "name": "Sidebar - Brand" },
+      { "type": "sidebar_color", "name": "Sidebar - Color" },
+      { "type": "sidebar_price", "name": "Sidebar - Price" },
+      { "type": "toolbar", "name": "Toolbar" },
+      { "type": "grid", "name": "Products grid" },
+      { "type": "pagination", "name": "Pagination" }
+    ],
     "presets": [
       {
-        "name": "Shop Category"
+        "name": "Shop Category",
+        "blocks": [
+          { "type": "sidebar_categories" },
+          { "type": "sidebar_brand" },
+          { "type": "sidebar_color" },
+          { "type": "sidebar_price" },
+          { "type": "toolbar" },
+          { "type": "grid" },
+          { "type": "pagination" }
+        ]
       }
     ]
   }

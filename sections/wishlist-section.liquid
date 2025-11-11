@@ -1,5 +1,5 @@
 {% capture icon_eye %}{% render 'icon-eye' %}{% endcapture %}
-{% capture icon_heart %}{% render 'icon-heart' %}{% endcapture %}
+{% capture icon_trash %}{% render 'icon-trash' %}{% endcapture %}
 {% capture icon_cart %}{% render 'icon-cart' %}{% endcapture %}
 
 <section class="py-16 md:py-20">
@@ -46,7 +46,7 @@
               ${img ? `<img class="w-full h-auto object-contain" src="${img}" alt="${p.title}">` : `<div class="w-full aspect-square bg-gray-50"></div>`}
               <div class="h-12 absolute bottom-0 left-1/2 -translate-x-1/2 w-[80%] bg-[#BDE399] flex items-center justify-center gap-6 py-3 opacity-0 group-hover:opacity-100 z-10 transform translate-y-full group-hover:translate-y-0 transition-all duration-300">
                 <button type="button" class="w-9 h-9 bg-white rounded-full flex items-center justify-center text-black hover:bg-[#71cd13]" data-quickview data-product-handle="${p.handle}">{{ icon_eye | strip_newlines }}</button>
-                <button type="button" class="w-9 h-9 bg-white rounded-full flex items-center justify-center text-black hover:bg-[#71cd13]" data-wishlist-remove data-product-handle="${p.handle}">{{ icon_heart | strip_newlines }}</button>
+                <button type="button" class="w-9 h-9 bg-white rounded-full flex items-center justify-center text-black hover:bg-[#71cd13]" data-wishlist-remove data-product-handle="${p.handle}">{{ icon_trash | strip_newlines }}</button>
                 ${v ? `<button type="button" class="w-9 h-9 bg-white rounded-full flex items-center justify-center text-black hover:bg-[#71cd13]" data-quick-add data-variant-id="${v.id}">{{ icon_cart | strip_newlines }}</button>` : ''}
               </div>
             </div>

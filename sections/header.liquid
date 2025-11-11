@@ -1,8 +1,8 @@
-<header class="relative w-full top-0 left-0 z-99 transition-colors duration-300">
+<header class="relative w-full top-0 left-0 z-99 transition-colors duration-300" x-data="{ mobileOpen: false }">
   <!-- Top Bar -->
   <div class="hidden md:block bg-neutral-100 h-[30px] leading-4">
     <div class="container mx-auto px-4">
-      <div class="flex items-center justify-between px-25">
+      <div class="flex items-center justify-between md:px-25 px-4">
         <div>
           <div>
             {% if section.settings.top_phone != blank %}
@@ -38,9 +38,9 @@
   </div>
 
   <!-- Main Menu -->
-  <div class="bg-white sticky left-0 w-full border-t border-[#dddddd61]">
+  <div class="bg-white left-0 w-full h-16 md:h-full border-t border-[#dddddd61]">
     <div class="container mx-auto px-4">
-      <div class="flex justify-between items-center py-1 px-25">
+      <div class="flex justify-between items-center py-2 md:py-1 md:px-25 px-4">
         <!-- Logo -->
         <a class="flex items-center" href="{{ routes.root_url }}">
           {% if section.settings.logo != blank %}
@@ -93,8 +93,8 @@
           {% endfor %}
         </nav>
 
-        <!-- Icons -->
-        <ul class="flex items-center space-x-4 [&_svg]:w-[18px] [&_svg]:h-[18px]">
+        <!-- Icons (desktop only) -->
+        <ul class="hidden md:flex items-center space-x-4 [&_svg]:w-[18px] [&_svg]:h-[18px]">
           <li>
             <a href="{{ routes.search_url }}" class="p-2 hover:text-[#71cd13]">
               {% render 'icon-search' %}
@@ -123,7 +123,118 @@
           </li>
         {% comment %} {% endif %} {% endcomment %}
         </ul>
+
+        <!-- Mobile menu button -->
+        <button
+          type="button"
+          class="md:hidden p-2 ml-2 text-blue-800 hover:text-[#71cd13] focus:outline-none"
+          @click="mobileOpen = true"
+          aria-label="Open menu">
+          {% render 'icon-hamburger' %}
+        </button>
       </div>
+    </div>
+  </div>
+
+  <!-- Mobile drawer -->
+  <div
+    class="fixed inset-0 z-100 md:hidden"
+    x-show="mobileOpen"
+    x-transition.opacity
+    style="display: none;">
+    <!-- Backdrop -->
+    <div class="absolute inset-0 bg-black/40" @click="mobileOpen = false"></div>
+
+    <!-- Panel (full screen) -->
+    <div
+      class="absolute inset-0 h-full w-full bg-white overflow-y-auto"
+      x-transition:enter="transition ease-out duration-200"
+      x-transition:enter-start="opacity-0"
+      x-transition:enter-end="opacity-100"
+      x-transition:leave="transition ease-in duration-150"
+      x-transition:leave-start="opacity-100"
+      x-transition:leave-end="opacity-0">
+      <div class="flex items-center justify-between px-5 py-4 border-b border-neutral-200">
+        <a
+          class="flex items-center"
+          href="{{ routes.root_url }}"
+          @click="mobileOpen = false">
+          {% if section.settings.logo != blank %}
+            <img
+              class="h-8 w-auto"
+              src="{{ section.settings.logo | image_url: width: 600 }}"
+              alt="{{ shop.name | escape }}"
+              height="32"
+              width="120">
+          {% else %}
+            <span class="text-base font-semibold">{{ shop.name | escape }}</span>
+          {% endif %}
+        </a>
+        <button
+          type="button"
+          class="p-2 text-neutral-900 hover:text-[#71cd13]"
+          @click="mobileOpen = false"
+          aria-label="Close menu">
+          <!-- Simple X icon -->
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="h-6 w-6"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.5">
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      <nav class="px-5 py-4">
+        <ul class="space-y-1">
+          {% for link in linklists.main-menu-1.links %}
+            <li>
+              {% if link.links != blank %}
+                <details class="group">
+                  <summary class="cursor-pointer py-3 border-b border-neutral-200 uppercase text-[13px] text-neutral-900 flex items-center justify-between">
+                    <span>{{ link.title }}</span>
+                    <span class="ml-3 group-open:rotate-180 transition">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        class="h-4 w-4"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="1.5">
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          d="M6 9l6 6 6-6" />
+                      </svg>
+                    </span>
+                  </summary>
+                  <ul class="pl-3 py-2">
+                    {% for child_link in link.links %}
+                      <li>
+                        <a href="{{ child_link.url }}" class="block py-2 text-[12px] uppercase text-neutral-800 hover:text-[#71cd13] border-b border-neutral-200 pl-3">
+                          {{ child_link.title }}
+                        </a>
+                      </li>
+                    {% endfor %}
+                  </ul>
+                </details>
+              {% else %}
+                <a href="{{ link.url }}" class="block py-3 border-b border-neutral-200 uppercase text-[13px] text-neutral-900 hover:text-[#71cd13]">
+                  {{ link.title }}
+                </a>
+              {% endif %}
+            </li>
+          {% endfor %}
+        </ul>
+      </nav>
+
+    <!-- Icons removed in full-screen mobile modal to match design -->
     </div>
   </div>
 </header>

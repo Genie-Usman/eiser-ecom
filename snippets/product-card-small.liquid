@@ -9,6 +9,7 @@
   assign card_compare_at = compare_at_price | default: card_product.compare_at_price
   assign card_image = image | default: card_product.featured_image
   assign quick_variant = card_product.selected_or_first_available_variant
+  assign link_overlay = wrap_link | default: false
 %}
 
 <div class="flex flex-col bg-white border border-gray-200 group relative overflow-hidden">
@@ -25,6 +26,13 @@
       <div class="w-full aspect-square bg-gray-50 flex items-center justify-center">
         <span class="text-gray-400">No image</span>
       </div>
+    {% endif %}
+
+    {% if link_overlay and card_url %}
+      <a
+        href="{{ card_url }}"
+        class="absolute inset-0 z-10"
+        aria-label="{{ card_title | escape }}"></a>
     {% endif %}
 
     <div class="h-12 absolute bottom-0 left-1/2 -translate-x-1/2 w-[80%] bg-[#BDE399] flex items-center justify-center gap-6 py-3 opacity-0 group-hover:opacity-100 z-10 transform translate-y-full group-hover:translate-y-0 transition-all duration-300">
