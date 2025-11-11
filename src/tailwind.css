@@ -1,1 +1,24 @@
 @import "tailwindcss";
+
+/* --- Import Google Font --- */
+@import url('https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700&display=swap');
+
+@layer base {
+  html, body {
+    font-family: 'Heebo', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Headings */
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Heebo', sans-serif;
+    font-weight: 600;
+    line-height: 1.2;
+  }
+
+  /* Buttons, links, and inputs */
+  button, a, input, select, textarea {
+    font-family: 'Heebo', sans-serif;
+  }
+}
