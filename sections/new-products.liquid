@@ -17,12 +17,12 @@
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-8">
       {%- comment -%} FEATURED PRODUCT AREA {%- endcomment -%}
       <div class="bg-[#F0F2F1] border border-gray-200 p-8 flex flex-col items-center">
-        <h5 class="text-lg font-medium tracking-wide text-gray-500 uppercase mt-10">
+        <h5 class="md:text-lg text-base font-medium tracking-wide text-gray-500 uppercase mt-10">
           {{ section.settings.collection_label | default: 'collection of 2025' }}
         </h5>
 
         {%- assign featured_product = all_products[section.settings.feature_product] -%}
-        <h3 class="text-2xl md:text-3xl font-bold uppercase text-[#2A2A2A] mt-4">
+        <h3 class="text-xl md:text-3xl font-bold uppercase text-[#2A2A2A] mt-4">
           {{ featured_product.title | default: section.settings.feature_title | default: "Men’s Summer T-Shirt" }}
         </h3>
 
@@ -36,7 +36,7 @@
               width="900"
               height="600" />
           {% else %}
-            <div class="w-full aspect-5/3 bg-gray-50"></div>
+            {{ 'product-2' | placeholder_svg_tag: 'w-full h-auto object-contain' }}
           {% endif %}
         </div>
 
