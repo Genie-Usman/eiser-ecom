@@ -649,10 +649,7 @@
 
     {% javascript %}
       document.addEventListener('DOMContentLoaded', function() {
-        var root = document.getElementById('shop-category');
-        var currentCollectionUrl = root
-          ? root.dataset.collectionUrl
-          : '';
+
 
 // Helper to preserve query params
         function setSearchParams(params) {
@@ -667,30 +664,8 @@
           window.location.href = url.toString();
         }
 
-// helper to set or clear a single-value filter param
-        function setSingleFilterParam(name, value) {
-          var url = new URL(window.location.href);
-
-// clear existing value for single filter
-          url.searchParams.delete(name);
-          if (value) 
-            url.searchParams.set(name, value);
-          
-
-          window.location.href = url.toString();
-        }
-
 // Category change → navigate to collection URL
         document.querySelectorAll('[data-category-radio]').forEach(function(el) {
-          el.addEventListener('change', function() {
-            if (el.checked && el.dataset.href) {
-              window.location.href = el.dataset.href;
-            }
-          });
-        });
-
-// Brand change → navigate to tagged URL
-        document.querySelectorAll('[data-brand-radio]').forEach(function(el) {
           el.addEventListener('change', function() {
             if (el.checked && el.dataset.href) {
               window.location.href = el.dataset.href;
@@ -708,53 +683,10 @@
               window.location.href = url;
             
 
+
           });
         });
 
-// Tag radios/checkboxes → navigate using tag URLs
-        function navigateWithTags() {
-          var activeRadios = Array.from(document.querySelectorAll('[data-tag-radio]:checked')).map(function(i) {
-            return i.dataset.tag;
-          });
-          var activeChecks = Array.from(document.querySelectorAll('[data-tag-checkbox]:checked')).map(function(i) {
-            return i.dataset.tag;
-          });
-          var tags = activeRadios.concat(activeChecks).filter(Boolean);
-          if (tags.length) {
-            var path = currentCollectionUrl + '/' + tags.map(encodeURIComponent).join('+');
-            window.location.href = path;
-          }
-        }
-        document.querySelectorAll('[data-tag-radio]').forEach(function(el) {
-          el.addEventListener('change', navigateWithTags);
-        });
-        document.querySelectorAll('[data-tag-checkbox]').forEach(function(el) {
-          el.addEventListener('change', navigateWithTags);
-        });
-
-// Brand/color filter radios using official filter params
-        document.querySelectorAll('input[data-filter-name]').forEach(function(el) {
-          el.addEventListener('change', function() {
-            if (! el.checked) return;
-            
-
-            var name = el.getAttribute('data-filter-name');
-            var value = el.getAttribute('data-filter-value');
-            setSingleFilterParam(name, value);
-          });
-        });
-
-// Pre-check radios from URL
-        (function presetFilterRadios() {
-          var url = new URL(window.location.href);
-          document.querySelectorAll('input[data-filter-name]').forEach(function(el) {
-            var name = el.getAttribute('data-filter-name');
-            var val = url.searchParams.get(name);
-            if (val && el.getAttribute('data-filter-value') === val) {
-              el.checked = true;
-            }
-          });
-        })();
 
 // Price filter: dual range (min & max)
         (function initDualRange() {
@@ -841,6 +773,7 @@
             if (! btn || ! menu) return;
             
 
+
             btn.addEventListener('click', function(e) {
               e.stopPropagation();
               var open = dd.getAttribute('aria-open') === 'true';
@@ -856,6 +789,7 @@
                 dd.setAttribute('aria-open', 'false');
               
 
+
             });
             dd.querySelectorAll('.dd-item').forEach(function(item) {
               item.addEventListener('click', function() {
@@ -864,6 +798,7 @@
                 if (span) 
                   span.textContent = label;
                 
+
 
                 dd.setAttribute('aria-open', 'false');
               });
