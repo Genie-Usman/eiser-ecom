@@ -8,201 +8,421 @@
         <div class="space-y-8">
           {% if section.blocks.size > 0 %}
             {% for block in section.blocks %}
-            {% case block.type %}
-              {% when 'sidebar_categories' %}
-                <div class="p-5 border border-gray-200" {{ block.shopify_attributes }}>
-                  <h3 class="ml-2 text-lg font-semibold text-gray-900">{{ section.settings.heading_categories | default: 'Browse Categories' }}</h3>
-                  <div class="flex justify-center">
-                    <div class="border-b border-[#71CD13] w-55 mt-2 mb-2"></div>
-                  </div>
-                  {% if collection %}
-                    {% for sub_collection in collections %}
-                      <label class="flex items-center gap-3 py-3 cursor-pointer group">
-                        <input type="radio" name="category" value="{{ sub_collection.handle }}" class="radio-md" data-category-radio data-href="{{ sub_collection.url }}" {% if sub_collection.handle == collection.handle %}checked{% endif %} />
-                        <span class="text-[#797979] text-sm group-hover:text-[#71cd13] transition-colors">{{ sub_collection.title }}</span>
-                      </label>
-                    {% endfor %}
-                  {% else %}
-                    {% for sub_collection in collections limit: 10 %}
-                      <label class="flex items-center gap-3 py-3 cursor-pointer group">
-                        <input type="radio" name="category" value="{{ sub_collection.handle }}" class="radio-md" data-category-radio data-href="{{ sub_collection.url }}" />
-                        <span class="text-[#797979] text-sm group-hover:text-[#71cd13] transition-colors">{{ sub_collection.title }}</span>
-                      </label>
-                    {% endfor %}
-                  {% endif %}
-                </div>
-
-              {% when 'sidebar_brand' %}
-                <div class="p-5 border border-gray-200" {{ block.shopify_attributes }}>
-                  <h3 class="ml-2 text-lg font-semibold text-gray-900">{{ section.settings.heading_brand | default: 'Product Brand' }}</h3>
-                  <div class="flex justify-center"><div class="border-b border-[#71CD13] w-55 mt-2 mb-2"></div></div>
-                  {% assign default_brands = section.settings.brands_list | default: 'Apple,Asus,Gionee,Micromax,Samsung' | split: ',' %}
-                  {% for brand in default_brands %}
-                    {% assign brand_trim = brand | strip %}
-                    <label class="flex items-center gap-3 py-3 cursor-pointer group">
-                      <input type="radio" name="brand" value="{{ brand_trim }}" class="radio-md" data-filter-name="filter.p.m.custom.brand" data-filter-value="{{ brand_trim | escape }}" />
-                      <span class="text-[#797979] text-sm group-hover:text-[#71cd13] transition-colors">{{ brand_trim }}</span>
-                    </label>
-                  {% endfor %}
-                </div>
-
-              {% when 'sidebar_color' %}
-                <div class="p-5 border border-gray-200" {{ block.shopify_attributes }}>
-                  <h3 class="ml-2 text-lg font-semibold text-gray-900">{{ section.settings.heading_color | default: 'Color Filter' }}</h3>
-                  <div class="flex justify-center"><div class="border-b border-[#71CD13] w-55 mt-2 mb-2"></div></div>
-                  {% assign colors_source = section.settings.colors_list | default: 'Black,Black Leather,Black with red,Gold,Spacegrey' %}
-                  {% assign colors = colors_source | split: ',' %}
-                  {% for color in colors %}
-                    {% assign color_trim = color | strip %}
-                    <label class="flex items-center gap-3 py-3 cursor-pointer group">
-                      <input type="radio" name="color" value="{{ color_trim }}" class="radio-md" data-filter-name="filter.v.option.color" data-filter-value="{{ color_trim | escape }}" />
-                      <span class="text-[#797979] text-sm group-hover:text-[#71cd13] transition-colors">{{ color_trim }}</span>
-                    </label>
-                  {% endfor %}
-                </div>
-
-              {% when 'sidebar_price' %}
-                <div class="p-5 border border-gray-200" {{ block.shopify_attributes }}>
-                  <h3 class="ml-2 text-lg font-semibold text-gray-900">{{ section.settings.heading_price | default: 'Price Filter' }}</h3>
-                  <div class="flex justify-center"><div class="border-b border-[#71CD13] w-55 mt-2 mb-2"></div></div>
-                  <div id="price-box" class="range-box" data-max="{{ section.settings.price_max | default: 5000 }}">
-                    <div class="range-wrap relative h-2 bg-white rounded">
-                      <div class="absolute left-0 right-0 top-0 h-[7px] bg-[#E8F0F2] rounded"></div>
-                      <div id="price-progress" class="range-progress absolute top-0 h-[7px] bg-transparent rounded" style="left:0%; width:100%"></div>
-                      <input type="range" id="price-min" min="0" max="{{ section.settings.price_max | default: 5000 }}" step="10" value="0" class="range-input min z-99">
-                      <input type="range" id="price-max" min="0" max="{{ section.settings.price_max | default: 5000 }}" step="10" value="{{ section.settings.price_max | default: 5000 }}" class="range-input max">
-                    </div>
-                    <p class="mt-4 text-gray-700 text-base">Price :
-                      <span id="price-min-label">Rs 0</span>
-                      -
-                      <span id="price-max-label">Rs {{ section.settings.price_max | default: 5000 }}</span>
-                    </p>
-                  </div>
-                </div>
-            {% endcase %}
-            {% endfor %}
-          {% else %}
-            {% comment %} Fallback: render default sidebar parts {% endcomment %}
-            {% assign sidebar_defaults = 'sidebar_categories|sidebar_brand|sidebar_color|sidebar_price' | split: '|' %}
-            {% for _t in sidebar_defaults %}
-              {% case _t %}
+              {% case block.type %}
                 {% when 'sidebar_categories' %}
-                  <div class="p-5 border border-gray-200">
+                  <div class="p-5 border border-gray-200" {{ block.shopify_attributes }}>
                     <h3 class="ml-2 text-lg font-semibold text-gray-900">{{ section.settings.heading_categories | default: 'Browse Categories' }}</h3>
-                    <div class="flex justify-center"><div class="border-b border-[#71CD13] w-55 mt-2 mb-2"></div></div>
+                    <div class="flex justify-center">
+                      <div class="border-b border-[#71CD13] w-55 mt-2 mb-2"></div>
+                    </div>
                     {% if collection %}
                       {% for sub_collection in collections %}
                         <label class="flex items-center gap-3 py-3 cursor-pointer group">
-                          <input type="radio" name="category" value="{{ sub_collection.handle }}" class="radio-md" data-category-radio data-href="{{ sub_collection.url }}" {% if sub_collection.handle == collection.handle %}checked{% endif %} />
+                          <input
+                            type="radio"
+                            name="category"
+                            value="{{ sub_collection.handle }}"
+                            class="radio-md"
+                            data-category-radio
+                            data-href="{{ sub_collection.url }}"
+                            {% if sub_collection.handle == collection.handle %}
+                            checked{% endif %} />
                           <span class="text-[#797979] text-sm group-hover:text-[#71cd13] transition-colors">{{ sub_collection.title }}</span>
                         </label>
                       {% endfor %}
                     {% else %}
                       {% for sub_collection in collections limit: 10 %}
                         <label class="flex items-center gap-3 py-3 cursor-pointer group">
-                          <input type="radio" name="category" value="{{ sub_collection.handle }}" class="radio-md" data-category-radio data-href="{{ sub_collection.url }}" />
+                          <input
+                            type="radio"
+                            name="category"
+                            value="{{ sub_collection.handle }}"
+                            class="radio-md"
+                            data-category-radio
+                            data-href="{{ sub_collection.url }}" />
                           <span class="text-[#797979] text-sm group-hover:text-[#71cd13] transition-colors">{{ sub_collection.title }}</span>
                         </label>
                       {% endfor %}
                     {% endif %}
                   </div>
-                {% when 'sidebar_brand' %}
-                  <div class="p-5 border border-gray-200">
-                    <h3 class="ml-2 text-lg font-semibold text-gray-900">{{ section.settings.heading_brand | default: 'Product Brand' }}</h3>
-                    <div class="flex justify-center"><div class="border-b border-[#71CD13] w-55 mt-2 mb-2"></div></div>
-                    {% assign default_brands = section.settings.brands_list | default: 'Apple,Asus,Gionee,Micromax,Samsung' | split: ',' %}
-                    {% for brand in default_brands %}
-                      {% assign brand_trim = brand | strip %}
-                      <label class="flex items-center gap-3 py-3 cursor-pointer group">
-                        <input type="radio" name="brand" value="{{ brand_trim }}" class="radio-md" data-filter-name="filter.p.m.custom.brand" data-filter-value="{{ brand_trim | escape }}" />
-                        <span class="text-[#797979] text-sm group-hover:text-[#71cd13] transition-colors">{{ brand_trim }}</span>
-                      </label>
-                    {% endfor %}
-                  </div>
-                {% when 'sidebar_color' %}
-                  <div class="p-5 border border-gray-200">
-                    <h3 class="ml-2 text-lg font-semibold text-gray-900">{{ section.settings.heading_color | default: 'Color Filter' }}</h3>
-                    <div class="flex justify-center"><div class="border-b border-[#71CD13] w-55 mt-2 mb-2"></div></div>
-                    {% assign colors_source = section.settings.colors_list | default: 'Black,Black Leather,Black with red,Gold,Spacegrey' %}
-                    {% assign colors = colors_source | split: ',' %}
-                    {% for color in colors %}
-                      {% assign color_trim = color | strip %}
-                      <label class="flex items-center gap-3 py-3 cursor-pointer group">
-                        <input type="radio" name="color" value="{{ color_trim }}" class="radio-md" data-filter-name="filter.v.option.color" data-filter-value="{{ color_trim | escape }}" />
-                        <span class="text-[#797979] text-sm group-hover:text-[#71cd13] transition-colors">{{ color_trim }}</span>
-                      </label>
-                    {% endfor %}
-                  </div>
-                {% when 'sidebar_price' %}
-                  <div class="p-5 border border-gray-200">
-                    <h3 class="ml-2 text-lg font-semibold text-gray-900">{{ section.settings.heading_price | default: 'Price Filter' }}</h3>
-                    <div class="flex justify-center"><div class="border-b border-[#71CD13] w-55 mt-2 mb-2"></div></div>
-                    <div id="price-box" class="range-box" data-max="{{ section.settings.price_max | default: 5000 }}">
-                      <div class="range-wrap relative h-2 bg-white rounded">
-                        <div class="absolute left-0 right-0 top-0 h-[7px] bg-[#E8F0F2] rounded"></div>
-                        <div id="price-progress" class="range-progress absolute top-0 h-[7px] bg-transparent rounded" style="left:0%; width:100%"></div>
-                        <input type="range" id="price-min" min="0" max="{{ section.settings.price_max | default: 5000 }}" step="10" value="0" class="range-input min z-99">
-                        <input type="range" id="price-max" min="0" max="{{ section.settings.price_max | default: 5000 }}" step="10" value="{{ section.settings.price_max | default: 5000 }}" class="range-input max">
-                      </div>
-                      <p class="mt-4 text-gray-700 text-base">Price :
-                        <span id="price-min-label">Rs 0</span>
-                        -
-                        <span id="price-max-label">Rs {{ section.settings.price_max | default: 5000 }}</span>
-                      </p>
-                    </div>
-                  </div>
-              {% endcase %}
-            {% endfor %}
-          {% endif %}
-        </div>
-      </aside>
 
-      <main class="flex-1">
-        {% if section.blocks.size > 0 %}
-          {% for block in section.blocks %}
-          {% case block.type %}
-            {% when 'toolbar' %}
-              <div class="bg-[#f0f2f1] p-4 mb-6 flex flex-col md:flex-row justify-between items-center gap-4" {{ block.shopify_attributes }}>
+                {% when 'sidebar_brand' %}
+                  {% comment %}
+                    Render Shopify Search & Discovery facets (filters) once here.
+                    Other filter sidebar blocks will be no-ops to avoid duplication.
+                  {% endcomment %}
+                  <div class="space-y-8" {{ block.shopify_attributes }}>
+                    {% if collection.filters.size > 0 %}
+                      {% for filter in collection.filters %}
+                        {% case filter.type %}
+                          {% when 'list' %}
+                            <div class="p-5 border border-gray-200">
+                              <h3 class="ml-2 text-lg font-semibold text-gray-900">{{ filter.label | escape }}</h3>
+                              <div class="flex justify-center">
+                                <div class="border-b border-[#71CD13] w-55 mt-2 mb-2"></div>
+                              </div>
+                              <div class="space-y-3">
+                                {% for value in filter.values %}
+                                  <label class="flex items-center gap-3 py-1.5 cursor-pointer group">
+                                    <input
+                                      type="checkbox"
+                                      class="radio-md"
+                                      data-facet-checkbox
+                                      data-url-to-add="{{ value.url_to_add }}"
+                                      data-url-to-remove="{{ value.url_to_remove }}"
+                                      {% if value.active %}
+                                      checked{% endif %}
+                                      {% if value.count == 0 and value.active == false %}
+                                      disabled{% endif %} />
+                                    <span class="text-[#797979] text-sm group-hover:text-[#71cd13] transition-colors">
+                                      {{ value.label | escape }}
+                                      {% if value.count > 0 %}
+                                        <span class="text-xs text-gray-400">({{ value.count }})</span>
+                                      {% endif %}
+                                    </span>
+                                  </label>
+                                {% endfor %}
+                              </div>
+                            </div>
+                          {% when 'price_range' %}
+                            <div class="p-5 border border-gray-200">
+                              <h3 class="ml-2 text-lg font-semibold text-gray-900">{{ filter.label | default: section.settings.heading_price | default: 'Price Filter' }}</h3>
+                              <div class="flex justify-center">
+                                <div class="border-b border-[#71CD13] w-55 mt-2 mb-2"></div>
+                              </div>
+                              {% assign min_value = 0 %}
+                              {% assign max_value = filter.range_max %}
+                              {% if filter.min_value.value %}
+                                {% assign min_value = filter.min_value.value %}{% endif %}
+                              {% if filter.max_value.value %}
+                                {% assign max_value = filter.max_value.value %}{% endif %}
+                              <div
+                                id="price-box"
+                                class="range-box"
+                                data-max="{{ filter.range_max }}">
+                                <div class="range-wrap relative h-2 bg-white rounded">
+                                  <div class="absolute left-0 right-0 top-0 h-[7px] bg-[#E8F0F2] rounded"></div>
+                                  <div
+                                    id="price-progress"
+                                    class="range-progress absolute top-0 h-[7px] bg-transparent rounded"
+                                    style="left:0%; width:100%"></div>
+                                  <input
+                                    type="range"
+                                    id="price-min"
+                                    min="0"
+                                    max="{{ filter.range_max }}"
+                                    step="1"
+                                    value="{{ min_value }}"
+                                    class="range-input min z-99">
+                                  <input
+                                    type="range"
+                                    id="price-max"
+                                    min="0"
+                                    max="{{ filter.range_max }}"
+                                    step="1"
+                                    value="{{ max_value }}"
+                                    class="range-input max">
+                                </div>
+                                <p class="mt-4 text-gray-700 text-base">
+                                  Price :
+                                  <span id="price-min-label">{{ cart.currency.symbol }} {{ min_value }}</span>
+                                  -
+                                  <span id="price-max-label">{{ cart.currency.symbol }} {{ max_value }}</span>
+                                </p>
+                              </div>
+                            </div>
+                        {% endcase %}
+                      {% endfor %}
+                    {% endif %}
+                  </div>
+
+                {% when 'sidebar_color' %}
+                {%- comment -%} Filters already rendered in 'sidebar_brand' block {%- endcomment -%}
+
+                {% when 'sidebar_price' %}
+                {%- comment -%} Filters already rendered in 'sidebar_brand' block {%- endcomment -%}
+                {% endcase %}
+              {% endfor %}
+            {% else %}
+              {% comment %} Fallback: render default sidebar parts {% endcomment %}
+              {% assign sidebar_defaults = 'sidebar_categories|sidebar_brand|sidebar_color|sidebar_price' | split: '|' %}
+              {% for _t in sidebar_defaults %}
+                {% case _t %}
+                  {% when 'sidebar_categories' %}
+                    <div class="p-5 border border-gray-200">
+                      <h3 class="ml-2 text-lg font-semibold text-gray-900">{{ section.settings.heading_categories | default: 'Browse Categories' }}</h3>
+                      <div class="flex justify-center">
+                        <div class="border-b border-[#71CD13] w-55 mt-2 mb-2"></div>
+                      </div>
+                      {% if collection %}
+                        {% for sub_collection in collections %}
+                          <label class="flex items-center gap-3 py-3 cursor-pointer group">
+                            <input
+                              type="radio"
+                              name="category"
+                              value="{{ sub_collection.handle }}"
+                              class="radio-md"
+                              data-category-radio
+                              data-href="{{ sub_collection.url }}"
+                              {% if sub_collection.handle == collection.handle %}
+                              checked{% endif %} />
+                            <span class="text-[#797979] text-sm group-hover:text-[#71cd13] transition-colors">{{ sub_collection.title }}</span>
+                          </label>
+                        {% endfor %}
+                      {% else %}
+                        {% for sub_collection in collections limit: 10 %}
+                          <label class="flex items-center gap-3 py-3 cursor-pointer group">
+                            <input
+                              type="radio"
+                              name="category"
+                              value="{{ sub_collection.handle }}"
+                              class="radio-md"
+                              data-category-radio
+                              data-href="{{ sub_collection.url }}" />
+                            <span class="text-[#797979] text-sm group-hover:text-[#71cd13] transition-colors">{{ sub_collection.title }}</span>
+                          </label>
+                        {% endfor %}
+                      {% endif %}
+                    </div>
+                  {% when 'sidebar_brand' %}
+                    {% if collection.filters.size > 0 %}
+                      <div class="space-y-8">
+                        {% for filter in collection.filters %}
+                          {% case filter.type %}
+                            {% when 'list' %}
+                              <div class="p-5 border border-gray-200">
+                                <h3 class="ml-2 text-lg font-semibold text-gray-900">{{ filter.label | escape }}</h3>
+                                <div class="flex justify-center">
+                                  <div class="border-b border-[#71CD13] w-55 mt-2 mb-2"></div>
+                                </div>
+                                <div class="space-y-3">
+                                  {% for value in filter.values %}
+                                    <label class="flex items-center gap-3 py-1.5 cursor-pointer group">
+                                      <input
+                                        type="checkbox"
+                                        class="radio-md"
+                                        data-facet-checkbox
+                                        data-url-to-add="{{ value.url_to_add }}"
+                                        data-url-to-remove="{{ value.url_to_remove }}"
+                                        {% if value.active %}
+                                        checked{% endif %}
+                                        {% if value.count == 0 and value.active == false %}
+                                        disabled{% endif %} />
+                                      <span class="text-[#797979] text-sm group-hover:text-[#71cd13] transition-colors">
+                                        {{ value.label | escape }}
+                                        {% if value.count > 0 %}
+                                          <span class="text-xs text-gray-400">({{ value.count }})</span>
+                                        {% endif %}
+                                      </span>
+                                    </label>
+                                  {% endfor %}
+                                </div>
+                              </div>
+                            {% when 'price_range' %}
+                              <div class="p-5 border border-gray-200">
+                                <h3 class="ml-2 text-lg font-semibold text-gray-900">{{ filter.label | default: section.settings.heading_price | default: 'Price Filter' }}</h3>
+                                <div class="flex justify-center">
+                                  <div class="border-b border-[#71CD13] w-55 mt-2 mb-2"></div>
+                                </div>
+                                {% assign min_value = 0 %}
+                                {% assign max_value = filter.range_max %}
+                                {% if filter.min_value.value %}
+                                  {% assign min_value = filter.min_value.value %}{% endif %}
+                                {% if filter.max_value.value %}
+                                  {% assign max_value = filter.max_value.value %}{% endif %}
+                                <div
+                                  id="price-box"
+                                  class="range-box"
+                                  data-max="{{ filter.range_max }}">
+                                  <div class="range-wrap relative h-2 bg-white rounded">
+                                    <div class="absolute left-0 right-0 top-0 h-[7px] bg-[#E8F0F2] rounded"></div>
+                                    <div
+                                      id="price-progress"
+                                      class="range-progress absolute top-0 h-[7px] bg-transparent rounded"
+                                      style="left:0%; width:100%"></div>
+                                    <input
+                                      type="range"
+                                      id="price-min"
+                                      min="0"
+                                      max="{{ filter.range_max }}"
+                                      step="1"
+                                      value="{{ min_value }}"
+                                      class="range-input min z-99">
+                                    <input
+                                      type="range"
+                                      id="price-max"
+                                      min="0"
+                                      max="{{ filter.range_max }}"
+                                      step="1"
+                                      value="{{ max_value }}"
+                                      class="range-input max">
+                                  </div>
+                                  <p class="mt-4 text-gray-700 text-base">
+                                    Price :
+                                    <span id="price-min-label">{{ cart.currency.symbol }} {{ min_value }}</span>
+                                    -
+                                    <span id="price-max-label">{{ cart.currency.symbol }} {{ max_value }}</span>
+                                  </p>
+                                </div>
+                              </div>
+                          {% endcase %}
+                        {% endfor %}
+                      </div>
+                    {% endif %}
+                  {% when 'sidebar_color' %}
+                  {%- comment -%} Filters rendered above {%- endcomment -%}
+                  {% when 'sidebar_price' %}
+                  {%- comment -%} Filters rendered above {%- endcomment -%}
+                  {% endcase %}
+                {% endfor %}
+              {% endif %}
+            </div>
+          </aside>
+
+          <main class="flex-1">
+            {% if section.blocks.size > 0 %}
+              {% for block in section.blocks %}
+                {% case block.type %}
+                  {% when 'toolbar' %}
+                    <div class="bg-[#f0f2f1] p-4 mb-6 flex flex-col md:flex-row justify-between items-center gap-4" {{ block.shopify_attributes }}>
+                      <div class="flex gap-4">
+                        <div class="dd select-wide" aria-open="false">
+                          <button class="dd-btn" type="button">
+                            <span>{{ section.settings.sorting_label | default: 'Default sorting' }}</span>
+                            {% render 'icon-caret'
+                              , class: 'dd-caret' %}
+                          </button>
+                          <div class="dd-menu">
+                            {% assign sorting_opts = section.settings.sorting_options | default: 'Default sorting|Price: Low to High|Price: High to Low|Newest' | split: '|' %}
+                            {% for opt in sorting_opts %}
+                              <button
+                                type="button"
+                                class="dd-item"
+                                data-sort-option="{{ opt | escape }}">{{ opt }}</button>
+                            {% endfor %}
+                          </div>
+                        </div>
+                        <div class="dd select-narrow" aria-open="false">
+                          <button class="dd-btn" type="button">
+                            <span>{{ section.settings.show_label | default: 'Show 12' }}</span>
+                            {% render 'icon-caret'
+                              , class: 'dd-caret' %}
+                          </button>
+                          <div class="dd-menu">
+                            {% assign show_opts = section.settings.show_options | default: 'Show 12|Show 24|Show 36|Show All' | split: '|' %}
+                            {% for opt in show_opts %}
+                              <button
+                                type="button"
+                                class="dd-item"
+                                data-show-option="{{ opt | escape }}">{{ opt }}</button>
+                            {% endfor %}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                  {% when 'grid' %}
+                    {% assign requested_size = request.params.page_size | default: '12' %}
+                    {% if requested_size == 'all' %}
+                      {% assign page_size = collection.products_count %}
+                    {% else %}
+                      {% assign page_size = requested_size | plus: 0 %}
+                      {% if page_size <= 0 %}
+                        {% assign page_size = 12 %}{% endif %}
+                    {% endif %}
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" {{ block.shopify_attributes }}>
+                      {% if collection and collection.products.size > 0 %}
+                        {% for product in collection.products limit: 12 %}
+                          {% render 'product-card-small'
+                            , product: product
+                            , wrap_link: true %}
+                        {% endfor %}
+                      {% else %}
+                        <div class="col-span-3">
+                          <div class="p-8 border border-gray-200 bg-white text-center">
+                            <h3 class="text-lg font-semibold text-[#2A2A2A]">No products found</h3>
+                            <p class="mt-2 text-sm text-[#797979]">Try adjusting your filters or clearing them.</p>
+                          </div>
+                        </div>
+                      {% endif %}
+                    </div>
+
+                  {% when 'pagination' %}
+                    {% if collection %}
+                      {% paginate collection.products by page_size %}
+                        {% if paginate.pages > 1 %}
+                          <div class="mt-8 flex justify-center gap-2" {{ block.shopify_attributes }}>
+                            {% if paginate.previous %}
+                              <a href="{{ paginate.previous.url }}" class="px-4 py-2 border border-gray-300 rounded hover:bg-[#71cd13] hover:text-white transition">Previous</a>
+                            {% endif %}
+                            {% for part in paginate.parts %}
+                              {% if part.is_link %}
+                                <a href="{{ part.url }}" class="px-4 py-2 border border-gray-300 rounded hover:bg-[#71cd13] hover:text-white transition">{{ part.title }}</a>
+                              {% else %}
+                                <span class="px-4 py-2 border border-gray-300 rounded {% if part.title == paginate.current_page %}bg-[#71cd13] text-white{% endif %}">{{ part.title }}</span>
+                              {% endif %}
+                            {% endfor %}
+                            {% if paginate.next %}
+                              <a href="{{ paginate.next.url }}" class="px-4 py-2 border border-gray-300 rounded hover:bg-[#71cd13] hover:text-white transition">Next</a>
+                            {% endif %}
+                          </div>
+                        {% endif %}
+                      {% endpaginate %}
+                    {% endif %}
+                {% endcase %}
+              {% endfor %}
+            {% else %}
+              {% comment %} Fallback: toolbar + grid + pagination {% endcomment %}
+              <div class="bg-[#f0f2f1] p-4 mb-6 flex flex-col md:flex-row justify-between items-center gap-4">
                 <div class="flex gap-4">
                   <div class="dd select-wide" aria-open="false">
                     <button class="dd-btn" type="button">
                       <span>{{ section.settings.sorting_label | default: 'Default sorting' }}</span>
-                      {% render 'icon-caret', class: 'dd-caret' %}
+                      {% render 'icon-caret'
+                        , class: 'dd-caret' %}
                     </button>
                     <div class="dd-menu">
                       {% assign sorting_opts = section.settings.sorting_options | default: 'Default sorting|Price: Low to High|Price: High to Low|Newest' | split: '|' %}
                       {% for opt in sorting_opts %}
-                        <button type="button" class="dd-item" data-sort-option="{{ opt | escape }}">{{ opt }}</button>
+                        <button
+                          type="button"
+                          class="dd-item"
+                          data-sort-option="{{ opt | escape }}">{{ opt }}</button>
                       {% endfor %}
                     </div>
                   </div>
                   <div class="dd select-narrow" aria-open="false">
                     <button class="dd-btn" type="button">
                       <span>{{ section.settings.show_label | default: 'Show 12' }}</span>
-                      {% render 'icon-caret', class: 'dd-caret' %}
+                      {% render 'icon-caret'
+                        , class: 'dd-caret' %}
                     </button>
                     <div class="dd-menu">
                       {% assign show_opts = section.settings.show_options | default: 'Show 12|Show 24|Show 36|Show All' | split: '|' %}
                       {% for opt in show_opts %}
-                        <button type="button" class="dd-item" data-show-option="{{ opt | escape }}">{{ opt }}</button>
+                        <button
+                          type="button"
+                          class="dd-item"
+                          data-show-option="{{ opt | escape }}">{{ opt }}</button>
                       {% endfor %}
                     </div>
                   </div>
                 </div>
               </div>
-
-            {% when 'grid' %}
               {% assign requested_size = request.params.page_size | default: '12' %}
               {% if requested_size == 'all' %}
                 {% assign page_size = collection.products_count %}
               {% else %}
                 {% assign page_size = requested_size | plus: 0 %}
-                {% if page_size <= 0 %}{% assign page_size = 12 %}{% endif %}
+                {% if page_size <= 0 %}
+                  {% assign page_size = 12 %}{% endif %}
               {% endif %}
-              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" {{ block.shopify_attributes }}>
+              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {% if collection and collection.products.size > 0 %}
                   {% for product in collection.products limit: 12 %}
-                    {% render 'product-card-small', product: product, wrap_link: true %}
+                    {% render 'product-card-small'
+                      , product: product
+                      , wrap_link: true %}
                   {% endfor %}
                 {% else %}
                   <div class="col-span-3">
@@ -213,12 +433,10 @@
                   </div>
                 {% endif %}
               </div>
-
-            {% when 'pagination' %}
               {% if collection %}
                 {% paginate collection.products by page_size %}
                   {% if paginate.pages > 1 %}
-                    <div class="mt-8 flex justify-center gap-2" {{ block.shopify_attributes }}>
+                    <div class="mt-8 flex justify-center gap-2">
                       {% if paginate.previous %}
                         <a href="{{ paginate.previous.url }}" class="px-4 py-2 border border-gray-300 rounded hover:bg-[#71cd13] hover:text-white transition">Previous</a>
                       {% endif %}
@@ -236,644 +454,629 @@
                   {% endif %}
                 {% endpaginate %}
               {% endif %}
-          {% endcase %}
-          {% endfor %}
-        {% else %}
-          {% comment %} Fallback: toolbar + grid + pagination {% endcomment %}
-          <div class="bg-[#f0f2f1] p-4 mb-6 flex flex-col md:flex-row justify-between items-center gap-4">
-            <div class="flex gap-4">
-              <div class="dd select-wide" aria-open="false">
-                <button class="dd-btn" type="button">
-                  <span>{{ section.settings.sorting_label | default: 'Default sorting' }}</span>
-                  {% render 'icon-caret', class: 'dd-caret' %}
-                </button>
-                <div class="dd-menu">
-                  {% assign sorting_opts = section.settings.sorting_options | default: 'Default sorting|Price: Low to High|Price: High to Low|Newest' | split: '|' %}
-                  {% for opt in sorting_opts %}
-                    <button type="button" class="dd-item" data-sort-option="{{ opt | escape }}">{{ opt }}</button>
-                  {% endfor %}
-                </div>
-              </div>
-              <div class="dd select-narrow" aria-open="false">
-                <button class="dd-btn" type="button">
-                  <span>{{ section.settings.show_label | default: 'Show 12' }}</span>
-                  {% render 'icon-caret', class: 'dd-caret' %}
-                </button>
-                <div class="dd-menu">
-                  {% assign show_opts = section.settings.show_options | default: 'Show 12|Show 24|Show 36|Show All' | split: '|' %}
-                  {% for opt in show_opts %}
-                    <button type="button" class="dd-item" data-show-option="{{ opt | escape }}">{{ opt }}</button>
-                  {% endfor %}
-                </div>
-              </div>
-            </div>
-          </div>
-          {% assign requested_size = request.params.page_size | default: '12' %}
-          {% if requested_size == 'all' %}
-            {% assign page_size = collection.products_count %}
-          {% else %}
-            {% assign page_size = requested_size | plus: 0 %}
-            {% if page_size <= 0 %}{% assign page_size = 12 %}{% endif %}
-          {% endif %}
-          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {% if collection and collection.products.size > 0 %}
-              {% for product in collection.products limit: 12 %}
-                {% render 'product-card-small', product: product, wrap_link: true %}
-              {% endfor %}
-            {% else %}
-              <div class="col-span-3">
-                <div class="p-8 border border-gray-200 bg-white text-center">
-                  <h3 class="text-lg font-semibold text-[#2A2A2A]">No products found</h3>
-                  <p class="mt-2 text-sm text-[#797979]">Try adjusting your filters or clearing them.</p>
-                </div>
-              </div>
             {% endif %}
-          </div>
-          {% if collection %}
-            {% paginate collection.products by page_size %}
-              {% if paginate.pages > 1 %}
-                <div class="mt-8 flex justify-center gap-2">
-                  {% if paginate.previous %}
-                    <a href="{{ paginate.previous.url }}" class="px-4 py-2 border border-gray-300 rounded hover:bg-[#71cd13] hover:text-white transition">Previous</a>
-                  {% endif %}
-                  {% for part in paginate.parts %}
-                    {% if part.is_link %}
-                      <a href="{{ part.url }}" class="px-4 py-2 border border-gray-300 rounded hover:bg-[#71cd13] hover:text-white transition">{{ part.title }}</a>
-                    {% else %}
-                      <span class="px-4 py-2 border border-gray-300 rounded {% if part.title == paginate.current_page %}bg-[#71cd13] text-white{% endif %}">{{ part.title }}</span>
-                    {% endif %}
-                  {% endfor %}
-                  {% if paginate.next %}
-                    <a href="{{ paginate.next.url }}" class="px-4 py-2 border border-gray-300 rounded hover:bg-[#71cd13] hover:text-white transition">Next</a>
-                  {% endif %}
-                </div>
-              {% endif %}
-            {% endpaginate %}
-          {% endif %}
-        {% endif %}
-      </main>
-    </div>
-  </div>
-</section>
+          </main>
+        </div>
+      </div>
+    </section>
 
-{% stylesheet %}
-  input[type="range"]::-webkit-slider-thumb {
-    appearance: none;
-    width: 20px;
-    height: 20px;
-    background: #71cd13;
-    border-radius: 50%;
-    cursor: pointer;
-  }
+    {% stylesheet %}
+      input[type="range"]::-webkit-slider-thumb {
+        appearance: none;
+        width: 20px;
+        height: 20px;
+        background: #71cd13;
+        border-radius: 50%;
+        cursor: pointer;
+      }
 
-  input[type="range"]::-moz-range-thumb {
-    width: 20px;
-    height: 20px;
-    background: #71cd13;
-    border-radius: 50%;
-    border: none;
-    cursor: pointer;
-  }
+      input[type="range"]::-moz-range-thumb {
+        width: 20px;
+        height: 20px;
+        background: #71cd13;
+        border-radius: 50%;
+        border: none;
+        cursor: pointer;
+      }
 
-  /* Medium custom radio to match the design */
-  .radio-md {
-    appearance: none;
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    width: 13px;
-    height: 13px;
-    border: 1px solid #bdbdbd;
-    /* grey ring */
-    border-radius: 50%;
-    display: inline-block;
-    position: relative;
-    background-color: transparent;
-    cursor: pointer;
-    transition: all 0.2s ease;
-  }
+      /* Medium custom radio to match the design */
+      .radio-md {
+        appearance: none;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        width: 13px;
+        height: 13px;
+        border: 1px solid #bdbdbd;
+        /* grey ring */
+        border-radius: 50%;
+        display: inline-block;
+        position: relative;
+        background-color: transparent;
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
 
-  /* Checked state: green fill */
-  .radio-md:checked {
-    background-color: #71cd13;
-    border-color: #71cd13;
-  }
+      /* Checked state: green fill */
+      .radio-md:checked {
+        background-color: #71cd13;
+        border-color: #71cd13;
+      }
 
-  /* White dot at bottom */
-  .radio-md:checked::after {
-    content: '';
-    position: absolute;
-    bottom: 1px;
-    left: 55%;
-    transform: translateX(-50%);
-    width: 4px;
-    height: 4px;
-    background-color: #ffffff;
-    border-radius: 50%;
-  }
+      /* White dot at bottom */
+      .radio-md:checked::after {
+        content: '';
+        position: absolute;
+        bottom: 1px;
+        left: 55%;
+        transform: translateX(-50%);
+        width: 4px;
+        height: 4px;
+        background-color: #ffffff;
+        border-radius: 50%;
+      }
 
-  /* Custom dropdown (button + menu) */
-  .dd {
-    position: relative;
-    display: inline-block;
-  }
-  .dd .dd-btn {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 24px;
-    min-width: 240px;
-    height: 44px;
-    padding: 0 16px;
-    background: #fff;
-    color: #666;
-    font-size: 15px;
-    line-height: 1;
-    border: 1px solid #e3e3e3;
-    border-radius: 3px;
-  }
-  .dd.select-narrow .dd-btn {
-    min-width: 120px;
-  }
-  .dd .dd-btn:focus {
-    outline: none;
-    box-shadow: 0 0 0 2px rgba(113, 205, 19, 0.18);
-    border-color: #cfd0d2;
-  }
-  /* Caret icon from snippet */
-  .dd .dd-caret {
-    display: inline-block;
-    width: 12px;
-    height: 12px;
-    color: #6f6f6f;
-    /* for currentColor-based svgs */
-    transition: transform 180ms ease
-    , color 180ms ease;
-  }
-  .dd .dd-btn[aria-expanded="true"] .dd-caret {
-    transform: rotate(180deg);
-    color: #444444;
-  }
-  .dd .dd-menu {
-    position: absolute;
-    left: 0;
-    top: calc(100% + 2px);
-    z-index: 30;
-    min-width: 100%;
-    background: #fff;
-    border: 1px solid #e6e6e6;
-    border-radius: 3px;
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
-    padding: 6px 0;
-    transform-origin: top left;
-    display: none;
-  }
-  .dd[aria-open="true"] .dd-menu { display: block; }
-  .dd .dd-item {
-    display: block;
-    width: 100%;
-    text-align: left;
-    padding: 10px 16px;
-    font-size: 14px;
-    color: #444;
-  }
-  .dd .dd-item:hover {
-    background: #f7f7f7;
-    color: #111;
-  }
+      /* Custom dropdown (button + menu) */
+      .dd {
+        position: relative;
+        display: inline-block;
+      }
+      .dd .dd-btn {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 24px;
+        min-width: 240px;
+        height: 44px;
+        padding: 0 16px;
+        background: #fff;
+        color: #666;
+        font-size: 15px;
+        line-height: 1;
+        border: 1px solid #e3e3e3;
+        border-radius: 3px;
+      }
+      .dd.select-narrow .dd-btn {
+        min-width: 120px;
+      }
+      .dd .dd-btn:focus {
+        outline: none;
+        box-shadow: 0 0 0 2px rgba(113, 205, 19, 0.18);
+        border-color: #cfd0d2;
+      }
+      /* Caret icon from snippet */
+      .dd .dd-caret {
+        display: inline-block;
+        width: 12px;
+        height: 12px;
+        color: #6f6f6f;
+        /* for currentColor-based svgs */
+        transition: transform 180ms ease
+        , color 180ms ease;
+      }
+      .dd .dd-btn[aria-expanded="true"] .dd-caret {
+        transform: rotate(180deg);
+        color: #444444;
+      }
+      .dd .dd-menu {
+        position: absolute;
+        left: 0;
+        top: calc(100% + 2px);
+        z-index: 30;
+        min-width: 100%;
+        background: #fff;
+        border: 1px solid #e6e6e6;
+        border-radius: 3px;
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+        padding: 6px 0;
+        transform-origin: top left;
+        display: none;
+      }
+      .dd[aria-open="true"] .dd-menu {
+        display: block;
+      }
+      .dd .dd-item {
+        display: block;
+        width: 100%;
+        text-align: left;
+        padding: 10px 16px;
+        font-size: 14px;
+        color: #444;
+      }
+      .dd .dd-item:hover {
+        background: #f7f7f7;
+        color: #111;
+      }
 
-  /* Highlight selected dropdown item */
-  .dd .dd-item.is-active {
-    background: #F0F2F1;
-    font-weight: 600;
-  }
+      /* Highlight selected dropdown item */
+      .dd .dd-item.is-active {
+        background: #F0F2F1;
+        font-weight: 600;
+      }
 
-  /* Dual range styles */
-  .range-box .range-wrap {
-    margin-top: 10px;
-    position: relative;
-  }
-  .range-box .range-input {
-    -webkit-appearance: none;
-    appearance: none;
-    position: absolute;
-    left: 0;
-    right: 0;
-    width: 100%;
-    height: 7px;
-    z-index: 3;
-    border-radius: 10px;
-    background: transparent;
-    pointer-events: none;
-  }
-  /* ensure min above max by default */
-  .range-box .range-input.min {
-    z-index: 4;
-  }
-  .range-box .range-input.max {
-    z-index: 3;
-  }
-  .range-box .range-input::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    appearance: none;
-    pointer-events: auto;
-    width: 18px;
-    height: 18px;
-    background: #71cd13;
-    border-radius: 9999px;
-    z-index: 5;
-    border: 3px solid #71cd13;
-    cursor: pointer;
-  }
-  .range-box .range-input::-moz-range-thumb {
-    pointer-events: auto;
-    width: 18px;
-    height: 18px;
-    z-index: 5;
-    background: #71cd13;
-    border: 3px solid #71cd13;
-    border-radius: 9999px;
-    cursor: pointer;
-  }
-  .range-box .range-progress {
-    pointer-events: none;
-    background: transparent;
-  }
+      /* Dual range styles */
+      .range-box .range-wrap {
+        margin-top: 10px;
+        position: relative;
+      }
+      .range-box .range-input {
+        -webkit-appearance: none;
+        appearance: none;
+        position: absolute;
+        left: 0;
+        right: 0;
+        width: 100%;
+        height: 7px;
+        z-index: 3;
+        border-radius: 10px;
+        background: transparent;
+        pointer-events: none;
+      }
+      /* ensure min above max by default */
+      .range-box .range-input.min {
+        z-index: 4;
+      }
+      .range-box .range-input.max {
+        z-index: 3;
+      }
+      .range-box .range-input::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        pointer-events: auto;
+        width: 18px;
+        height: 18px;
+        background: #71cd13;
+        border-radius: 9999px;
+        z-index: 5;
+        border: 3px solid #71cd13;
+        cursor: pointer;
+      }
+      .range-box .range-input::-moz-range-thumb {
+        pointer-events: auto;
+        width: 18px;
+        height: 18px;
+        z-index: 5;
+        background: #71cd13;
+        border: 3px solid #71cd13;
+        border-radius: 9999px;
+        cursor: pointer;
+      }
+      .range-box .range-progress {
+        pointer-events: none;
+        background: transparent;
+      }
 
-{% endstylesheet %}
+    {% endstylesheet %}
 
-{% javascript %}
-  document.addEventListener('DOMContentLoaded', function() {
-    var root = document.getElementById('shop-category');
-    var currentCollectionUrl = root
-      ? root.dataset.collectionUrl
-      : '';
+    {% javascript %}
+      document.addEventListener('DOMContentLoaded', function() {
+        var root = document.getElementById('shop-category');
+        var currentCollectionUrl = root
+          ? root.dataset.collectionUrl
+          : '';
 
 // Helper to preserve query params
-    function setSearchParams(params) {
-      var url = new URL(window.location.href);
-      Object.keys(params).forEach(function(k) {
-        if (params[k] === null) {
-          url.searchParams.delete(k);
-        } else {
-          url.searchParams.set(k, params[k]);
+        function setSearchParams(params) {
+          var url = new URL(window.location.href);
+          Object.keys(params).forEach(function(k) {
+            if (params[k] === null) {
+              url.searchParams.delete(k);
+            } else {
+              url.searchParams.set(k, params[k]);
+            }
+          });
+          window.location.href = url.toString();
         }
-      });
-      window.location.href = url.toString();
-    }
-      // helper to set or clear a single-value filter param
-      function setSingleFilterParam(name, value){
-        var url = new URL(window.location.href);
-        // clear existing value for single filter
-        url.searchParams.delete(name);
-        if (value) url.searchParams.set(name, value);
-        window.location.href = url.toString();
-      }
+
+// helper to set or clear a single-value filter param
+        function setSingleFilterParam(name, value) {
+          var url = new URL(window.location.href);
+
+// clear existing value for single filter
+          url.searchParams.delete(name);
+          if (value) 
+            url.searchParams.set(name, value);
+          
+
+          window.location.href = url.toString();
+        }
 
 // Category change → navigate to collection URL
-    document.querySelectorAll('[data-category-radio]').forEach(function(el) {
-      el.addEventListener('change', function() {
-        if (el.checked && el.dataset.href) {
-          window.location.href = el.dataset.href;
-        }
-      });
-    });
-
-// Brand change → navigate to tagged URL
-    document.querySelectorAll('[data-brand-radio]').forEach(function(el) {
-      el.addEventListener('change', function() {
-        if (el.checked && el.dataset.href) {
-          window.location.href = el.dataset.href;
-        }
-      });
-    });
-
-// Color change → navigate to tagged URL
-    document.querySelectorAll('[data-color-radio]').forEach(function(el) {
-      el.addEventListener('change', function() {
-        if (el.checked && el.dataset.href) {
-          window.location.href = el.dataset.href;
-        }
-      });
-    });
-
-// Tag radios/checkboxes → navigate using tag URLs
-    function navigateWithTags() {
-      var activeRadios = Array.from(document.querySelectorAll('[data-tag-radio]:checked')).map(function(i) {
-        return i.dataset.tag;
-      });
-      var activeChecks = Array.from(document.querySelectorAll('[data-tag-checkbox]:checked')).map(function(i) {
-        return i.dataset.tag;
-      });
-      var tags = activeRadios.concat(activeChecks).filter(Boolean);
-      if (tags.length) {
-        var path = currentCollectionUrl + '/' + tags.map(encodeURIComponent).join('+');
-        window.location.href = path;
-      }
-    }
-    document.querySelectorAll('[data-tag-radio]').forEach(function(el) {
-      el.addEventListener('change', navigateWithTags);
-    });
-    document.querySelectorAll('[data-tag-checkbox]').forEach(function(el) {
-      el.addEventListener('change', navigateWithTags);
-    });
-
-// Brand/color filter radios using official filter params
-    document.querySelectorAll('input[data-filter-name]').forEach(function(el){
-      el.addEventListener('change', function(){
-        if (!el.checked) return;
-        var name = el.getAttribute('data-filter-name');
-        var value = el.getAttribute('data-filter-value');
-        setSingleFilterParam(name, value);
-      });
-    });
-
-// Pre-check radios from URL
-    (function presetFilterRadios(){
-      var url = new URL(window.location.href);
-      document.querySelectorAll('input[data-filter-name]').forEach(function(el){
-        var name = el.getAttribute('data-filter-name');
-        var val = url.searchParams.get(name);
-        if (val && el.getAttribute('data-filter-value') === val){
-          el.checked = true;
-        }
-      });
-    })();
-
-// Price filter: dual range (min & max)
-    (function initDualRange() {
-      var box = document.getElementById('price-box');
-      if (! box) return;
-      
-
-      var maxAllowed = parseInt(box.dataset.max || '1000', 10);
-      var minInput = document.getElementById('price-min');
-      var maxInput = document.getElementById('price-max');
-      var prog = document.getElementById('price-progress');
-      var minLabel = document.getElementById('price-min-label');
-      var maxLabel = document.getElementById('price-max-label');
-
-      function setFromParams() {
-        var url = new URL(window.location.href);
-        var gte = parseInt(url.searchParams.get('filter.v.price.gte') || '0', 10);
-        var lte = parseInt(url.searchParams.get('filter.v.price.lte') || String(maxAllowed), 10);
-        if (!isNaN(gte)) 
-          minInput.value = Math.max(0, Math.min(maxAllowed, gte));
-        
-
-        if (!isNaN(lte)) 
-          maxInput.value = Math.max(0, Math.min(maxAllowed, lte));
-        
-      }
-
-      function updateUI() {
-        var a = parseInt(minInput.value, 10),
-          b = parseInt(maxInput.value, 10);
-        var minVal = Math.min(a, b),
-          maxVal = Math.max(a, b);
-        minInput.value = minVal;
-        maxInput.value = maxVal;
-        var left = (minVal / maxAllowed) * 100;
-        var width = ((maxVal - minVal) / maxAllowed) * 100;
-        prog.style.left = left + '%';
-        prog.style.width = width + '%';
-        minLabel.textContent = 'Rs ' + minVal;
-        maxLabel.textContent = 'Rs ' + maxVal;
-      }
-
-      function submitParams() {
-        var minVal = parseInt(minInput.value, 10);
-        var maxVal = parseInt(maxInput.value, 10);
-        setSearchParams({'filter.v.price.gte': minVal, 'filter.v.price.lte': maxVal});
-      }
-
-      setFromParams();
-      updateUI();
-      [
-        'input',
-        'change',
-        'pointerdown',
-        'mousedown',
-        'touchstart'
-      ].forEach(function(evt) {
-        minInput.addEventListener(evt, function() {
-
-// bring min knob to front when overlapping
-          minInput.style.zIndex = '1000';
-          maxInput.style.zIndex = '10';
-          updateUI();
-        });
-        maxInput.addEventListener(evt, function() {
-          maxInput.style.zIndex = '1000';
-          minInput.style.zIndex = '10';
-          updateUI();
-        });
-      });
-      minInput.addEventListener('change', submitParams);
-      maxInput.addEventListener('change', submitParams);
-    })();
-
-// Initialize dropdowns (no Alpine)
-    (function initCustomDropdowns(){
-      document.querySelectorAll('.dd').forEach(function(dd){
-        var btn = dd.querySelector('.dd-btn');
-        var menu = dd.querySelector('.dd-menu');
-        if (!btn || !menu) return;
-        btn.addEventListener('click', function(e){
-          e.stopPropagation();
-          var open = dd.getAttribute('aria-open') === 'true';
-          dd.setAttribute('aria-open', open ? 'false' : 'true');
-        });
-        document.addEventListener('click', function(e){
-          if (!dd.contains(e.target)) dd.setAttribute('aria-open', 'false');
-        });
-        dd.querySelectorAll('.dd-item').forEach(function(item){
-          item.addEventListener('click', function(){
-            var label = item.textContent.trim();
-            var span = dd.querySelector('.dd-btn span');
-            if (span) span.textContent = label;
-            dd.setAttribute('aria-open', 'false');
+        document.querySelectorAll('[data-category-radio]').forEach(function(el) {
+          el.addEventListener('change', function() {
+            if (el.checked && el.dataset.href) {
+              window.location.href = el.dataset.href;
+            }
           });
         });
-      });
-    })();
+
+// Brand change → navigate to tagged URL
+        document.querySelectorAll('[data-brand-radio]').forEach(function(el) {
+          el.addEventListener('change', function() {
+            if (el.checked && el.dataset.href) {
+              window.location.href = el.dataset.href;
+            }
+          });
+        });
+
+// Facet list filter checkboxes (Search & Discovery)
+        document.querySelectorAll('input[data-facet-checkbox]').forEach(function(el) {
+          el.addEventListener('change', function() {
+            var url = el.checked
+              ? el.getAttribute('data-url-to-add')
+              : el.getAttribute('data-url-to-remove');
+            if (url) 
+              window.location.href = url;
+            
+
+          });
+        });
+
+// Tag radios/checkboxes → navigate using tag URLs
+        function navigateWithTags() {
+          var activeRadios = Array.from(document.querySelectorAll('[data-tag-radio]:checked')).map(function(i) {
+            return i.dataset.tag;
+          });
+          var activeChecks = Array.from(document.querySelectorAll('[data-tag-checkbox]:checked')).map(function(i) {
+            return i.dataset.tag;
+          });
+          var tags = activeRadios.concat(activeChecks).filter(Boolean);
+          if (tags.length) {
+            var path = currentCollectionUrl + '/' + tags.map(encodeURIComponent).join('+');
+            window.location.href = path;
+          }
+        }
+        document.querySelectorAll('[data-tag-radio]').forEach(function(el) {
+          el.addEventListener('change', navigateWithTags);
+        });
+        document.querySelectorAll('[data-tag-checkbox]').forEach(function(el) {
+          el.addEventListener('change', navigateWithTags);
+        });
+
+// Brand/color filter radios using official filter params
+        document.querySelectorAll('input[data-filter-name]').forEach(function(el) {
+          el.addEventListener('change', function() {
+            if (! el.checked) return;
+            
+
+            var name = el.getAttribute('data-filter-name');
+            var value = el.getAttribute('data-filter-value');
+            setSingleFilterParam(name, value);
+          });
+        });
+
+// Pre-check radios from URL
+        (function presetFilterRadios() {
+          var url = new URL(window.location.href);
+          document.querySelectorAll('input[data-filter-name]').forEach(function(el) {
+            var name = el.getAttribute('data-filter-name');
+            var val = url.searchParams.get(name);
+            if (val && el.getAttribute('data-filter-value') === val) {
+              el.checked = true;
+            }
+          });
+        })();
+
+// Price filter: dual range (min & max)
+        (function initDualRange() {
+          var box = document.getElementById('price-box');
+          if (! box) return;
+          
+
+
+          var maxAllowed = parseInt(box.dataset.max || '1000', 10);
+          var minInput = document.getElementById('price-min');
+          var maxInput = document.getElementById('price-max');
+          var prog = document.getElementById('price-progress');
+          var minLabel = document.getElementById('price-min-label');
+          var maxLabel = document.getElementById('price-max-label');
+
+          function setFromParams() {
+            var url = new URL(window.location.href);
+            var gte = parseInt(url.searchParams.get('filter.v.price.gte') || '0', 10);
+            var lte = parseInt(url.searchParams.get('filter.v.price.lte') || String(maxAllowed), 10);
+            if (!isNaN(gte)) 
+              minInput.value = Math.max(0, Math.min(maxAllowed, gte));
+            
+
+
+            if (!isNaN(lte)) 
+              maxInput.value = Math.max(0, Math.min(maxAllowed, lte));
+            
+
+
+          }
+
+          function updateUI() {
+            var a = parseInt(minInput.value, 10),
+              b = parseInt(maxInput.value, 10);
+            var minVal = Math.min(a, b),
+              maxVal = Math.max(a, b);
+            minInput.value = minVal;
+            maxInput.value = maxVal;
+            var left = (minVal / maxAllowed) * 100;
+            var width = ((maxVal - minVal) / maxAllowed) * 100;
+            prog.style.left = left + '%';
+            prog.style.width = width + '%';
+            minLabel.textContent = 'Rs ' + minVal;
+            maxLabel.textContent = 'Rs ' + maxVal;
+          }
+
+          function submitParams() {
+            var minVal = parseInt(minInput.value, 10);
+            var maxVal = parseInt(maxInput.value, 10);
+            setSearchParams({'filter.v.price.gte': minVal, 'filter.v.price.lte': maxVal});
+          }
+
+          setFromParams();
+          updateUI();
+          [
+            'input',
+            'change',
+            'pointerdown',
+            'mousedown',
+            'touchstart'
+          ].forEach(function(evt) {
+            minInput.addEventListener(evt, function() {
+
+// bring min knob to front when overlapping
+              minInput.style.zIndex = '1000';
+              maxInput.style.zIndex = '10';
+              updateUI();
+            });
+            maxInput.addEventListener(evt, function() {
+              maxInput.style.zIndex = '1000';
+              minInput.style.zIndex = '10';
+              updateUI();
+            });
+          });
+          minInput.addEventListener('change', submitParams);
+          maxInput.addEventListener('change', submitParams);
+        })();
+
+// Initialize dropdowns (no Alpine)
+        (function initCustomDropdowns() {
+          document.querySelectorAll('.dd').forEach(function(dd) {
+            var btn = dd.querySelector('.dd-btn');
+            var menu = dd.querySelector('.dd-menu');
+            if (! btn || ! menu) return;
+            
+
+            btn.addEventListener('click', function(e) {
+              e.stopPropagation();
+              var open = dd.getAttribute('aria-open') === 'true';
+              dd.setAttribute(
+                'aria-open',
+                open
+                  ? 'false'
+                  : 'true'
+              );
+            });
+            document.addEventListener('click', function(e) {
+              if (! dd.contains(e.target)) 
+                dd.setAttribute('aria-open', 'false');
+              
+
+            });
+            dd.querySelectorAll('.dd-item').forEach(function(item) {
+              item.addEventListener('click', function() {
+                var label = item.textContent.trim();
+                var span = dd.querySelector('.dd-btn span');
+                if (span) 
+                  span.textContent = label;
+                
+
+                dd.setAttribute('aria-open', 'false');
+              });
+            });
+          });
+        })();
 
 // Map sort labels → Shopify sort codes
-    var sortMap = {
-      'Default sorting': null,
-      'Price: Low to High': 'price-ascending',
-      'Price: High to Low': 'price-descending',
-      'Newest': 'created-descending'
-    };
+        var sortMap = {
+          'Default sorting': null,
+          'Price: Low to High': 'price-ascending',
+          'Price: High to Low': 'price-descending',
+          'Newest': 'created-descending'
+        };
 
 // Global functions for Alpine.js to call
-    window.handleSortChange = function(label) {
-      var code = sortMap[label] || null;
-      setSearchParams({'sort_by': code});
-    };
-
-    window.handleShowChange = function(label) {
-      var m = label.match(/(\d+)/);
-      var size = m
-        ? m[1]
-        : 'all';
-      setSearchParams({'page_size': size});
-    };
-
-// Fallback for non-Alpine.js environments
-    document.querySelectorAll('.dd.select-wide .dd-item').forEach(function(it) {
-      it.addEventListener('click', function(e) {
-        if (!window.Alpine) {
-          var label = it.textContent.trim();
+        window.handleSortChange = function(label) {
           var code = sortMap[label] || null;
           setSearchParams({'sort_by': code});
-        }
-      });
-    });
+        };
 
-// Page size menu → update page_size param
-    document.querySelectorAll('.dd.select-narrow .dd-item').forEach(function(it) {
-      it.addEventListener('click', function(e) {
-        if (!window.Alpine) {
-          var label = it.textContent.trim();
+        window.handleShowChange = function(label) {
           var m = label.match(/(\d+)/);
           var size = m
             ? m[1]
             : 'all';
           setSearchParams({'page_size': size});
-        }
-      });
-    });
+        };
+
+// Fallback for non-Alpine.js environments
+        document.querySelectorAll('.dd.select-wide .dd-item').forEach(function(it) {
+          it.addEventListener('click', function(e) {
+            if (!window.Alpine) {
+              var label = it.textContent.trim();
+              var code = sortMap[label] || null;
+              setSearchParams({'sort_by': code});
+            }
+          });
+        });
+
+// Page size menu → update page_size param
+        document.querySelectorAll('.dd.select-narrow .dd-item').forEach(function(it) {
+          it.addEventListener('click', function(e) {
+            if (!window.Alpine) {
+              var label = it.textContent.trim();
+              var m = label.match(/(\d+)/);
+              var size = m
+                ? m[1]
+                : 'all';
+              setSearchParams({'page_size': size});
+            }
+          });
+        });
 
 // Initialize dropdown labels and active items from URL
-    (function initDropdownLabels() {
-      var url = new URL(window.location.href);
-      var sort = url.searchParams.get('sort_by');
-      var sortReverse = {
-        'price-ascending': 'Price: Low to High',
-        'price-descending': 'Price: High to Low',
-        'created-descending': 'Newest'
-      };
-      var sortLabel = sortReverse[sort] || 'Default sorting';
-      var sortDd = document.querySelector('.dd.select-wide');
-      if (sortDd) {
-        var btn = sortDd.querySelector('.dd-btn span');
-        if (btn) 
-          btn.textContent = sortLabel;
-        
+        (function initDropdownLabels() {
+          var url = new URL(window.location.href);
+          var sort = url.searchParams.get('sort_by');
+          var sortReverse = {
+            'price-ascending': 'Price: Low to High',
+            'price-descending': 'Price: High to Low',
+            'created-descending': 'Newest'
+          };
+          var sortLabel = sortReverse[sort] || 'Default sorting';
+          var sortDd = document.querySelector('.dd.select-wide');
+          if (sortDd) {
+            var btn = sortDd.querySelector('.dd-btn span');
+            if (btn) 
+              btn.textContent = sortLabel;
+            
 
 
-        sortDd.querySelectorAll('.dd-item').forEach(function(it) {
-          it.classList.toggle('is-active', it.textContent.trim() === sortLabel);
-        });
-      }
+            sortDd.querySelectorAll('.dd-item').forEach(function(it) {
+              it.classList.toggle('is-active', it.textContent.trim() === sortLabel);
+            });
+          }
 
-      var size = url.searchParams.get('page_size');
-      var sizeLabel = size === 'all'
-        ? 'Show All'
-        : (
-          size
-            ? ('Show ' + size)
-            : 'Show 12'
-        );
-      var sizeDd = document.querySelector('.dd.select-narrow');
-      if (sizeDd) {
-        var b2 = sizeDd.querySelector('.dd-btn span');
-        if (b2) 
-          b2.textContent = sizeLabel;
-        
+          var size = url.searchParams.get('page_size');
+          var sizeLabel = size === 'all'
+            ? 'Show All'
+            : (
+              size
+                ? ('Show ' + size)
+                : 'Show 12'
+            );
+          var sizeDd = document.querySelector('.dd.select-narrow');
+          if (sizeDd) {
+            var b2 = sizeDd.querySelector('.dd-btn span');
+            if (b2) 
+              b2.textContent = sizeLabel;
+            
 
 
-        sizeDd.querySelectorAll('.dd-item').forEach(function(it) {
-          it.classList.toggle('is-active', it.textContent.trim() === sizeLabel);
-        });
-      }
-    })();
-  });
-{% endjavascript %}
+            sizeDd.querySelectorAll('.dd-item').forEach(function(it) {
+              it.classList.toggle('is-active', it.textContent.trim() === sizeLabel);
+            });
+          }
+        })();
+      });
+    {% endjavascript %}
 
-{% schema %}
-  {
-    "name": "Shop Category",
-    "tag": "section",
-    "class": "shop-category-section",
-    "settings": [
-      {
-        "type": "text",
-        "id": "heading_categories",
-        "label": "Categories heading",
-        "default": "Browse Categories"
-      },
-      {
-        "type": "text",
-        "id": "heading_brand",
-        "label": "Brand heading",
-        "default": "Product Brand"
-      },
-      {
-        "type": "text",
-        "id": "heading_color",
-        "label": "Color heading",
-        "default": "Color Filter"
-      },
-      {
-        "type": "text",
-        "id": "heading_price",
-        "label": "Price heading",
-        "default": "Price Filter"
-      }, {
-        "type": "textarea",
-        "id": "brands_list",
-        "label": "Brands (comma separated)",
-        "default": "Apple,Asus,Gionee,Micromax,Samsung"
-      }, {
-        "type": "textarea",
-        "id": "colors_list",
-        "label": "Colors (comma separated)",
-        "default": "Black,Black Leather,Black with red,Gold,Spacegrey"
-      }, {
-        "type": "text",
-        "id": "sorting_label",
-        "label": "Sorting default label",
-        "default": "Default sorting"
-      }, {
-        "type": "textarea",
-        "id": "sorting_options",
-        "label": "Sorting options (pipe separated)",
-        "default": "Default sorting|Price: Low to High|Price: High to Low|Newest"
-      }, {
-        "type": "text",
-        "id": "show_label",
-        "label": "Show default label",
-        "default": "Show 12"
-      }, {
-        "type": "textarea",
-        "id": "show_options",
-        "label": "Show options (pipe separated)",
-        "default": "Show 12|Show 24|Show 36|Show All"
-      }
-    ],
-    "blocks": [
-      { "type": "sidebar_categories", "name": "Sidebar - Categories" },
-      { "type": "sidebar_brand", "name": "Sidebar - Brand" },
-      { "type": "sidebar_color", "name": "Sidebar - Color" },
-      { "type": "sidebar_price", "name": "Sidebar - Price" },
-      { "type": "toolbar", "name": "Toolbar" },
-      { "type": "grid", "name": "Products grid" },
-      { "type": "pagination", "name": "Pagination" }
-    ],
-    "presets": [
+    {% schema %}
       {
         "name": "Shop Category",
+        "tag": "section",
+        "class": "shop-category-section",
+        "settings": [
+          {
+            "type": "text",
+            "id": "heading_categories",
+            "label": "Categories heading",
+            "default": "Browse Categories"
+          },
+          {
+            "type": "text",
+            "id": "heading_brand",
+            "label": "Brand heading",
+            "default": "Product Brand"
+          },
+          {
+            "type": "text",
+            "id": "heading_color",
+            "label": "Color heading",
+            "default": "Color Filter"
+          },
+          {
+            "type": "text",
+            "id": "heading_price",
+            "label": "Price heading",
+            "default": "Price Filter"
+          }, {
+            "type": "textarea",
+            "id": "brands_list",
+            "label": "Brands (comma separated)",
+            "default": "Apple,Asus,Gionee,Micromax,Samsung"
+          }, {
+            "type": "textarea",
+            "id": "colors_list",
+            "label": "Colors (comma separated)",
+            "default": "Black,Black Leather,Black with red,Gold,Spacegrey"
+          }, {
+            "type": "text",
+            "id": "sorting_label",
+            "label": "Sorting default label",
+            "default": "Default sorting"
+          }, {
+            "type": "textarea",
+            "id": "sorting_options",
+            "label": "Sorting options (pipe separated)",
+            "default": "Default sorting|Price: Low to High|Price: High to Low|Newest"
+          }, {
+            "type": "text",
+            "id": "show_label",
+            "label": "Show default label",
+            "default": "Show 12"
+          }, {
+            "type": "textarea",
+            "id": "show_options",
+            "label": "Show options (pipe separated)",
+            "default": "Show 12|Show 24|Show 36|Show All"
+          }
+        ],
         "blocks": [
-          { "type": "sidebar_categories" },
-          { "type": "sidebar_brand" },
-          { "type": "sidebar_color" },
-          { "type": "sidebar_price" },
-          { "type": "toolbar" },
-          { "type": "grid" },
-          { "type": "pagination" }
+          {
+            "type": "sidebar_categories",
+            "name": "Sidebar - Categories"
+          },
+          {
+            "type": "sidebar_brand",
+            "name": "Sidebar - Brand"
+          },
+          {
+            "type": "sidebar_color",
+            "name": "Sidebar - Color"
+          },
+          {
+            "type": "sidebar_price",
+            "name": "Sidebar - Price"
+          }, {
+            "type": "toolbar",
+            "name": "Toolbar"
+          }, {
+            "type": "grid",
+            "name": "Products grid"
+          }, {
+            "type": "pagination",
+            "name": "Pagination"
+          }
+        ],
+        "presets": [
+          {
+            "name": "Shop Category",
+            "blocks": [
+              {
+                "type": "sidebar_categories"
+              },
+              {
+                "type": "sidebar_brand"
+              },
+              {
+                "type": "sidebar_color"
+              },
+              {
+                "type": "sidebar_price"
+              }, {
+                "type": "toolbar"
+              }, {
+                "type": "grid"
+              }, {
+                "type": "pagination"
+              }
+            ]
+          }
         ]
       }
-    ]
-  }
-{% endschema %}
+    {% endschema %}

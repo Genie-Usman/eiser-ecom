@@ -15,7 +15,9 @@
     },
     "main": {
       "type": "shop-category",
-      "settings": {},
+      "settings": {
+        "show_filters": true
+      },
       "blocks": {
         "sidebar-categories": { "type": "sidebar_categories", "settings": {} },
         "sidebar-brand": { "type": "sidebar_brand", "settings": {} },
