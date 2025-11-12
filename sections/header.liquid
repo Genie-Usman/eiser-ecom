@@ -70,6 +70,7 @@
                 <div
                   x-show="open"
                   x-transition
+                  x-cloak
                   class="absolute ml-24 z-10 transform px-2 w-55 max-w-md sm:px-0 lg:left-1/2 lg:-translate-x-1/2">
                   <div class=" overflow-hidden">
                     <div class="h-2 bg-white"></div>
@@ -101,11 +102,12 @@
             </a>
           </li>
           <li class="relative">
-            <a href="{{ routes.cart_url }}" class="text-base p-2 hover:text-[#71cd13] relative inline-block">
+            <a
+              href="{{ routes.cart_url }}"
+              class="text-base p-2 hover:text-[#71cd13] relative inline-block"
+              data-cart-link>
               {% render 'icon-cart' %}
-              {% if cart.item_count > 0 %}
-                <sup class="absolute -top-1 -right-1 bg-[#71cd13] text-white text-xs rounded-full w-5 h-5 flex items-center justify-center leading-none">{{ cart.item_count }}</sup>
-              {% endif %}
+              <sup class="absolute -top-1 -right-1 bg-[#71cd13] text-white text-xs rounded-full w-5 h-5 flex items-center justify-center leading-none{% if cart.item_count == 0 %} hidden{% endif %}" data-cart-count>{{ cart.item_count }}</sup>
             </a>
           </li>
           {% if shop.customer_accounts_enabled %}
@@ -141,6 +143,7 @@
     class="fixed inset-0 z-100 md:hidden"
     x-show="mobileOpen"
     x-transition.opacity
+    x-cloak
     style="display: none;">
     <!-- Backdrop -->
     <div class="absolute inset-0 bg-black/40" @click="mobileOpen = false"></div>

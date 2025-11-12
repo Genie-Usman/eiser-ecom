@@ -1,9 +1,10 @@
 <section
   class="py-8 bg-white"
   id="shop-category"
-  data-collection-url="{{ collection.url }}">
+  data-collection-url="{{ collection.url }}"
+  data-section-id="{{ section.id }}">
   <div class="container mx-auto px-20 mt-24">
-    <div class="flex flex-col md:flex-row gap-8">
+    <div class="flex flex-col md:flex-row gap-8" data-collection-dynamic>
       <aside class="w-full md:w-1/4 bg-white p-">
         <div class="space-y-8">
           {% if section.blocks.size > 0 %}
@@ -99,7 +100,8 @@
                               <div
                                 id="price-box"
                                 class="range-box"
-                                data-max="{{ filter.range_max }}">
+                                data-max="{{ filter.range_max }}"
+                                data-currency="{{ cart.currency.symbol }}">
                                 <div class="range-wrap relative h-2 bg-white rounded">
                                   <div class="absolute left-0 right-0 top-0 h-[7px] bg-[#E8F0F2] rounded"></div>
                                   <div
@@ -461,6 +463,10 @@
   </section>
 
   {% stylesheet %}
+    #shop-category.is-loading [data-collection-dynamic] {
+      opacity: 0.45;
+      pointer-events: none;
+    }
     input[type="range"]::-webkit-slider-thumb {
       appearance: none;
       width: 20px;
@@ -648,257 +654,301 @@
   {% endstylesheet %}
 
   {% javascript %}
-    document.addEventListener('DOMContentLoaded', function() {
+  document.addEventListener('DOMContentLoaded', function() {
+    var section = document.getElementById('shop-category');
+    if (!section) return;
 
+    var sectionId = section.getAttribute('data-section-id');
+    var dynamic = section.querySelector('[data-collection-dynamic]');
+    if (!sectionId || !dynamic) return;
 
-// Helper to preserve query params
-      function setSearchParams(params) {
-        var url = new URL(window.location.href);
-        Object.keys(params).forEach(function(k) {
-          if (params[k] === null) {
-            url.searchParams.delete(k);
-          } else {
-            url.searchParams.set(k, params[k]);
+    var parser = new DOMParser();
+    var docClickBound = false;
+    var requestSerial = 0;
+
+    function toggleLoading(state) {
+      section.classList.toggle('is-loading', !!state);
+    }
+
+    function fetchCollection(url) {
+      if (!url) return;
+
+      var fetchId = ++requestSerial;
+
+      var requestUrl = new URL(url, window.location.origin);
+      var historyUrl = requestUrl.pathname + requestUrl.search;
+      var renderUrl = new URL(requestUrl.toString());
+      renderUrl.searchParams.set('section_id', sectionId);
+
+      toggleLoading(true);
+
+      fetch(renderUrl.toString(), { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+        .then(function(response) {
+          if (!response.ok) throw new Error('Failed to fetch collection');
+          return response.text();
+        })
+        .then(function(html) {
+          if (fetchId !== requestSerial) return;
+          var doc = parser.parseFromString(html, 'text/html');
+          var fresh = doc.querySelector('[data-collection-dynamic]');
+          if (!fresh) throw new Error('Missing dynamic container');
+          dynamic.innerHTML = fresh.innerHTML;
+          window.history.replaceState({}, '', historyUrl);
+          section.setAttribute('data-collection-url', requestUrl.pathname);
+          bindDynamic();
+        })
+        .catch(function(error) {
+          if (fetchId !== requestSerial) return;
+          console.error(error);
+          window.location.href = url;
+        })
+        .finally(function() {
+          if (fetchId === requestSerial) {
+            toggleLoading(false);
           }
         });
-        window.location.href = url.toString();
+    }
+
+    function setSearchParams(params) {
+      var url = new URL(window.location.href);
+      Object.keys(params).forEach(function(key) {
+        var value = params[key];
+        if (value === null || value === undefined || value === '') {
+          url.searchParams.delete(key);
+        } else {
+          url.searchParams.set(key, value);
+        }
+      });
+      fetchCollection(url.toString());
+    }
+
+    var sortMap = {
+      'Default sorting': null,
+      'Price: Low to High': 'price-ascending',
+      'Price: High to Low': 'price-descending',
+      'Newest': 'created-descending'
+    };
+
+    function handleSort(label) {
+      var code = sortMap[label] || null;
+      setSearchParams({ 'sort_by': code });
+    }
+
+    function handlePageSize(label) {
+      var lower = label.toLowerCase();
+      var match = label.match(/(\d+)/);
+      var value = '';
+      if (lower.indexOf('all') !== -1) {
+        value = 'all';
+      } else if (match) {
+        value = match[1];
+      }
+      setSearchParams({ 'page_size': value || null });
+    }
+
+    function bindCategoryRadios() {
+      dynamic.querySelectorAll('[data-category-radio]').forEach(function(input) {
+        input.addEventListener('change', function() {
+          if (input.checked && input.dataset.href) {
+            fetchCollection(input.dataset.href);
+          }
+        });
+      });
+    }
+
+    function bindFacetCheckboxes() {
+      dynamic.querySelectorAll('input[data-facet-checkbox]').forEach(function(input) {
+        input.addEventListener('change', function() {
+          var url = input.checked ? input.getAttribute('data-url-to-add') : input.getAttribute('data-url-to-remove');
+          if (url) fetchCollection(url);
+        });
+      });
+    }
+
+    function bindPagination() {
+      dynamic.querySelectorAll('.default-pagination a, .pagination a').forEach(function(link) {
+        link.addEventListener('click', function(event) {
+          event.preventDefault();
+          fetchCollection(link.href);
+        });
+      });
+    }
+
+    function initDualRange() {
+      var box = dynamic.querySelector('#price-box');
+      if (!box) return;
+
+      var maxAllowed = parseInt(box.dataset.max || '1000', 10);
+      var minInput = dynamic.querySelector('#price-min');
+      var maxInput = dynamic.querySelector('#price-max');
+      var prog = dynamic.querySelector('#price-progress');
+      var minLabel = dynamic.querySelector('#price-min-label');
+      var maxLabel = dynamic.querySelector('#price-max-label');
+      var currency = box.getAttribute('data-currency') || '';
+      if (!minInput || !maxInput || !prog) return;
+
+      function format(value) {
+        var prefix = currency ? (currency + ' ') : '';
+        return prefix + value;
       }
 
-// Category change → navigate to collection URL
-      document.querySelectorAll('[data-category-radio]').forEach(function(el) {
-        el.addEventListener('change', function() {
-          if (el.checked && el.dataset.href) {
-            window.location.href = el.dataset.href;
-          }
-        });
-      });
-
-// Facet list filter checkboxes (Search & Discovery)
-      document.querySelectorAll('input[data-facet-checkbox]').forEach(function(el) {
-        el.addEventListener('change', function() {
-          var url = el.checked
-            ? el.getAttribute('data-url-to-add')
-            : el.getAttribute('data-url-to-remove');
-          if (url) 
-            window.location.href = url;
-          
-
-
-        });
-      });
-
-
-// Price filter: dual range (min & max)
-      (function initDualRange() {
-        var box = document.getElementById('price-box');
-        if (! box) return;
-        
-
-
-        var maxAllowed = parseInt(box.dataset.max || '1000', 10);
-        var minInput = document.getElementById('price-min');
-        var maxInput = document.getElementById('price-max');
-        var prog = document.getElementById('price-progress');
-        var minLabel = document.getElementById('price-min-label');
-        var maxLabel = document.getElementById('price-max-label');
-
-        function setFromParams() {
-          var url = new URL(window.location.href);
-          var gte = parseInt(url.searchParams.get('filter.v.price.gte') || '0', 10);
-          var lte = parseInt(url.searchParams.get('filter.v.price.lte') || String(maxAllowed), 10);
-          if (!isNaN(gte)) 
-            minInput.value = Math.max(0, Math.min(maxAllowed, gte));
-          
-
-
-          if (!isNaN(lte)) 
-            maxInput.value = Math.max(0, Math.min(maxAllowed, lte));
-          
-
-
-        }
-
-        function updateUI() {
-          var a = parseInt(minInput.value, 10),
-            b = parseInt(maxInput.value, 10);
-          var minVal = Math.min(a, b),
-            maxVal = Math.max(a, b);
-          minInput.value = minVal;
-          maxInput.value = maxVal;
-          var left = (minVal / maxAllowed) * 100;
-          var width = ((maxVal - minVal) / maxAllowed) * 100;
-          prog.style.left = left + '%';
-          prog.style.width = width + '%';
-          minLabel.textContent = 'Rs ' + minVal;
-          maxLabel.textContent = 'Rs ' + maxVal;
-        }
-
-        function submitParams() {
-          var minVal = parseInt(minInput.value, 10);
-          var maxVal = parseInt(maxInput.value, 10);
-          setSearchParams({'filter.v.price.gte': minVal, 'filter.v.price.lte': maxVal});
-        }
-
-        setFromParams();
-        updateUI();
-        [
-          'input',
-          'change',
-          'pointerdown',
-          'mousedown',
-          'touchstart'
-        ].forEach(function(evt) {
-          minInput.addEventListener(evt, function() {
-
-// bring min knob to front when overlapping
-            minInput.style.zIndex = '1000';
-            maxInput.style.zIndex = '10';
-            updateUI();
-          });
-          maxInput.addEventListener(evt, function() {
-            maxInput.style.zIndex = '1000';
-            minInput.style.zIndex = '10';
-            updateUI();
-          });
-        });
-        minInput.addEventListener('change', submitParams);
-        maxInput.addEventListener('change', submitParams);
-      })();
-
-// Initialize dropdowns (no Alpine)
-      (function initCustomDropdowns() {
-        document.querySelectorAll('.dd').forEach(function(dd) {
-          var btn = dd.querySelector('.dd-btn');
-          var menu = dd.querySelector('.dd-menu');
-          if (! btn || ! menu) return;
-          
-
-
-          btn.addEventListener('click', function(e) {
-            e.stopPropagation();
-            var open = dd.getAttribute('aria-open') === 'true';
-            dd.setAttribute(
-              'aria-open',
-              open
-                ? 'false'
-                : 'true'
-            );
-          });
-          document.addEventListener('click', function(e) {
-            if (! dd.contains(e.target)) 
-              dd.setAttribute('aria-open', 'false');
-            
-
-
-          });
-          dd.querySelectorAll('.dd-item').forEach(function(item) {
-            item.addEventListener('click', function() {
-              var label = item.textContent.trim();
-              var span = dd.querySelector('.dd-btn span');
-              if (span) 
-                span.textContent = label;
-              
-
-
-              dd.setAttribute('aria-open', 'false');
-            });
-          });
-        });
-      })();
-
-// Map sort labels → Shopify sort codes
-      var sortMap = {
-        'Default sorting': null,
-        'Price: Low to High': 'price-ascending',
-        'Price: High to Low': 'price-descending',
-        'Newest': 'created-descending'
-      };
-
-// Global functions for Alpine.js to call
-      window.handleSortChange = function(label) {
-        var code = sortMap[label] || null;
-        setSearchParams({'sort_by': code});
-      };
-
-      window.handleShowChange = function(label) {
-        var m = label.match(/(\d+)/);
-        var size = m
-          ? m[1]
-          : 'all';
-        setSearchParams({'page_size': size});
-      };
-
-// Fallback for non-Alpine.js environments
-      document.querySelectorAll('.dd.select-wide .dd-item').forEach(function(it) {
-        it.addEventListener('click', function(e) {
-          if (!window.Alpine) {
-            var label = it.textContent.trim();
-            var code = sortMap[label] || null;
-            setSearchParams({'sort_by': code});
-          }
-        });
-      });
-
-// Page size menu → update page_size param
-      document.querySelectorAll('.dd.select-narrow .dd-item').forEach(function(it) {
-        it.addEventListener('click', function(e) {
-          if (!window.Alpine) {
-            var label = it.textContent.trim();
-            var m = label.match(/(\d+)/);
-            var size = m
-              ? m[1]
-              : 'all';
-            setSearchParams({'page_size': size});
-          }
-        });
-      });
-
-// Initialize dropdown labels and active items from URL
-      (function initDropdownLabels() {
+      function setFromParams() {
         var url = new URL(window.location.href);
-        var sort = url.searchParams.get('sort_by');
-        var sortReverse = {
-          'price-ascending': 'Price: Low to High',
-          'price-descending': 'Price: High to Low',
-          'created-descending': 'Newest'
-        };
-        var sortLabel = sortReverse[sort] || 'Default sorting';
-        var sortDd = document.querySelector('.dd.select-wide');
-        if (sortDd) {
-          var btn = sortDd.querySelector('.dd-btn span');
-          if (btn) 
-            btn.textContent = sortLabel;
-          
-
-
-          sortDd.querySelectorAll('.dd-item').forEach(function(it) {
-            it.classList.toggle('is-active', it.textContent.trim() === sortLabel);
-          });
+        var gte = parseInt(url.searchParams.get('filter.v.price.gte') || '0', 10);
+        var lte = parseInt(url.searchParams.get('filter.v.price.lte') || String(maxAllowed), 10);
+        if (!isNaN(gte)) {
+          minInput.value = Math.max(0, Math.min(maxAllowed, gte));
         }
-
-        var size = url.searchParams.get('page_size');
-        var sizeLabel = size === 'all'
-          ? 'Show All'
-          : (
-            size
-              ? ('Show ' + size)
-              : 'Show 12'
-          );
-        var sizeDd = document.querySelector('.dd.select-narrow');
-        if (sizeDd) {
-          var b2 = sizeDd.querySelector('.dd-btn span');
-          if (b2) 
-            b2.textContent = sizeLabel;
-          
-
-
-          sizeDd.querySelectorAll('.dd-item').forEach(function(it) {
-            it.classList.toggle('is-active', it.textContent.trim() === sizeLabel);
-          });
+        if (!isNaN(lte)) {
+          maxInput.value = Math.max(0, Math.min(maxAllowed, lte));
         }
-      })();
-    });
-  {% endjavascript %}
+      }
+
+      function updateUI() {
+        var a = parseInt(minInput.value, 10);
+        var b = parseInt(maxInput.value, 10);
+        var minVal = Math.min(a, b);
+        var maxVal = Math.max(a, b);
+        minInput.value = minVal;
+        maxInput.value = maxVal;
+        var left = (minVal / maxAllowed) * 100;
+        var width = ((maxVal - minVal) / maxAllowed) * 100;
+        prog.style.left = left + '%';
+        prog.style.width = width + '%';
+        if (minLabel) minLabel.textContent = format(minVal);
+        if (maxLabel) maxLabel.textContent = format(maxVal);
+      }
+
+      function submitParams() {
+        var minVal = parseInt(minInput.value, 10);
+        var maxVal = parseInt(maxInput.value, 10);
+        setSearchParams({
+          'filter.v.price.gte': Math.max(0, minVal || 0),
+          'filter.v.price.lte': Math.max(0, maxVal || 0)
+        });
+      }
+
+      setFromParams();
+      updateUI();
+
+      ['input', 'change', 'pointerdown', 'mousedown', 'touchstart'].forEach(function(evt) {
+        minInput.addEventListener(evt, function() {
+          minInput.style.zIndex = '1000';
+          maxInput.style.zIndex = '10';
+          updateUI();
+        });
+        maxInput.addEventListener(evt, function() {
+          maxInput.style.zIndex = '1000';
+          minInput.style.zIndex = '10';
+          updateUI();
+        });
+      });
+
+      minInput.addEventListener('change', submitParams);
+      maxInput.addEventListener('change', submitParams);
+    }
+
+    function initCustomDropdowns() {
+      dynamic.querySelectorAll('.dd').forEach(function(dd) {
+        var btn = dd.querySelector('.dd-btn');
+        var menu = dd.querySelector('.dd-menu');
+        if (!btn || !menu) return;
+
+        btn.addEventListener('click', function(event) {
+          event.stopPropagation();
+          var open = dd.getAttribute('aria-open') === 'true';
+          dd.setAttribute('aria-open', open ? 'false' : 'true');
+          btn.setAttribute('aria-expanded', open ? 'false' : 'true');
+        });
+
+        dd.querySelectorAll('.dd-item').forEach(function(item) {
+          item.addEventListener('click', function() {
+            var span = dd.querySelector('.dd-btn span');
+            if (span) span.textContent = item.textContent.trim();
+            dd.setAttribute('aria-open', 'false');
+            btn.setAttribute('aria-expanded', 'false');
+          });
+        });
+      });
+
+      if (!docClickBound) {
+        document.addEventListener('click', function(event) {
+          if (!dynamic.contains(event.target)) {
+            dynamic.querySelectorAll('.dd[aria-open="true"]').forEach(function(dd) {
+              dd.setAttribute('aria-open', 'false');
+              var btn = dd.querySelector('.dd-btn');
+              if (btn) btn.setAttribute('aria-expanded', 'false');
+            });
+          }
+        });
+        docClickBound = true;
+      }
+    }
+
+    function initDropdownLabels() {
+      var url = new URL(window.location.href);
+      var sort = url.searchParams.get('sort_by');
+      var sortReverse = {
+        'price-ascending': 'Price: Low to High',
+        'price-descending': 'Price: High to Low',
+        'created-descending': 'Newest'
+      };
+      var sortLabel = sortReverse[sort] || 'Default sorting';
+      var sortDd = dynamic.querySelector('.dd.select-wide');
+      if (sortDd) {
+        var btn = sortDd.querySelector('.dd-btn span');
+        if (btn) btn.textContent = sortLabel;
+        sortDd.querySelectorAll('.dd-item').forEach(function(item) {
+          item.classList.toggle('is-active', item.textContent.trim() === sortLabel);
+        });
+      }
+
+      var size = url.searchParams.get('page_size');
+      var sizeLabel = size === 'all'
+        ? 'Show All'
+        : (size ? ('Show ' + size) : 'Show 12');
+      var sizeDd = dynamic.querySelector('.dd.select-narrow');
+      if (sizeDd) {
+        var span = sizeDd.querySelector('.dd-btn span');
+        if (span) span.textContent = sizeLabel;
+        sizeDd.querySelectorAll('.dd-item').forEach(function(item) {
+          item.classList.toggle('is-active', item.textContent.trim() === sizeLabel);
+        });
+      }
+    }
+
+    function bindSortShowItems() {
+      dynamic.querySelectorAll('[data-sort-option]').forEach(function(item) {
+        item.addEventListener('click', function() {
+          var label = item.getAttribute('data-sort-option');
+          handleSort(label);
+        });
+      });
+
+      dynamic.querySelectorAll('[data-show-option]').forEach(function(item) {
+        item.addEventListener('click', function() {
+          var label = item.getAttribute('data-show-option');
+          handlePageSize(label);
+        });
+      });
+    }
+
+    function bindDynamic() {
+      bindCategoryRadios();
+      bindFacetCheckboxes();
+      bindPagination();
+      bindSortShowItems();
+      initCustomDropdowns();
+      initDualRange();
+      initDropdownLabels();
+    }
+
+    window.handleSortChange = handleSort;
+    window.handleShowChange = handlePageSize;
+
+    bindDynamic();
+  });
+ {% endjavascript %}
 
   {% schema %}
     {

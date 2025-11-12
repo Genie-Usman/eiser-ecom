@@ -92,7 +92,9 @@
             {% assign form_id = 'product-form-' | append: section.id %}
             {% form 'product'
               , product
-              , id: form_id %}
+              , id: form_id
+              , class: 'space-y-6'
+              , data-product-form: true %}
               {% if product.has_only_default_variant == false %}
                 <label for="variant-id-{{ section.id }}" class="sr-only">Variant</label>
                 <select
@@ -151,7 +153,10 @@
 
                 <div class="flex flex-row gap-3 mt-5">
 
-                  <button type="submit" class="inline-flex items-center justify-center h-10 px-7 bg-[#71CD14] hover:bg-transparent border border-[#71CD14] hover:text-[#71CD14] uppercase transition-all duration-400 cursor-pointer ease-in-out text-white text-xs font-medium rounded">
+                  <button
+                    type="submit"
+                    class="inline-flex items-center justify-center h-10 px-7 bg-[#71CD14] hover:bg-transparent border border-[#71CD14] hover:text-[#71CD14] uppercase transition-all duration-400 cursor-pointer ease-in-out text-white text-xs font-medium rounded"
+                    data-add-to-cart>
                     Add to cart
                   </button>
                   <div class="flex items-center gap-2">
@@ -419,6 +424,74 @@
 
   <script>
     (function() {
+      // AJAX add to cart
+      var productForm = document.querySelector('[data-product-form]');
+      if (productForm) {
+        var addButton = productForm.querySelector('[data-add-to-cart]');
+        var statusEl = productForm.querySelector('[data-add-status]');
+        var qtyInput = productForm.querySelector('input[name="quantity"]');
+        var variantSelector = productForm.querySelector('select[name="id"], input[name="id"]');
+
+        function showStatus(message, tone) {
+          if (!statusEl) return;
+          statusEl.textContent = message;
+          statusEl.classList.remove('hidden');
+          if (tone === 'error') {
+            statusEl.classList.add('text-rose-600');
+            statusEl.classList.remove('text-[#71cd13]');
+          } else {
+            statusEl.classList.add('text-[#71cd13]');
+            statusEl.classList.remove('text-rose-600');
+          }
+          if (statusEl._timer) clearTimeout(statusEl._timer);
+          statusEl._timer = setTimeout(function(){ statusEl.classList.add('hidden'); }, tone === 'error' ? 4000 : 2200);
+        }
+
+        productForm.addEventListener('submit', function(event) {
+          event.preventDefault();
+          if (addButton) addButton.disabled = true;
+
+          var variantId = variantSelector ? variantSelector.value : '';
+          var quantity = qtyInput ? parseInt(qtyInput.value || '1', 10) : 1;
+          if (!variantId) {
+            showStatus('Select an option', 'error');
+            if (addButton) addButton.disabled = false;
+            return;
+          }
+
+          quantity = Math.max(1, Number.isFinite(quantity) ? quantity : 1);
+
+          var payload = { id: variantId, quantity: quantity };
+          var request;
+
+          if (window.ShopCart && typeof window.ShopCart.add === 'function') {
+            request = window.ShopCart.add(payload);
+          } else {
+            request = fetch('/cart/add.js', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(payload)
+            })
+              .then(function(response) {
+                if (!response.ok) throw new Error('Request failed');
+                return response.json();
+              })
+              .then(function(){ try { window.dispatchEvent(new CustomEvent('cart:updated')); } catch(err) {} });
+          }
+
+          Promise.resolve(request)
+            .then(function(){
+              showStatus('Added to cart', 'success');
+            })
+            .catch(function(){
+              showStatus('Could not add to cart', 'error');
+            })
+            .finally(function(){
+              if (addButton) addButton.disabled = false;
+            });
+        });
+      }
+
       // Carousel: loop through main images; sync red shade on thumbnails
       var carousel = document.getElementById('carousel-{{ section.id }}');
       if (carousel) {

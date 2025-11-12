@@ -83,6 +83,58 @@
     },
   },
   "sections": {
+    "search": {
+      "name": "Search page",
+      "settings": {
+        "hero_heading": {
+          "label": "Hero heading"
+        },
+        "hero_subheading": {
+          "label": "Hero subheading"
+        },
+        "popular_heading": {
+          "label": "Popular searches heading"
+        },
+        "results_caption": {
+          "label": "Results caption"
+        },
+        "empty_body": {
+          "label": "Empty state description"
+        },
+        "empty_primary_label": {
+          "label": "Primary empty state button label"
+        },
+        "empty_secondary_label": {
+          "label": "Secondary empty state button label"
+        },
+        "view_details_label": {
+          "label": "View details label"
+        },
+        "initial_heading": {
+          "label": "Initial state heading"
+        },
+        "initial_body": {
+          "label": "Initial state description"
+        },
+        "results_per_page": {
+          "label": "Results per page"
+        },
+        "suggestion_one": {
+          "label": "Suggested search #1"
+        },
+        "suggestion_two": {
+          "label": "Suggested search #2"
+        },
+        "suggestion_three": {
+          "label": "Suggested search #3"
+        }
+      },
+      "presets": {
+        "default": {
+          "name": "Search"
+        }
+      }
+    },
     "tracking": {
       "name": "Order tracking",
       "settings": {

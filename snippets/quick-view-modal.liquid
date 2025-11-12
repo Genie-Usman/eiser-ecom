@@ -122,9 +122,16 @@
         viewEl.href = p.url || ('/products/' + handle);
         addEl.onclick = function(){
           if (!currentVariantId) return;
-          fetch('/cart/add.js', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ id: currentVariantId, quantity: 1 }) })
-            .then(function(r){ return r.ok ? r.json() : Promise.reject(); })
-            .then(function(){ closeModal(); window.dispatchEvent(new CustomEvent('cart:updated')); })
+          var addPromise;
+          if (window.ShopCart && typeof window.ShopCart.add === 'function') {
+            addPromise = window.ShopCart.add({ id: currentVariantId, quantity: 1 });
+          } else {
+            addPromise = fetch('/cart/add.js', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ id: currentVariantId, quantity: 1 }) })
+              .then(function(r){ if (!r.ok) throw new Error('Request failed'); return r.json(); })
+              .then(function(){ try { window.dispatchEvent(new CustomEvent('cart:updated')); } catch(err) {} });
+          }
+          Promise.resolve(addPromise)
+            .then(function(){ closeModal(); })
             .catch(function(){ /* swallow */ });
         };
         openModal();
@@ -159,10 +166,16 @@
         e.preventDefault();
         var vid = add.getAttribute('data-variant-id');
         if (vid){
-          fetch('/cart/add.js', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ id: Number(vid), quantity: 1 }) })
-            .then(function(r){ return r.ok ? r.json() : Promise.reject(); })
-            .then(function(){ 
-              try { window.dispatchEvent(new CustomEvent('cart:updated')); } catch(err) {}
+          var addPromise;
+          if (window.ShopCart && typeof window.ShopCart.add === 'function') {
+            addPromise = window.ShopCart.add({ id: Number(vid), quantity: 1 });
+          } else {
+            addPromise = fetch('/cart/add.js', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ id: Number(vid), quantity: 1 }) })
+              .then(function(r){ if (!r.ok) throw new Error('Request failed'); return r.json(); })
+              .then(function(){ try { window.dispatchEvent(new CustomEvent('cart:updated')); } catch(err) {} });
+          }
+          Promise.resolve(addPromise)
+            .then(function(){
               try { window.dispatchEvent(new CustomEvent('toast:show', { detail: { message: 'Added to cart' } })); } catch(err) {}
             })
             .catch(function(){});

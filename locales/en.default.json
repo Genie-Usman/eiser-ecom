@@ -67,6 +67,22 @@
     "placeholder": "Search articles, pages, or products",
     "submit": "Search",
     "no_results_html": "No results found for {{ terms }}",
-    "results_for_html": "{{ count }} results found for {{ terms }}"
+    "results_for_html": "{{ count }} results found for {{ terms }}",
+    "results_summary_empty_html": "We couldn't find any matches for {{ terms }} yet.",
+    "hero_heading": "Find what you're looking for",
+    "hero_subheading": "Discover curated products, inspiration, and helpful resources by searching below.",
+    "popular_heading": "Popular searches",
+    "initial_heading": "Start exploring",
+    "initial_body_html": "Use the search bar above to browse the latest releases, curated collections, and helpful articles.",
+    "empty_heading_html": "We couldn't find any results for <strong>{{ terms }}</strong>",
+    "empty_body_html": "Double-check your spelling or try searching with different keywords or categories.",
+    "empty_cta_label": "Browse all products",
+    "empty_secondary_label": "Return to homepage",
+    "type_product": "Product",
+    "type_article": "Article",
+    "type_page": "Page",
+    "type_collection": "Collection",
+    "type_default": "Result",
+    "view_details": "View details"
   }
 }

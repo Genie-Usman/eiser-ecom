@@ -61,17 +61,25 @@
     
       function toInt(v, d){ v = parseInt(v, 10); return isNaN(v) ? (d||0) : v; }
     
-      async function post(url, data){
-        var res = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data||{}) });
-        return res.ok;
-      }
-    
       async function clearCart(){
-        try { await post('/cart/clear.js', {}); } catch(e) {}
+        if (window.ShopCart && typeof window.ShopCart.clear === 'function') {
+          try { await window.ShopCart.clear(); } catch(e) {}
+          return;
+        }
+        try { await fetch('/cart/clear.js', { method: 'POST' }); } catch(e) {}
       }
     
       async function addToCart(vId, quantity){
-        return await post('/cart/add.js', { id: vId, quantity: quantity });
+        if (window.ShopCart && typeof window.ShopCart.add === 'function') {
+          try {
+            await window.ShopCart.add({ id: vId, quantity: quantity });
+            return true;
+          } catch(e) {
+            return false;
+          }
+        }
+        var res = await fetch('/cart/add.js', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: vId, quantity: quantity }) });
+        return res.ok;
       }
     
       function goCheckout(){

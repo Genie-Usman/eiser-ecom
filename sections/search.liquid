@@ -1,63 +1,420 @@
-<h1>{{ 'search.title' | t }}</h1>
+<section
+  id="search-page"
+  class="search-section bg-[#f9fafb] py-16"
+  data-section-id="{{ section.id }}">
+  <div class="container mx-auto px-6 lg:px-20">
+    <div class="search-hero bg-white border border-[#e6e6e6] rounded-2xl shadow-sm px-6 sm:px-10 py-10">
+      <header class="flex flex-col gap-3 text-center lg:text-left">
+        <span class="text-xs font-semibold tracking-[0.25em] uppercase text-[#71cd13]">{{ 'search.title' | t }}</span>
+        <h1 class="text-3xl sm:text-4xl font-semibold text-[#2A2A2A]">{{ section.settings.hero_heading | default: "Find what you're looking for" }}</h1>
+        <p class="text-base sm:text-lg text-[#797979]">{{ section.settings.hero_subheading | default: "Discover curated products, inspiration, and helpful resources by searching below." }}</p>
+      </header>
 
-<form action="{{ routes.search_url }}" method="get" role="search">
-  <input
-    type="search"
-    size="50"
-    name="q"
-    value="{{ search.terms | escape }}"
-    placeholder="{{ 'search.placeholder' | t }}"
-  >
-  <button type="submit">{{ 'search.submit' | t }}</button>
-</form>
+      <form
+        action="{{ routes.search_url }}"
+        method="get"
+        role="search"
+        class="search-form mt-8"
+        data-search-form>
+        <label for="SearchPageInput" class="sr-only">{{ 'search.placeholder' | t }}</label>
+        <div class="search-form__controls flex flex-col sm:flex-row gap-3 sm:gap-4">
+          <input
+            id="SearchPageInput"
+            type="search"
+            name="q"
+            class="flex-1 rounded-xl border border-[#d9d9d9] bg-[#f7f7f7] px-5 py-3 text-base text-[#2a2a2a] placeholder:text-[#9c9c9c] focus:border-[#71cd13] focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-[#71cd13]"
+            value="{{ search.terms | escape }}"
+            placeholder="{{ 'search.placeholder' | t }}"
+            autocomplete="off"
+            data-search-input />
+          <input
+            type="hidden"
+            name="options[prefix]"
+            value="last">
+          <button type="submit" class="inline-flex items-center justify-center rounded-xl bg-[#71cd13] px-6 py-3 text-base font-semibold uppercase tracking-[0.08em] text-white transition hover:bg-[#5caf0f]">
+            {{ 'search.submit' | t }}
+          </button>
+        </div>
+      </form>
 
-{% if search.performed %}
-  {% if search.results_count == 0 %}
-    <p>{{ 'search.no_results_html' | t: terms: search.terms }}</p>
-  {% else %}
-    <p>{{ 'search.results_for_html' | t: terms: search.terms, count: search.results_count }}</p>
-
-    <div class="search-results">
-      {% paginate search.results by 20 %}
-        {% # Search result items may be an article, a page, or a product. %}
-        {% for result in search.results %}
-          <div class="search-result">
-            {% assign featured_image = result.featured_image | default: result.image %}
-            {% if featured_image %}
-              {% render 'image', class: 'search-result__image', image: featured_image, url: result.url, width: 400 %}
+      {% liquid
+        assign suggestion_one = section.settings.suggestion_one | strip
+        assign suggestion_two = section.settings.suggestion_two | strip
+        assign suggestion_three = section.settings.suggestion_three | strip
+        assign suggestion_list = ''
+        if suggestion_one != ''
+          assign suggestion_list = suggestion_one
+        endif
+        if suggestion_two != ''
+          if suggestion_list == ''
+            assign suggestion_list = suggestion_two
+          else
+            assign suggestion_list = suggestion_list | append: '||' | append: suggestion_two
+          endif
+        endif
+        if suggestion_three != ''
+          if suggestion_list == ''
+            assign suggestion_list = suggestion_three
+          else
+            assign suggestion_list = suggestion_list | append: '||' | append: suggestion_three
+          endif
+        endif
+      %}
+      {% if suggestion_list != '' %}
+        {% assign suggestion_array = suggestion_list | split: '||' %}
+        <div class="search-popular mt-6 flex flex-wrap items-center gap-3 text-sm text-[#797979]">
+          <span class="font-medium text-[#2a2a2a]">{{ section.settings.popular_heading | default: 'Popular searches' }}</span>
+          {% for suggestion in suggestion_array %}
+            {% assign suggestion_term = suggestion | strip %}
+            {% if suggestion_term != '' %}
+              <a
+                href="{{ routes.search_url }}?q={{ suggestion_term | url_encode }}"
+                class="inline-flex items-center gap-2 rounded-full border border-[#d9d9d9] bg-white px-4 py-2 text-sm font-medium text-[#2a2a2a] transition hover:border-[#71cd13] hover:text-[#71cd13]"
+                data-search-suggestion
+                data-search-term="{{ suggestion_term | strip | escape }}">
+                <span>#</span>
+                {{ suggestion_term }}</a>
             {% endif %}
-            <div class="search-result__content">
-              <p>
-                {{ result.title | link_to: result.url }}
-                {% if result.price %}
-                  {{ result.price | money_with_currency }}
-                {% endif %}
-              </p>
-            </div>
-          </div>
-        {% endfor %}
-
-        {{ paginate | default_pagination }}
-      {% endpaginate %}
+          {% endfor %}
+        </div>
+      {% endif %}
     </div>
-  {% endif %}
-{% endif %}
+
+    <div data-search-dynamic>
+      {% if search.performed %}
+        <div class="search-results-wrapper mt-12" data-search-results>
+          <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4">
+            {% if search.results_count > 0 %}
+              <h2 class="text-lg font-semibold text-[#2A2A2A]">{{ 'search.results_for_html' | t: terms: search.terms, count: search.results_count }}</h2>
+            {% else %}
+              <h2 class="text-lg font-semibold text-[#2A2A2A]">{{ 'search.no_results_html' | t: terms: search.terms }}</h2>
+            {% endif %}
+            {% if search.results_count > 0 %}
+              {% assign summary_template = section.settings.results_caption | default: 'Showing {count} matching items' %}
+              <p class="text-sm text-[#797979]">{{ summary_template | replace: '{count}', search.results_count }}</p>
+            {% endif %}
+          </div>
+
+          {% if search.results_count == 0 %}
+            <div class="search-empty mt-10 rounded-2xl border border-[#e6e6e6] bg-white px-6 py-12 text-center shadow-sm">
+              <h3 class="text-2xl font-semibold text-[#2A2A2A]">{{ 'search.no_results_html' | t: terms: search.terms }}</h3>
+              <p class="mt-3 text-base text-[#797979]">{{ section.settings.empty_body | default: 'Double-check your spelling or try searching with different keywords or categories.' }}</p>
+              <div class="mt-6 flex flex-wrap justify-center gap-3">
+                <a class="inline-flex items-center rounded-full border border-[#71cd13] px-5 py-2.5 text-sm font-semibold text-[#71cd13] transition hover:bg-[#71cd13] hover:text-white" href="{{ routes.all_products_collection_url }}">
+                  {{ section.settings.empty_primary_label | default: 'Browse all products' }}
+                </a>
+                <a class="inline-flex items-center rounded-full border border-[#d9d9d9] px-5 py-2.5 text-sm font-medium text-[#2a2a2a] transition hover:border-[#71cd13]" href="{{ routes.root_url }}">
+                  {{ section.settings.empty_secondary_label | default: 'Return to homepage' }}
+                </a>
+              </div>
+            </div>
+          {% else %}
+            {% assign per_page = section.settings.results_per_page | default: 12 %}
+            {% paginate search.results by per_page %}
+              <div class="search-grid mt-10 grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3">
+                {% for result in search.results %}
+                  {% liquid
+                    case result.object_type
+                      when 'product'
+                        assign result_type_label = 'Product'
+                      when 'article'
+                        assign result_type_label = 'Article'
+                      when 'page'
+                        assign result_type_label = 'Page'
+                      when 'collection'
+                        assign result_type_label = 'Collection'
+                      else
+                        assign result_type_label = 'Result'
+                    endcase
+                  %}
+
+                  {% if result.object_type == 'product' %}
+                    <div class="search-card search-card--product">
+                      {% render 'product-card-small'
+                        , product: result
+                        , wrap_link: true %}
+                    </div>
+                  {% else %}
+                    {% assign raw_body = result.excerpt | default: result.content | default: result.body %}
+                    {% assign summary = raw_body | strip_html | truncatewords: 24 %}
+                    <article class="search-card search-card--content flex flex-col rounded-2xl border border-[#e6e6e6] bg-white p-6 shadow-sm">
+                      <span class="inline-flex w-fit items-center rounded-full bg-[#ecf8df] px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-[#5caf0f]">{{ result_type_label }}</span>
+                      <h3 class="mt-4 text-xl font-semibold text-[#2A2A2A]">
+                        <a href="{{ result.url }}" class="transition hover:text-[#71cd13]">{{ result.title | escape }}</a>
+                      </h3>
+                      {% if summary != '' %}
+                        <p class="mt-3 flex-1 text-sm text-[#5f5f5f]">{{ summary }}</p>
+                      {% endif %}
+                      <div class="mt-6 flex items-center justify-between gap-3 text-sm">
+                        <a href="{{ result.url }}" class="font-semibold text-[#71cd13] transition hover:text-[#5caf0f]">{{ section.settings.view_details_label | default: 'View details' }}</a>
+                        <span class="text-[#9c9c9c]">{{ result.updated_at | date: '%b %d, %Y' }}</span>
+                      </div>
+                    </article>
+                  {% endif %}
+                {% endfor %}
+              </div>
+              <div class="search-pagination mt-10 flex justify-center">
+                {{ paginate | default_pagination }}
+              </div>
+            {% endpaginate %}
+          {% endif %}
+        </div>
+      {% else %}
+        <div class="search-initial mt-12 rounded-2xl border border-dashed border-[#cfd8dc] bg-white px-8 py-12 text-center" data-search-initial>
+          <h2 class="text-2xl font-semibold text-[#2A2A2A]">{{ section.settings.initial_heading | default: 'Start exploring' }}</h2>
+          <p class="mt-3 text-base text-[#797979]">{{ section.settings.initial_body | default: 'Use the search bar above to browse the latest releases, curated collections, and helpful articles.' }}</p>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</section>
 
 {% stylesheet %}
-  .search-results {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  #search-page.is-loading [data-search-dynamic] {
+    opacity: 0.4;
+    pointer-events: none;
   }
-  .search-results .prev,
-  .search-results .page,
-  .search-results .next {
-    grid-column: 1 / -1;
+  #search-page .default-pagination {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    border-radius: 999px;
+    background: #ffffff;
+    padding: 6px 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+  }
+  #search-page .default-pagination a,
+  #search-page .default-pagination span {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 36px;
+    height: 36px;
+    border-radius: 999px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #5f5f5f;
+    transition: all 0.2s ease;
+  }
+  #search-page .default-pagination a:hover {
+    color: #71cd13;
+  }
+  #search-page .default-pagination .current {
+    background: #71cd13;
+    color: #ffffff;
+  }
+  #search-page .search-card--product .product-card-small {
+    height: 100%;
+  }
+  #search-page .search-card--product > .flex {
+    height: 100%;
   }
 {% endstylesheet %}
 
+{% javascript %}
+  document.addEventListener('DOMContentLoaded', function() {
+    var searchSection = document.getElementById('search-page');
+    if (! searchSection) return;
+    
+
+
+    var form = searchSection.querySelector('[data-search-form]');
+    var input = searchSection.querySelector('[data-search-input]');
+    var dynamic = searchSection.querySelector('[data-search-dynamic]');
+    if (! form || ! input || ! dynamic) return;
+    
+
+
+    var sectionId = searchSection.getAttribute('data-section-id');
+    var action = form.getAttribute('action');
+
+    form.addEventListener('submit', function(event) {
+      event.preventDefault();
+      fetchResults(input.value.trim());
+    });
+
+    searchSection.querySelectorAll('[data-search-suggestion]').forEach(function(link) {
+      link.addEventListener('click', function(event) {
+        event.preventDefault();
+        var term = link.getAttribute('data-search-term') || link.textContent.replace('#', '').trim();
+        input.value = term;
+        fetchResults(term);
+      });
+    });
+
+    function buildParams(query) {
+      var params = new URLSearchParams(new FormData(form));
+      params.set('options[prefix]', 'last');
+      params.delete('page');
+      params.set('q', query);
+      return params;
+    }
+
+    function fetchResults(query, extraParams) {
+      var params = buildParams(query);
+
+      if (extraParams) {
+        extraParams.forEach(function(value, key) {
+          if (key === 'section_id') return;
+          
+
+
+          if (key === 'q') {
+            params.set('q', value);
+            input.value = value;
+          } else {
+            params.set(key, value);
+          }
+        });
+      } else {
+        input.value = params.get('q');
+      }
+
+      var historyUrl = action + '?' + params.toString();
+      var fetchParams = new URLSearchParams(params.toString());
+      fetchParams.set('section_id', sectionId);
+      var fetchUrl = action + '?' + fetchParams.toString();
+
+      toggleLoading(true);
+
+      fetch(fetchUrl, {
+        headers: {
+          'X-Requested-With': 'XMLHttpRequest'
+        }
+      })
+        .then(function(response) {
+          if (! response.ok) 
+            throw new Error('Network response was not ok');
+          
+
+
+          return response.text();
+        })
+        .then(function(html) {
+          var parser = new DOMParser();
+          var doc = parser.parseFromString(html, 'text/html');
+          var newDynamic = doc.querySelector('[data-search-dynamic]');
+          if (! newDynamic) 
+            throw new Error('Missing dynamic content');
+          
+
+
+          dynamic.innerHTML = newDynamic.innerHTML;
+          window.history.replaceState({}, '', historyUrl);
+          rebindDynamic();
+        })
+        .catch(function() {
+          window.location.href = historyUrl;
+        })
+        . finally(function() {
+          toggleLoading(false);
+        });
+    }
+
+    function toggleLoading(state) {
+      searchSection.classList.toggle('is-loading', state);
+    }
+
+    function rebindDynamic() {
+      dynamic.querySelectorAll('.default-pagination a').forEach(function(link) {
+        link.addEventListener('click', function(event) {
+          event.preventDefault();
+          var url = new URL(link.href, window.location.origin);
+          fetchResults(url.searchParams.get('q') || input.value.trim(), url.searchParams);
+        });
+      });
+    }
+
+    rebindDynamic();
+  });
+{% endjavascript %}
+
 {% schema %}
-{
-  "name": "t:general.search",
-  "settings": []
-}
+  {
+    "name": "Search Page",
+    "settings": [
+      {
+        "type": "text",
+        "id": "hero_heading",
+        "label": "Heading",
+        "default": "Find what you're looking for"
+      },
+      {
+        "type": "textarea",
+        "id": "hero_subheading",
+        "label": "SubHeading",
+        "default": "Discover curated products, inspiration, and helpful resources by searching below."
+      },
+      {
+        "type": "text",
+        "id": "popular_heading",
+        "label": "Popular Searches Heading",
+        "default": "Popular searches"
+      },
+      {
+        "type": "text",
+        "id": "results_caption",
+        "label": "Results Caption",
+        "default": "Showing {count} matching items"
+      }, {
+        "type": "textarea",
+        "id": "empty_body",
+        "label": "Empty Body",
+        "default": "Double-check your spelling or try searching with different keywords or categories."
+      }, {
+        "type": "text",
+        "id": "empty_primary_label",
+        "label": "Empty Primary Label",
+        "default": "Browse all products"
+      }, {
+        "type": "text",
+        "id": "empty_secondary_label",
+        "label": "Empty Secondary Label",
+        "default": "Return to homepage"
+      }, {
+        "type": "text",
+        "id": "view_details_label",
+        "label": "View Details Label",
+        "default": "View details"
+      }, {
+        "type": "text",
+        "id": "initial_heading",
+        "label": "Initial Heading",
+        "default": "Start exploring"
+      }, {
+        "type": "textarea",
+        "id": "initial_body",
+        "label": "Initial Body",
+        "default": "Use the search bar above to browse the latest releases, curated collections, and helpful articles."
+      }, {
+        "type": "range",
+        "id": "results_per_page",
+        "label": "Results Per Page",
+        "min": 6,
+        "max": 24,
+        "step": 6,
+        "default": 12
+      }, {
+        "type": "text",
+        "id": "suggestion_one",
+        "label": "Suggested Search #1",
+        "default": "Featured products"
+      }, {
+        "type": "text",
+        "id": "suggestion_two",
+        "label": "Suggested Search #2",
+        "default": "Summer sale"
+      }, {
+        "type": "text",
+        "id": "suggestion_three",
+        "label": "Suggested Search #3",
+        "default": "Gift ideas"
+      }
+    ],
+    "presets": [
+      {
+        "name": "Search Page"
+      }
+    ]
+  }
 {% endschema %}

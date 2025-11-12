@@ -1,5 +1,8 @@
 <section class="py-10 md:py-14">
-  <div class="container mx-auto px-20">
+  <div
+    class="container mx-auto px-20"
+    data-cart-root
+    data-section-id="{{ section.id }}">
     {% if cart.item_count == 0 %}
       <p class="mt-6 text-[#797979]">Your cart is currently empty.</p>
       <div class="mt-4">
@@ -9,7 +12,8 @@
       <form
         action="{{ routes.cart_url }}"
         method="post"
-        class="mt-6 grid lg:grid-cols-12 gap-8">
+        class="mt-6 grid lg:grid-cols-12 gap-8"
+        data-cart-form>
         <!-- Items list -->
         <div class="lg:col-span-12">
           <!-- Header -->
@@ -22,7 +26,7 @@
 
           <div class="divide-y divide-gray-200 md:border-t-0">
             {% for item in cart.items %}
-              <div class="p-5 grid grid-cols-12 items-center gap-5">
+              <div class="p-5 grid grid-cols-12 items-center gap-5" data-line-key="{{ item.key }}">
                 <a href="{{ item.url }}" class="col-span-2 block w-24 h-24 bg-white border border-gray-200 rounded overflow-hidden shrink-0 ml-3">
                   {% if item.image %}
                     {{ item.image | image_url: width: 200 | image_tag: class: 'w-full h-full object-contain' }}
@@ -39,43 +43,52 @@
                       <button
                         type="button"
                         class="w-9 h-9 grid place-content-center text-gray-600"
-                        data-qty-minus-idx="{{ forloop.index0 }}">−</button>
+                        data-cart-qty-change
+                        data-change="minus">−</button>
                       <input
                         class="w-12 h-9 text-center text-sm outline-none border-x border-gray-300"
                         type="number"
                         min="0"
                         value="{{ item.quantity }}"
-                        data-qty-input-idx="{{ forloop.index0 }}">
+                        data-cart-qty-input
+                        data-line-key="{{ item.key }}">
                       <button
                         type="button"
                         class="w-9 h-9 grid place-content-center text-gray-600"
-                        data-qty-plus-idx="{{ forloop.index0 }}">+</button>
+                        data-cart-qty-change
+                        data-change="plus">+</button>
                     </div>
-                    <a href="{{ item.url_to_remove }}" class="text-sm text-rose-600 hover:underline">{{ 'cart.remove' | t | default: 'Remove' }}</a>
+                    <a
+                      href="{{ item.url_to_remove }}"
+                      class="text-sm text-rose-600 hover:underline"
+                      data-cart-remove
+                      data-line-key="{{ item.key }}">{{ 'cart.remove' | t | default: 'Remove' }}</a>
                   </div>
                 </div>
                 <div class="hidden md:block col-span-2 font-medium text-sm text-center text-[#2A2A2A]">{{ item.final_price | money }}</div>
                 <div class="hidden md:flex col-span-1 items-center justify-center">
                   <div class="relative">
                     <input
-                      id="qty-{{ section.id }}"
                       type="number"
                       min="0"
                       value="{{ item.quantity }}"
-                      data-qty-input-idx="{{ forloop.index0 }}"
-                      class="qty-input w-[80px] h-[40px] rounded-md font-semibold border border-[#e7e7e7] bg-white pl-3 text-[12px] leading-none text-gray-900 text-left outline-none appearance-none">
+                      data-cart-qty-input
+                      data-line-key="{{ item.key }}"
+                      class="cart-qty-input w-[80px] h-[40px] rounded-md font-semibold border border-[#e7e7e7] bg-white pl-3 text-[12px] leading-none text-gray-900 text-left outline-none appearance-none">
                     <div class="absolute inset-y-0 right-0 w-[21px] flex flex-col rounded-r-[14px] overflow-hidden">
                       <button
                         type="button"
                         class="flex-1 grid place-content-center border-l border-[#e7e7e7] text-[#cfcfcf] hover:text-black transition-colors duration-300 ease-in-out cursor-pointer"
-                        data-qty-plus-idx="{{ forloop.index0 }}"
+                        data-cart-qty-change
+                        data-change="plus"
                         aria-label="Increase quantity">
                         {% render 'icon-chevron-up' %}
                       </button>
                       <button
                         type="button"
                         class="flex-1 grid place-content-center border-l border-t border-[#e7e7e7] text-[#cfcfcf] hover:text-black transition-colors duration-300 ease-in-out cursor-pointer"
-                        data-qty-minus-idx="{{ forloop.index0 }}"
+                        data-cart-qty-change
+                        data-change="minus"
                         aria-label="Decrease quantity">
                         {% render 'icon-chevron-down' %}
                       </button>
@@ -83,12 +96,12 @@
                   </div>
                 </div>
                 <div class="col-span-2 text-right text-gray-900 font-medium">{{ item.final_line_price | money }}</div>
-                <!-- Hidden submit input bound to this row -->
                 <input
                   type="hidden"
                   name="updates[{{ item.key }}]"
                   value="{{ item.quantity }}"
-                  data-qty-submit-idx="{{ forloop.index0 }}">
+                  data-cart-qty-hidden
+                  data-line-key="{{ item.key }}">
               </div>
             {% endfor %}
           </div>
@@ -100,7 +113,8 @@
                 <input
                   type="submit"
                   class="inline-flex uppercase bg-[#F6F6F6] text-sm font-medium h-10 px-10 items-center justify-center cursor-pointer text-[#2A2A2A] rounded hover:border-gray-400"
-                  value="Update Cart">
+                  value="Update Cart"
+                  data-cart-update>
               </div>
               <div class="flex items-center justify-start md:justify-end gap-1">
                 <input class="h-10 w-50 border border-[#CCCCCC] rounded text-[#CCCCCC] px-3 text-sm" placeholder="Coupon Code">
@@ -238,13 +252,17 @@
       </form>
 
       <style>
+        [data-cart-root].is-loading {
+          opacity: 0.6;
+          pointer-events: none;
+        }
         /* Hide native number input controls; we use our own chevrons */
-        #qty-{{ section.id }}::-webkit-outer-spin-button,
-        #qty-{{ section.id }}::-webkit-inner-spin-button {
+        .cart-qty-input::-webkit-outer-spin-button,
+        .cart-qty-input::-webkit-inner-spin-button {
           -webkit-appearance: none;
           margin: 0;
         }
-        #qty-{{ section.id }} {
+        .cart-qty-input {
           -moz-appearance: textfield;
         }
         /* Hover shadow for small icon tiles (lower-left) */
