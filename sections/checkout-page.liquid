@@ -2,7 +2,7 @@
   assign section_id = 'section-' | append: section.id
 %}
 
-<section id="{{ section_id }}" class="bg-white py-20 px-15">
+<section id="{{ section_id }}" class="bg-white py-20 md:px-15 px-4">
   <div class="container mx-auto px-4">
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
 
@@ -600,6 +600,7 @@
       if (! dd) return;
       
 
+
       const btn = dd.querySelector('.dd-btn');
       const valueEl = dd.querySelector('.dd-value');
       const menu = dd.querySelector('.dd-menu');
@@ -623,6 +624,7 @@
           open();
         
 
+
       });
 
       dd.querySelectorAll('.dd-item').forEach((item) => {
@@ -631,6 +633,7 @@
           if (valueEl) 
             valueEl.textContent = item.textContent.trim();
           
+
 
           if (hiddenInput && item.dataset.value !== undefined) {
             hiddenInput.value = item.dataset.value;
@@ -644,12 +647,14 @@
           close();
         
 
+
       });
 
       btn.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') 
           close();
         
+
 
       });
     }

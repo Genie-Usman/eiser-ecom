@@ -1,4 +1,4 @@
-<section class="py-16 md:py-20 px-15">
+<section class="py-16 md:py-20 md:px-15 px-4">
   <div class="container mx-auto px-4">
     <div class="flex justify-center">
       <div class="text-center max-w-2xl px-4">
@@ -6,8 +6,8 @@
           <span class="text-black uppercase">{{ section.settings.heading | default: 'new products' }}</span>
         </h2>
         <div class="flex justify-center">
-            <div class="border-b border-gray-300 w-55"></div>
-          </div>
+          <div class="border-b border-gray-300 w-55"></div>
+        </div>
         <p class="text-gray-500 text-xs mt-5 md:text-[14px]">
           {{ section.settings.subheading | default: 'Bring called seed first of third give itself now ment' }}
         </p>
@@ -49,8 +49,7 @@
         </h4>
 
         {% if featured_product %}
-          <a href="{{ featured_product.url }}"
-             class="inline-block mb-5 mt-8 px-7 py-3 bg-[#71cd13] text-white uppercase font-medium text-xs md:text-xs rounded-md hover:bg-transparent hover:text-[#71cd13] border border-[#71cd13] transition-colors duration-300 no-underline">
+          <a href="{{ featured_product.url }}" class="inline-block mb-5 mt-8 px-7 py-3 bg-[#71cd13] text-white uppercase font-medium text-xs md:text-xs rounded-md hover:bg-transparent hover:text-[#71cd13] border border-[#71cd13] transition-colors duration-300 no-underline">
             {{ section.settings.feature_cta | default: 'Add to cart' }}
           </a>
         {% endif %}
@@ -63,7 +62,8 @@
             {% assign b_product = all_products[block.settings.product] %}
             <div {{ block.shopify_attributes }}>
               {% if b_product %}
-                {% render 'product-card-small', product: b_product %}
+                {% render 'product-card-small'
+                  , product: b_product %}
               {% else %}
                 {% render 'product-card-placeholder' %}
               {% endif %}
@@ -107,13 +107,11 @@
           "type": "product",
           "id": "feature_product",
           "label": "Feature product"
-        },
-        {
+        }, {
           "type": "text",
           "id": "feature_title",
           "label": "(Fallback) Feature title"
-        },
-        {
+        }, {
           "type": "text",
           "id": "feature_cta",
           "label": "Feature button label",
@@ -137,10 +135,15 @@
         {
           "name": "New Products",
           "blocks": [
-            { "type": "small_product" },
-            { "type": "small_product" },
-            { "type": "small_product" },
-            { "type": "small_product" }
+            {
+              "type": "small_product"
+            }, {
+              "type": "small_product"
+            }, {
+              "type": "small_product"
+            }, {
+              "type": "small_product"
+            }
           ]
         }
       ]

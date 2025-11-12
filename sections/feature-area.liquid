@@ -1,5 +1,5 @@
 <section>
-  <div class="container mx-auto px-15">
+  <div class="container mx-auto md:px-15 px-4">
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
       {% for block in section.blocks %}
         <div class="bg-white border border-gray-200 p-8 text-center hover:shadow-md transition-all duration-300">
@@ -33,47 +33,49 @@
 </section>
 
 {% schema %}
-{
-  "name": "Feature Area",
-  "settings": [],
-  "blocks": [
-    {
-      "type": "feature",
-      "name": "Feature",
-      "settings": [
-        {
-          "type": "image_picker",
-          "id": "icon_image",
-          "label": "Icon image (PNG/JPG preferred)",
-          "info": "If set, this image will be used instead of the SVG/html icon."
-        },
-
-        {
-          "type": "text",
-          "id": "title",
-          "label": "Title",
-          "default": "Money Back Guarantee"
-        },
-        {
-          "type": "text",
-          "id": "subtitle",
-          "label": "Subtitle",
-          "default": "We ensure 100% satisfaction"
-        }
-      ]
-    }
-  ],
-  "max_blocks": 8,
-  "presets": [
-    {
-      "name": "Feature Area",
-      "blocks": [
-        { "type": "feature" },
-        { "type": "feature" },
-        { "type": "feature" },
-        { "type": "feature" }
-      ]
-    }
-  ]
-}
+  {
+    "name": "Feature Area",
+    "settings": [],
+    "blocks": [
+      {
+        "type": "feature",
+        "name": "Feature",
+        "settings": [
+          {
+            "type": "image_picker",
+            "id": "icon_image",
+            "label": "Icon image (PNG/JPG preferred)",
+            "info": "If set, this image will be used instead of the SVG/html icon."
+          }, {
+            "type": "text",
+            "id": "title",
+            "label": "Title",
+            "default": "Money Back Guarantee"
+          }, {
+            "type": "text",
+            "id": "subtitle",
+            "label": "Subtitle",
+            "default": "We ensure 100% satisfaction"
+          }
+        ]
+      }
+    ],
+    "max_blocks": 8,
+    "presets": [
+      {
+        "name": "Feature Area",
+        "blocks": [
+          {
+            "type": "feature"
+          }, {
+            "type": "feature"
+          }, {
+            "type": "feature"
+          }, {
+            "type": "feature"
+          }
+        ]
+      }
+    ]
+  }
 {% endschema %}

@@ -1246,9 +1246,6 @@
   .px-10 {
     padding-inline: calc(var(--spacing) * 10);
   }
-  .px-15 {
-    padding-inline: calc(var(--spacing) * 15);
-  }
   .px-20 {
     padding-inline: calc(var(--spacing) * 20);
   }
@@ -2069,6 +2066,13 @@
   .md\:bg-bottom {
     @media (width >= 48rem) {
       background-position: bottom;
+    }
+  }
+  .md\:md\:px-15 {
+    @media (width >= 48rem) {
+      @media (width >= 48rem) {
+        padding-inline: calc(var(--spacing) * 15);
+      }
     }
   }
   .md\:px-12 {
