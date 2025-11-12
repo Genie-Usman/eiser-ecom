@@ -3,7 +3,7 @@
   id="shop-category"
   data-collection-url="{{ collection.url }}"
   data-section-id="{{ section.id }}">
-  <div class="container mx-auto px-20 mt-24">
+  <div class="container mx-auto md:px-20 px-4 mt-24">
     <div class="flex flex-col md:flex-row gap-8" data-collection-dynamic>
       <aside class="w-full md:w-1/4 bg-white p-">
         <div class="space-y-8">
@@ -148,130 +148,130 @@
             {% else %}
             {% comment %} Fallback: render default sidebar parts {% endcomment %}
             {% comment %} {% assign sidebar_defaults = 'sidebar_categories|sidebar_brand|sidebar_color|sidebar_price' | split: '|' %}
-                            {% for _t in sidebar_defaults %}
-                              {% case _t %}
-                                {% when 'sidebar_categories' %}
-                                  <div class="p-5 border border-gray-200">
-                                    <h3 class="ml-2 text-lg font-semibold text-gray-900">{{ section.settings.heading_categories | default: 'Browse Categories' }}</h3>
-                                    <div class="flex justify-center">
-                                      <div class="border-b border-[#71CD13] w-55 mt-2 mb-2"></div>
-                                    </div>
-                                    {% if collection %}
-                                      {% for sub_collection in collections %}
-                                        <label class="flex items-center gap-3 py-3 cursor-pointer group">
-                                          <input
-                                            type="radio"
-                                            name="category"
-                                            value="{{ sub_collection.handle }}"
-                                            class="radio-md"
-                                            data-category-radio
-                                            data-href="{{ sub_collection.url }}"
-                                            {% if sub_collection.handle == collection.handle %}
-                                            checked{% endif %} />
-                                          <span class="text-[#797979] text-sm group-hover:text-[#71cd13] transition-colors">{{ sub_collection.title }}</span>
-                                        </label>
-                                      {% endfor %}
-                                    {% else %}
-                                      {% for sub_collection in collections limit: 10 %}
-                                        <label class="flex items-center gap-3 py-3 cursor-pointer group">
-                                          <input
-                                            type="radio"
-                                            name="category"
-                                            value="{{ sub_collection.handle }}"
-                                            class="radio-md"
-                                            data-category-radio
-                                            data-href="{{ sub_collection.url }}" />
-                                          <span class="text-[#797979] text-sm group-hover:text-[#71cd13] transition-colors">{{ sub_collection.title }}</span>
-                                        </label>
-                                      {% endfor %}
-                                    {% endif %}
-                                  </div>
-                                {% when 'sidebar_brand' %}
-                                  {% if collection.filters.size > 0 %}
-                                    <div class="space-y-8">
-                                      {% for filter in collection.filters %}
-                                        {% case filter.type %}
-                                          {% when 'list' %}
-                                            <div class="p-5 border border-gray-200">
-                                              <h3 class="ml-2 text-lg font-semibold text-gray-900">{{ filter.label | escape }}</h3>
-                                              <div class="flex justify-center">
-                                                <div class="border-b border-[#71CD13] w-55 mt-2 mb-2"></div>
-                                              </div>
-                                              <div class="space-y-3">
-                                                {% for value in filter.values %}
-                                                  <label class="flex items-center gap-3 py-1.5 cursor-pointer group">
-                                                    <input
-                                                      type="checkbox"
-                                                      class="radio-md"
-                                                      data-facet-checkbox
-                                                      data-url-to-add="{{ value.url_to_add }}"
-                                                      data-url-to-remove="{{ value.url_to_remove }}"
-                                                      {% if value.active %}
-                                                      checked{% endif %}
-                                                      {% if value.count == 0 and value.active == false %}
-                                                      disabled{% endif %} />
-                                                    <span class="text-[#797979] text-sm group-hover:text-[#71cd13] transition-colors">
-                                                      {{ value.label | escape }}
-                                                      {% if value.count > 0 %}
-                                                        <span class="text-xs text-gray-400">({{ value.count }})</span>
-                                                      {% endif %}
-                                                    </span>
-                                                  </label>
-                                                {% endfor %}
-                                              </div>
-                                            </div>
-                                          {% when 'price_range' %}
-                                            <div class="p-5 border border-gray-200">
-                                              <h3 class="ml-2 text-lg font-semibold text-gray-900">{{ filter.label | default: section.settings.heading_price | default: 'Price Filter' }}</h3>
-                                              <div class="flex justify-center">
-                                                <div class="border-b border-[#71CD13] w-55 mt-2 mb-2"></div>
-                                              </div>
-                                              {% assign min_value = 0 %}
-                                              {% assign max_value = filter.range_max %}
-                                              {% if filter.min_value.value %}
-                                                {% assign min_value = filter.min_value.value %}{% endif %}
-                                              {% if filter.max_value.value %}
-                                                {% assign max_value = filter.max_value.value %}{% endif %}
-                                              <div
-                                                id="price-box"
-                                                class="range-box"
-                                                data-max="{{ filter.range_max }}">
-                                                <div class="range-wrap relative h-2 bg-white rounded">
-                                                  <div class="absolute left-0 right-0 top-0 h-[7px] bg-[#E8F0F2] rounded"></div>
-                                                  <div
-                                                    id="price-progress"
-                                                    class="range-progress absolute top-0 h-[7px] bg-transparent rounded"
-                                                    style="left:0%; width:100%"></div>
-                                                  <input
-                                                    type="range"
-                                                    id="price-min"
-                                                    min="0"
-                                                    max="{{ filter.range_max }}"
-                                                    step="1"
-                                                    value="{{ min_value }}"
-                                                    class="range-input min z-99">
-                                                  <input
-                                                    type="range"
-                                                    id="price-max"
-                                                    min="0"
-                                                    max="{{ filter.range_max }}"
-                                                    step="1"
-                                                    value="{{ max_value }}"
-                                                    class="range-input max">
+                                          {% for _t in sidebar_defaults %}
+                                            {% case _t %}
+                                              {% when 'sidebar_categories' %}
+                                                <div class="p-5 border border-gray-200">
+                                                  <h3 class="ml-2 text-lg font-semibold text-gray-900">{{ section.settings.heading_categories | default: 'Browse Categories' }}</h3>
+                                                  <div class="flex justify-center">
+                                                    <div class="border-b border-[#71CD13] w-55 mt-2 mb-2"></div>
+                                                  </div>
+                                                  {% if collection %}
+                                                    {% for sub_collection in collections %}
+                                                      <label class="flex items-center gap-3 py-3 cursor-pointer group">
+                                                        <input
+                                                          type="radio"
+                                                          name="category"
+                                                          value="{{ sub_collection.handle }}"
+                                                          class="radio-md"
+                                                          data-category-radio
+                                                          data-href="{{ sub_collection.url }}"
+                                                          {% if sub_collection.handle == collection.handle %}
+                                                          checked{% endif %} />
+                                                        <span class="text-[#797979] text-sm group-hover:text-[#71cd13] transition-colors">{{ sub_collection.title }}</span>
+                                                      </label>
+                                                    {% endfor %}
+                                                  {% else %}
+                                                    {% for sub_collection in collections limit: 10 %}
+                                                      <label class="flex items-center gap-3 py-3 cursor-pointer group">
+                                                        <input
+                                                          type="radio"
+                                                          name="category"
+                                                          value="{{ sub_collection.handle }}"
+                                                          class="radio-md"
+                                                          data-category-radio
+                                                          data-href="{{ sub_collection.url }}" />
+                                                        <span class="text-[#797979] text-sm group-hover:text-[#71cd13] transition-colors">{{ sub_collection.title }}</span>
+                                                      </label>
+                                                    {% endfor %}
+                                                  {% endif %}
                                                 </div>
-                                                <p class="mt-4 text-gray-700 text-base">
-                                                  Price :
-                                                  <span id="price-min-label">{{ cart.currency.symbol }} {{ min_value }}</span>
-                                                  -
-                                                  <span id="price-max-label">{{ cart.currency.symbol }} {{ max_value }}</span>
-                                                </p>
-                                              </div>
-                                            </div>
-                                        {% endcase %}
-                                      {% endfor %}
-                                    </div>
-                                  {% endif %}
-                              {% when 'sidebar_color' %} {% endcomment %}
+                                              {% when 'sidebar_brand' %}
+                                                {% if collection.filters.size > 0 %}
+                                                  <div class="space-y-8">
+                                                    {% for filter in collection.filters %}
+                                                      {% case filter.type %}
+                                                        {% when 'list' %}
+                                                          <div class="p-5 border border-gray-200">
+                                                            <h3 class="ml-2 text-lg font-semibold text-gray-900">{{ filter.label | escape }}</h3>
+                                                            <div class="flex justify-center">
+                                                              <div class="border-b border-[#71CD13] w-55 mt-2 mb-2"></div>
+                                                            </div>
+                                                            <div class="space-y-3">
+                                                              {% for value in filter.values %}
+                                                                <label class="flex items-center gap-3 py-1.5 cursor-pointer group">
+                                                                  <input
+                                                                    type="checkbox"
+                                                                    class="radio-md"
+                                                                    data-facet-checkbox
+                                                                    data-url-to-add="{{ value.url_to_add }}"
+                                                                    data-url-to-remove="{{ value.url_to_remove }}"
+                                                                    {% if value.active %}
+                                                                    checked{% endif %}
+                                                                    {% if value.count == 0 and value.active == false %}
+                                                                    disabled{% endif %} />
+                                                                  <span class="text-[#797979] text-sm group-hover:text-[#71cd13] transition-colors">
+                                                                    {{ value.label | escape }}
+                                                                    {% if value.count > 0 %}
+                                                                      <span class="text-xs text-gray-400">({{ value.count }})</span>
+                                                                    {% endif %}
+                                                                  </span>
+                                                                </label>
+                                                              {% endfor %}
+                                                            </div>
+                                                          </div>
+                                                        {% when 'price_range' %}
+                                                          <div class="p-5 border border-gray-200">
+                                                            <h3 class="ml-2 text-lg font-semibold text-gray-900">{{ filter.label | default: section.settings.heading_price | default: 'Price Filter' }}</h3>
+                                                            <div class="flex justify-center">
+                                                              <div class="border-b border-[#71CD13] w-55 mt-2 mb-2"></div>
+                                                            </div>
+                                                            {% assign min_value = 0 %}
+                                                            {% assign max_value = filter.range_max %}
+                                                            {% if filter.min_value.value %}
+                                                              {% assign min_value = filter.min_value.value %}{% endif %}
+                                                            {% if filter.max_value.value %}
+                                                              {% assign max_value = filter.max_value.value %}{% endif %}
+                                                            <div
+                                                              id="price-box"
+                                                              class="range-box"
+                                                              data-max="{{ filter.range_max }}">
+                                                              <div class="range-wrap relative h-2 bg-white rounded">
+                                                                <div class="absolute left-0 right-0 top-0 h-[7px] bg-[#E8F0F2] rounded"></div>
+                                                                <div
+                                                                  id="price-progress"
+                                                                  class="range-progress absolute top-0 h-[7px] bg-transparent rounded"
+                                                                  style="left:0%; width:100%"></div>
+                                                                <input
+                                                                  type="range"
+                                                                  id="price-min"
+                                                                  min="0"
+                                                                  max="{{ filter.range_max }}"
+                                                                  step="1"
+                                                                  value="{{ min_value }}"
+                                                                  class="range-input min z-99">
+                                                                <input
+                                                                  type="range"
+                                                                  id="price-max"
+                                                                  min="0"
+                                                                  max="{{ filter.range_max }}"
+                                                                  step="1"
+                                                                  value="{{ max_value }}"
+                                                                  class="range-input max">
+                                                              </div>
+                                                              <p class="mt-4 text-gray-700 text-base">
+                                                                Price :
+                                                                <span id="price-min-label">{{ cart.currency.symbol }} {{ min_value }}</span>
+                                                                -
+                                                                <span id="price-max-label">{{ cart.currency.symbol }} {{ max_value }}</span>
+                                                              </p>
+                                                            </div>
+                                                          </div>
+                                                      {% endcase %}
+                                                    {% endfor %}
+                                                  </div>
+                                                {% endif %}
+                                          {% when 'sidebar_color' %} {% endcomment %}
             {%- comment -%} Filters rendered above {%- endcomment -%}
             {% comment %} {% when 'sidebar_price' %} {% endcomment %}
             {%- comment -%} Filters rendered above {%- endcomment -%}
@@ -654,301 +654,357 @@
   {% endstylesheet %}
 
   {% javascript %}
-  document.addEventListener('DOMContentLoaded', function() {
-    var section = document.getElementById('shop-category');
-    if (!section) return;
+    document.addEventListener('DOMContentLoaded', function() {
+      var section = document.getElementById('shop-category');
+      if (! section) return;
+      
 
-    var sectionId = section.getAttribute('data-section-id');
-    var dynamic = section.querySelector('[data-collection-dynamic]');
-    if (!sectionId || !dynamic) return;
+      var sectionId = section.getAttribute('data-section-id');
+      var dynamic = section.querySelector('[data-collection-dynamic]');
+      if (! sectionId || ! dynamic) return;
+      
 
-    var parser = new DOMParser();
-    var docClickBound = false;
-    var requestSerial = 0;
+      var parser = new DOMParser();
+      var docClickBound = false;
+      var requestSerial = 0;
 
-    function toggleLoading(state) {
-      section.classList.toggle('is-loading', !!state);
-    }
-
-    function fetchCollection(url) {
-      if (!url) return;
-
-      var fetchId = ++requestSerial;
-
-      var requestUrl = new URL(url, window.location.origin);
-      var historyUrl = requestUrl.pathname + requestUrl.search;
-      var renderUrl = new URL(requestUrl.toString());
-      renderUrl.searchParams.set('section_id', sectionId);
-
-      toggleLoading(true);
-
-      fetch(renderUrl.toString(), { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
-        .then(function(response) {
-          if (!response.ok) throw new Error('Failed to fetch collection');
-          return response.text();
-        })
-        .then(function(html) {
-          if (fetchId !== requestSerial) return;
-          var doc = parser.parseFromString(html, 'text/html');
-          var fresh = doc.querySelector('[data-collection-dynamic]');
-          if (!fresh) throw new Error('Missing dynamic container');
-          dynamic.innerHTML = fresh.innerHTML;
-          window.history.replaceState({}, '', historyUrl);
-          section.setAttribute('data-collection-url', requestUrl.pathname);
-          bindDynamic();
-        })
-        .catch(function(error) {
-          if (fetchId !== requestSerial) return;
-          console.error(error);
-          window.location.href = url;
-        })
-        .finally(function() {
-          if (fetchId === requestSerial) {
-            toggleLoading(false);
-          }
-        });
-    }
-
-    function setSearchParams(params) {
-      var url = new URL(window.location.href);
-      Object.keys(params).forEach(function(key) {
-        var value = params[key];
-        if (value === null || value === undefined || value === '') {
-          url.searchParams.delete(key);
-        } else {
-          url.searchParams.set(key, value);
-        }
-      });
-      fetchCollection(url.toString());
-    }
-
-    var sortMap = {
-      'Default sorting': null,
-      'Price: Low to High': 'price-ascending',
-      'Price: High to Low': 'price-descending',
-      'Newest': 'created-descending'
-    };
-
-    function handleSort(label) {
-      var code = sortMap[label] || null;
-      setSearchParams({ 'sort_by': code });
-    }
-
-    function handlePageSize(label) {
-      var lower = label.toLowerCase();
-      var match = label.match(/(\d+)/);
-      var value = '';
-      if (lower.indexOf('all') !== -1) {
-        value = 'all';
-      } else if (match) {
-        value = match[1];
-      }
-      setSearchParams({ 'page_size': value || null });
-    }
-
-    function bindCategoryRadios() {
-      dynamic.querySelectorAll('[data-category-radio]').forEach(function(input) {
-        input.addEventListener('change', function() {
-          if (input.checked && input.dataset.href) {
-            fetchCollection(input.dataset.href);
-          }
-        });
-      });
-    }
-
-    function bindFacetCheckboxes() {
-      dynamic.querySelectorAll('input[data-facet-checkbox]').forEach(function(input) {
-        input.addEventListener('change', function() {
-          var url = input.checked ? input.getAttribute('data-url-to-add') : input.getAttribute('data-url-to-remove');
-          if (url) fetchCollection(url);
-        });
-      });
-    }
-
-    function bindPagination() {
-      dynamic.querySelectorAll('.default-pagination a, .pagination a').forEach(function(link) {
-        link.addEventListener('click', function(event) {
-          event.preventDefault();
-          fetchCollection(link.href);
-        });
-      });
-    }
-
-    function initDualRange() {
-      var box = dynamic.querySelector('#price-box');
-      if (!box) return;
-
-      var maxAllowed = parseInt(box.dataset.max || '1000', 10);
-      var minInput = dynamic.querySelector('#price-min');
-      var maxInput = dynamic.querySelector('#price-max');
-      var prog = dynamic.querySelector('#price-progress');
-      var minLabel = dynamic.querySelector('#price-min-label');
-      var maxLabel = dynamic.querySelector('#price-max-label');
-      var currency = box.getAttribute('data-currency') || '';
-      if (!minInput || !maxInput || !prog) return;
-
-      function format(value) {
-        var prefix = currency ? (currency + ' ') : '';
-        return prefix + value;
+      function toggleLoading(state) {
+        section.classList.toggle('is-loading', !! state);
       }
 
-      function setFromParams() {
+      function fetchCollection(url) {
+        if (! url) return;
+        
+
+        var fetchId = ++ requestSerial;
+
+        var requestUrl = new URL(url, window.location.origin);
+        var historyUrl = requestUrl.pathname + requestUrl.search;
+        var renderUrl = new URL(requestUrl.toString());
+        renderUrl.searchParams.set('section_id', sectionId);
+
+        toggleLoading(true);
+
+        fetch(renderUrl.toString(), {
+          headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+          }
+        })
+          .then(function(response) {
+            if (! response.ok) 
+              throw new Error('Failed to fetch collection');
+            
+            return response.text();
+          })
+          .then(function(html) {
+            if (fetchId !== requestSerial) return;
+            
+            var doc = parser.parseFromString(html, 'text/html');
+            var fresh = doc.querySelector('[data-collection-dynamic]');
+            if (! fresh) 
+              throw new Error('Missing dynamic container');
+            
+            dynamic.innerHTML = fresh.innerHTML;
+            window.history.replaceState({}, '', historyUrl);
+            section.setAttribute('data-collection-url', requestUrl.pathname);
+            bindDynamic();
+          })
+          .catch(function(error) {
+            if (fetchId !== requestSerial) return;
+            
+            console.error(error);
+            window.location.href = url;
+          })
+          . finally(function() {
+            if (fetchId === requestSerial) {
+              toggleLoading(false);
+            }
+          });
+      }
+
+      function setSearchParams(params) {
         var url = new URL(window.location.href);
-        var gte = parseInt(url.searchParams.get('filter.v.price.gte') || '0', 10);
-        var lte = parseInt(url.searchParams.get('filter.v.price.lte') || String(maxAllowed), 10);
-        if (!isNaN(gte)) {
-          minInput.value = Math.max(0, Math.min(maxAllowed, gte));
-        }
-        if (!isNaN(lte)) {
-          maxInput.value = Math.max(0, Math.min(maxAllowed, lte));
-        }
+        Object.keys(params).forEach(function(key) {
+          var value = params[key];
+          if (value === null || value === undefined || value === '') {
+            url.searchParams.delete(key);
+          } else {
+            url.searchParams.set(key, value);
+          }
+        });
+        fetchCollection(url.toString());
       }
 
-      function updateUI() {
-        var a = parseInt(minInput.value, 10);
-        var b = parseInt(maxInput.value, 10);
-        var minVal = Math.min(a, b);
-        var maxVal = Math.max(a, b);
-        minInput.value = minVal;
-        maxInput.value = maxVal;
-        var left = (minVal / maxAllowed) * 100;
-        var width = ((maxVal - minVal) / maxAllowed) * 100;
-        prog.style.left = left + '%';
-        prog.style.width = width + '%';
-        if (minLabel) minLabel.textContent = format(minVal);
-        if (maxLabel) maxLabel.textContent = format(maxVal);
+      var sortMap = {
+        'Default sorting': null,
+        'Price: Low to High': 'price-ascending',
+        'Price: High to Low': 'price-descending',
+        'Newest': 'created-descending'
+      };
+
+      function handleSort(label) {
+        var code = sortMap[label] || null;
+        setSearchParams({'sort_by': code});
       }
 
-      function submitParams() {
-        var minVal = parseInt(minInput.value, 10);
-        var maxVal = parseInt(maxInput.value, 10);
+      function handlePageSize(label) {
+        var lower = label.toLowerCase();
+        var match = label.match(/(\d+)/);
+        var value = '';
+        if (lower.indexOf('all') !== -1) {
+          value = 'all';
+        } else if (match) {
+          value = match[1];
+        }
         setSearchParams({
-          'filter.v.price.gte': Math.max(0, minVal || 0),
-          'filter.v.price.lte': Math.max(0, maxVal || 0)
+          'page_size': value || null
         });
       }
 
-      setFromParams();
-      updateUI();
-
-      ['input', 'change', 'pointerdown', 'mousedown', 'touchstart'].forEach(function(evt) {
-        minInput.addEventListener(evt, function() {
-          minInput.style.zIndex = '1000';
-          maxInput.style.zIndex = '10';
-          updateUI();
-        });
-        maxInput.addEventListener(evt, function() {
-          maxInput.style.zIndex = '1000';
-          minInput.style.zIndex = '10';
-          updateUI();
-        });
-      });
-
-      minInput.addEventListener('change', submitParams);
-      maxInput.addEventListener('change', submitParams);
-    }
-
-    function initCustomDropdowns() {
-      dynamic.querySelectorAll('.dd').forEach(function(dd) {
-        var btn = dd.querySelector('.dd-btn');
-        var menu = dd.querySelector('.dd-menu');
-        if (!btn || !menu) return;
-
-        btn.addEventListener('click', function(event) {
-          event.stopPropagation();
-          var open = dd.getAttribute('aria-open') === 'true';
-          dd.setAttribute('aria-open', open ? 'false' : 'true');
-          btn.setAttribute('aria-expanded', open ? 'false' : 'true');
-        });
-
-        dd.querySelectorAll('.dd-item').forEach(function(item) {
-          item.addEventListener('click', function() {
-            var span = dd.querySelector('.dd-btn span');
-            if (span) span.textContent = item.textContent.trim();
-            dd.setAttribute('aria-open', 'false');
-            btn.setAttribute('aria-expanded', 'false');
+      function bindCategoryRadios() {
+        dynamic.querySelectorAll('[data-category-radio]').forEach(function(input) {
+          input.addEventListener('change', function() {
+            if (input.checked && input.dataset.href) {
+              fetchCollection(input.dataset.href);
+            }
           });
         });
-      });
+      }
 
-      if (!docClickBound) {
-        document.addEventListener('click', function(event) {
-          if (!dynamic.contains(event.target)) {
-            dynamic.querySelectorAll('.dd[aria-open="true"]').forEach(function(dd) {
-              dd.setAttribute('aria-open', 'false');
-              var btn = dd.querySelector('.dd-btn');
-              if (btn) btn.setAttribute('aria-expanded', 'false');
-            });
+      function bindFacetCheckboxes() {
+        dynamic.querySelectorAll('input[data-facet-checkbox]').forEach(function(input) {
+          input.addEventListener('change', function() {
+            var url = input.checked
+              ? input.getAttribute('data-url-to-add')
+              : input.getAttribute('data-url-to-remove');
+            if (url) 
+              fetchCollection(url);
+            
+          });
+        });
+      }
+
+      function bindPagination() {
+        dynamic.querySelectorAll('.default-pagination a, .pagination a').forEach(function(link) {
+          link.addEventListener('click', function(event) {
+            event.preventDefault();
+            fetchCollection(link.href);
+          });
+        });
+      }
+
+      function initDualRange() {
+        var box = dynamic.querySelector('#price-box');
+        if (! box) return;
+        
+
+        var maxAllowed = parseInt(box.dataset.max || '1000', 10);
+        var minInput = dynamic.querySelector('#price-min');
+        var maxInput = dynamic.querySelector('#price-max');
+        var prog = dynamic.querySelector('#price-progress');
+        var minLabel = dynamic.querySelector('#price-min-label');
+        var maxLabel = dynamic.querySelector('#price-max-label');
+        var currency = box.getAttribute('data-currency') || '';
+        if (! minInput || ! maxInput || ! prog) return;
+        
+
+        function format(value) {
+          var prefix = currency
+            ? (currency + ' ')
+            : '';
+          return prefix + value;
+        }
+
+        function setFromParams() {
+          var url = new URL(window.location.href);
+          var gte = parseInt(url.searchParams.get('filter.v.price.gte') || '0', 10);
+          var lte = parseInt(url.searchParams.get('filter.v.price.lte') || String(maxAllowed), 10);
+          if (!isNaN(gte)) {
+            minInput.value = Math.max(0, Math.min(maxAllowed, gte));
           }
+          if (!isNaN(lte)) {
+            maxInput.value = Math.max(0, Math.min(maxAllowed, lte));
+          }
+        }
+
+        function updateUI() {
+          var a = parseInt(minInput.value, 10);
+          var b = parseInt(maxInput.value, 10);
+          var minVal = Math.min(a, b);
+          var maxVal = Math.max(a, b);
+          minInput.value = minVal;
+          maxInput.value = maxVal;
+          var left = (minVal / maxAllowed) * 100;
+          var width = ((maxVal - minVal) / maxAllowed) * 100;
+          prog.style.left = left + '%';
+          prog.style.width = width + '%';
+          if (minLabel) 
+            minLabel.textContent = format(minVal);
+          
+          if (maxLabel) 
+            maxLabel.textContent = format(maxVal);
+          
+        }
+
+        function submitParams() {
+          var minVal = parseInt(minInput.value, 10);
+          var maxVal = parseInt(maxInput.value, 10);
+          setSearchParams({
+            'filter.v.price.gte': Math.max(0, minVal || 0),
+            'filter.v.price.lte': Math.max(0, maxVal || 0)
+          });
+        }
+
+        setFromParams();
+        updateUI();
+
+        [
+          'input',
+          'change',
+          'pointerdown',
+          'mousedown',
+          'touchstart'
+        ].forEach(function(evt) {
+          minInput.addEventListener(evt, function() {
+            minInput.style.zIndex = '1000';
+            maxInput.style.zIndex = '10';
+            updateUI();
+          });
+          maxInput.addEventListener(evt, function() {
+            maxInput.style.zIndex = '1000';
+            minInput.style.zIndex = '10';
+            updateUI();
+          });
         });
-        docClickBound = true;
+
+        minInput.addEventListener('change', submitParams);
+        maxInput.addEventListener('change', submitParams);
       }
-    }
 
-    function initDropdownLabels() {
-      var url = new URL(window.location.href);
-      var sort = url.searchParams.get('sort_by');
-      var sortReverse = {
-        'price-ascending': 'Price: Low to High',
-        'price-descending': 'Price: High to Low',
-        'created-descending': 'Newest'
-      };
-      var sortLabel = sortReverse[sort] || 'Default sorting';
-      var sortDd = dynamic.querySelector('.dd.select-wide');
-      if (sortDd) {
-        var btn = sortDd.querySelector('.dd-btn span');
-        if (btn) btn.textContent = sortLabel;
-        sortDd.querySelectorAll('.dd-item').forEach(function(item) {
-          item.classList.toggle('is-active', item.textContent.trim() === sortLabel);
+      function initCustomDropdowns() {
+        dynamic.querySelectorAll('.dd').forEach(function(dd) {
+          var btn = dd.querySelector('.dd-btn');
+          var menu = dd.querySelector('.dd-menu');
+          if (! btn || ! menu) return;
+          
+
+          btn.addEventListener('click', function(event) {
+            event.stopPropagation();
+            var open = dd.getAttribute('aria-open') === 'true';
+            dd.setAttribute(
+              'aria-open',
+              open
+                ? 'false'
+                : 'true'
+            );
+            btn.setAttribute(
+              'aria-expanded',
+              open
+                ? 'false'
+                : 'true'
+            );
+          });
+
+          dd.querySelectorAll('.dd-item').forEach(function(item) {
+            item.addEventListener('click', function() {
+              var span = dd.querySelector('.dd-btn span');
+              if (span) 
+                span.textContent = item.textContent.trim();
+              
+              dd.setAttribute('aria-open', 'false');
+              btn.setAttribute('aria-expanded', 'false');
+            });
+          });
+        });
+
+        if (! docClickBound) {
+          document.addEventListener('click', function(event) {
+            if (! dynamic.contains(event.target)) {
+              dynamic.querySelectorAll('.dd[aria-open="true"]').forEach(function(dd) {
+                dd.setAttribute('aria-open', 'false');
+                var btn = dd.querySelector('.dd-btn');
+                if (btn) 
+                  btn.setAttribute('aria-expanded', 'false');
+                
+              });
+            }
+          });
+          docClickBound = true;
+        }
+      }
+
+      function initDropdownLabels() {
+        var url = new URL(window.location.href);
+        var sort = url.searchParams.get('sort_by');
+        var sortReverse = {
+          'price-ascending': 'Price: Low to High',
+          'price-descending': 'Price: High to Low',
+          'created-descending': 'Newest'
+        };
+        var sortLabel = sortReverse[sort] || 'Default sorting';
+        var sortDd = dynamic.querySelector('.dd.select-wide');
+        if (sortDd) {
+          var btn = sortDd.querySelector('.dd-btn span');
+          if (btn) 
+            btn.textContent = sortLabel;
+          
+          sortDd.querySelectorAll('.dd-item').forEach(function(item) {
+            item.classList.toggle('is-active', item.textContent.trim() === sortLabel);
+          });
+        }
+
+        var size = url.searchParams.get('page_size');
+        var sizeLabel = size === 'all'
+          ? 'Show All'
+          : (
+            size
+              ? ('Show ' + size)
+              : 'Show 12'
+          );
+        var sizeDd = dynamic.querySelector('.dd.select-narrow');
+        if (sizeDd) {
+          var span = sizeDd.querySelector('.dd-btn span');
+          if (span) 
+            span.textContent = sizeLabel;
+          
+          sizeDd.querySelectorAll('.dd-item').forEach(function(item) {
+            item.classList.toggle('is-active', item.textContent.trim() === sizeLabel);
+          });
+        }
+      }
+
+      function bindSortShowItems() {
+        dynamic.querySelectorAll('[data-sort-option]').forEach(function(item) {
+          item.addEventListener('click', function() {
+            var label = item.getAttribute('data-sort-option');
+            handleSort(label);
+          });
+        });
+
+        dynamic.querySelectorAll('[data-show-option]').forEach(function(item) {
+          item.addEventListener('click', function() {
+            var label = item.getAttribute('data-show-option');
+            handlePageSize(label);
+          });
         });
       }
 
-      var size = url.searchParams.get('page_size');
-      var sizeLabel = size === 'all'
-        ? 'Show All'
-        : (size ? ('Show ' + size) : 'Show 12');
-      var sizeDd = dynamic.querySelector('.dd.select-narrow');
-      if (sizeDd) {
-        var span = sizeDd.querySelector('.dd-btn span');
-        if (span) span.textContent = sizeLabel;
-        sizeDd.querySelectorAll('.dd-item').forEach(function(item) {
-          item.classList.toggle('is-active', item.textContent.trim() === sizeLabel);
-        });
+      function bindDynamic() {
+        bindCategoryRadios();
+        bindFacetCheckboxes();
+        bindPagination();
+        bindSortShowItems();
+        initCustomDropdowns();
+        initDualRange();
+        initDropdownLabels();
       }
-    }
 
-    function bindSortShowItems() {
-      dynamic.querySelectorAll('[data-sort-option]').forEach(function(item) {
-        item.addEventListener('click', function() {
-          var label = item.getAttribute('data-sort-option');
-          handleSort(label);
-        });
-      });
+      window.handleSortChange = handleSort;
+      window.handleShowChange = handlePageSize;
 
-      dynamic.querySelectorAll('[data-show-option]').forEach(function(item) {
-        item.addEventListener('click', function() {
-          var label = item.getAttribute('data-show-option');
-          handlePageSize(label);
-        });
-      });
-    }
-
-    function bindDynamic() {
-      bindCategoryRadios();
-      bindFacetCheckboxes();
-      bindPagination();
-      bindSortShowItems();
-      initCustomDropdowns();
-      initDualRange();
-      initDropdownLabels();
-    }
-
-    window.handleSortChange = handleSort;
-    window.handleShowChange = handlePageSize;
-
-    bindDynamic();
-  });
- {% endjavascript %}
+      bindDynamic();
+    });
+  {% endjavascript %}
 
   {% schema %}
     {
