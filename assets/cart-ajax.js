@@ -1,284 +1,283 @@
-(function () {
+(() => {
   'use strict';
 
-  var cartBusy = false;
+  let cartBusy = false;
+  let qtyChangeTimeout = null;
 
-  function dispatch(name, detail) {
+  const dispatch = (name, detail) => {
     try {
-      window.dispatchEvent(new CustomEvent(name, { detail: detail }));
+      window.dispatchEvent(new CustomEvent(name, { detail }));
     } catch (err) {
-      /* noop */
+      // noop for old browsers that may not support CustomEvent constructor
     }
-  }
+  };
 
-  function jsonRequest(url, options) {
-    options = options || {};
-    options.headers = Object.assign({ 'Accept': 'application/json' }, options.headers || {});
+  const jsonRequest = async (url, options = {}) => {
+    options.headers = Object.assign({ Accept: 'application/json' }, options.headers || {});
 
     if (options.body && typeof options.body !== 'string') {
       options.headers['Content-Type'] = 'application/json';
       options.body = JSON.stringify(options.body);
     }
 
-    return fetch(url, options).then(function (response) {
-      if (!response.ok) {
-        return response.json().catch(function () {
-          throw new Error('Request failed');
-        }).then(function (payload) {
-          var err = new Error(payload && payload.description ? payload.description : 'Request failed');
-          err.payload = payload;
-          throw err;
-        });
-      }
-      return response.json();
-    });
-  }
+    const response = await fetch(url, options);
 
-  function updateCountDisplay(count) {
-    var badge = document.querySelector('[data-cart-count]');
+    if (!response.ok) {
+      // try to read JSON payload; if that fails, throw generic error
+      try {
+        const payload = await response.json();
+        const err = new Error(payload?.description ?? 'Request failed');
+        err.payload = payload;
+        throw err;
+      } catch {
+        throw new Error('Request failed');
+      }
+    }
+
+    return response.json();
+  };
+
+  const updateCountDisplay = (count) => {
+    const badge = document.querySelector('[data-cart-count]');
     if (!badge) return;
-    var value = Number(count) || 0;
+    const value = Number(count) || 0;
     if (value <= 0) {
       badge.textContent = '0';
       badge.classList.add('hidden');
     } else {
-      badge.textContent = value;
+      badge.textContent = `${value}`;
       badge.classList.remove('hidden');
     }
-  }
+  };
 
-  function getCart() {
-    return jsonRequest('/cart.js');
-  }
+  const getCart = () => jsonRequest('/cart.js');
 
-  function refreshCount() {
-    return getCart()
-      .then(function (cart) {
-        updateCountDisplay(cart.item_count);
-        return cart.item_count;
-      })
-      .catch(function () {
-        /* ignore */
-      });
-  }
+  const refreshCount = async () => {
+    try {
+      const cart = await getCart();
+      updateCountDisplay(cart.item_count);
+      return cart.item_count;
+    } catch {
+      // ignore errors
+    }
+  };
 
-  function add(payload) {
-    payload = payload || {};
+  const add = async (payload = {}) => {
     if (!payload.id) return Promise.reject(new Error('Variant id is required.'));
 
-    dispatch('cart:request', { action: 'add', payload: payload });
+    dispatch('cart:request', { action: 'add', payload });
 
-    return jsonRequest('/cart/add.js', {
+    await jsonRequest('/cart/add.js', {
       method: 'POST',
       body: {
         id: payload.id,
-        quantity: payload.quantity || 1,
-        properties: payload.properties || undefined
+        quantity: payload.quantity ?? 1,
+        properties: payload.properties ?? undefined
       }
-    }).then(function () {
-      return getCart();
-    }).then(function (cart) {
-      updateCountDisplay(cart.item_count);
-      dispatch('cart:updated', { action: 'add', cart: cart, payload: payload });
-      return cart;
     });
-  }
 
-  function change(payload) {
-    payload = payload || {};
+    const cart = await getCart();
+    updateCountDisplay(cart.item_count);
+    dispatch('cart:updated', { action: 'add', cart, payload });
+    return cart;
+  };
+
+  const change = async (payload = {}) => {
     if (typeof payload.id === 'undefined') {
       return Promise.reject(new Error('Line item key is required.'));
     }
 
-    dispatch('cart:request', { action: 'change', payload: payload });
+    dispatch('cart:request', { action: 'change', payload });
 
-    return jsonRequest('/cart/change.js', {
+    const cart = await jsonRequest('/cart/change.js', {
       method: 'POST',
       body: {
         id: payload.id,
         quantity: typeof payload.quantity === 'number' ? payload.quantity : payload.quantity || 0
       }
-    }).then(function (cart) {
-      updateCountDisplay(cart.item_count);
-      dispatch('cart:updated', { action: 'change', cart: cart, payload: payload });
-      return cart;
     });
-  }
 
-  function updateCart(updates) {
-    updates = updates || {};
+    updateCountDisplay(cart.item_count);
+    dispatch('cart:updated', { action: 'change', cart, payload });
+    return cart;
+  };
+
+  const updateCart = async (updates = {}) => {
     dispatch('cart:request', { action: 'update', payload: updates });
-    return jsonRequest('/cart/update.js', {
+
+    const cart = await jsonRequest('/cart/update.js', {
       method: 'POST',
-      body: { updates: updates }
-    }).then(function (cart) {
-      updateCountDisplay(cart.item_count);
-      dispatch('cart:updated', { action: 'update', cart: cart, payload: updates });
-      return cart;
+      body: { updates }
     });
-  }
 
-  function clearCart() {
+    updateCountDisplay(cart.item_count);
+    dispatch('cart:updated', { action: 'update', cart, payload: updates });
+    return cart;
+  };
+
+  const clearCart = async () => {
     dispatch('cart:request', { action: 'clear' });
-    return jsonRequest('/cart/clear.js', { method: 'POST' }).then(function (cart) {
-      updateCountDisplay(0);
-      dispatch('cart:updated', { action: 'clear', cart: cart });
-      return cart;
-    });
-  }
 
-  function fetchSections(sectionIds, url) {
-    if (!sectionIds || !sectionIds.length) return Promise.resolve({});
-    var target = (url || window.location.pathname) + '?sections=' + sectionIds.join(',');
-    return fetch(target, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
-      .then(function (response) {
-        if (!response.ok) throw new Error('Section request failed');
-        return response.json();
-      });
-  }
+    const cart = await jsonRequest('/cart/clear.js', { method: 'POST' });
 
-  function renderSection(sectionId, url) {
-    var target = (url || window.location.pathname) + '?section_id=' + sectionId;
-    return fetch(target, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
-      .then(function (response) {
-        if (!response.ok) throw new Error('Section render failed');
-        return response.text();
-      });
-  }
+    updateCountDisplay(0);
+    dispatch('cart:updated', { action: 'clear', cart });
+    return cart;
+  };
 
-  function getCartRoot() {
-    return document.querySelector('[data-cart-root]');
-  }
+  const fetchSections = async (sectionIds, url) => {
+    if (!sectionIds || !sectionIds.length) return {};
+    const target = `${url ?? window.location.pathname}?sections=${sectionIds.join(',')}`;
+    const response = await fetch(target, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+    if (!response.ok) throw new Error('Section request failed');
+    return response.json();
+  };
 
-  function toggleCartLoading(state) {
-    var root = getCartRoot();
+  const renderSection = async (sectionId, url) => {
+    const target = `${url ?? window.location.pathname}?section_id=${sectionId}`;
+    const response = await fetch(target, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+    if (!response.ok) throw new Error('Section render failed');
+    return response.text();
+  };
+
+  const getCartRoot = () => document.querySelector('[data-cart-root]');
+
+  const toggleCartLoading = (state) => {
+    const root = getCartRoot();
     if (!root) return;
     root.classList.toggle('is-loading', state);
-  }
+  };
 
-  function syncLineInputs(lineKey, quantity) {
-    var root = getCartRoot();
+  const syncLineInputs = (lineKey, quantity) => {
+    const root = getCartRoot();
     if (!root) return;
-    var qty = Math.max(0, Number(quantity) || 0);
-    root.querySelectorAll('[data-cart-qty-input]').forEach(function (input) {
-      if (input.getAttribute('data-line-key') === lineKey) {
-        input.value = qty;
-      }
-    });
-    root.querySelectorAll('[data-cart-qty-hidden]').forEach(function (input) {
-      if (input.getAttribute('data-line-key') === lineKey) {
-        input.value = qty;
-      }
-    });
-  }
+    const qty = Math.max(0, Number(quantity) || 0);
 
-  function getLineQuantity(lineKey) {
-    var root = getCartRoot();
+    root.querySelectorAll('[data-cart-qty-input]').forEach((input) => {
+      if (input.getAttribute('data-line-key') === lineKey) input.value = qty;
+    });
+
+    root.querySelectorAll('[data-cart-qty-hidden]').forEach((input) => {
+      if (input.getAttribute('data-line-key') === lineKey) input.value = qty;
+    });
+  };
+
+  const getLineQuantity = (lineKey) => {
+    const root = getCartRoot();
     if (!root) return 0;
-    var input = Array.prototype.find.call(root.querySelectorAll('[data-cart-qty-input]'), function (el) {
-      return el.getAttribute('data-line-key') === lineKey;
-    });
+    const inputs = root.querySelectorAll('[data-cart-qty-input]');
+    const input = Array.from(inputs).find((el) => el.getAttribute('data-line-key') === lineKey);
     return input ? (Number(input.value) || 0) : 0;
-  }
+  };
 
-  function refreshCartSection() {
-    var root = getCartRoot();
-    if (!root) return Promise.resolve();
-    var sectionId = root.getAttribute('data-section-id');
-    if (!sectionId) return Promise.resolve();
+  const refreshCartSection = async () => {
+    const root = getCartRoot();
+    if (!root) return;
+    const sectionId = root.getAttribute('data-section-id');
+    if (!sectionId) return;
 
-    return renderSection(sectionId, window.location.pathname)
-      .then(function (html) {
-        var parser = new DOMParser();
-        var doc = parser.parseFromString(html, 'text/html');
-        var fresh = doc.querySelector('[data-cart-root]');
-        if (!fresh) throw new Error('Missing cart root in rendered section');
-        root.replaceWith(fresh);
-      })
-      .catch(function (error) {
-        console.error(error);
-        window.location.reload();
-      });
-  }
+    try {
+      const html = await renderSection(sectionId, window.location.pathname);
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(html, 'text/html');
+      const fresh = doc.querySelector('[data-cart-root]');
+      if (!fresh) throw new Error('Missing cart root in rendered section');
+      root.replaceWith(fresh);
+    } catch (error) {
+      console.error(error);
+      window.location.reload();
+    }
+  };
 
-  function updateLineQuantity(lineKey, quantity) {
+  const updateLineQuantity = (lineKey, quantity) => {
     quantity = Math.max(0, Number(quantity) || 0);
     if (cartBusy) return Promise.resolve();
     syncLineInputs(lineKey, quantity);
     cartBusy = true;
     toggleCartLoading(true);
-    return change({ id: lineKey, quantity: quantity })
-      .then(function () {
-        return refreshCartSection();
-      })
-      .catch(function (error) {
+
+    return change({ id: lineKey, quantity })
+      .then(refreshCartSection)
+      .catch((error) => {
         console.error(error);
         window.location.reload();
       })
-      .finally(function () {
+      .finally(() => {
         cartBusy = false;
         toggleCartLoading(false);
       });
-  }
+  };
 
-  function handleCartClick(event) {
-    var root = getCartRoot();
+  const handleCartClick = (event) => {
+    const root = getCartRoot();
     if (!root || !root.contains(event.target)) return;
 
-    var changeBtn = event.target.closest('[data-cart-qty-change]');
+    const changeBtn = event.target.closest('[data-cart-qty-change]');
     if (changeBtn) {
       event.preventDefault();
-      var row = changeBtn.closest('[data-line-key]');
+      const row = changeBtn.closest('[data-line-key]');
       if (!row) return;
-      var lineKey = row.getAttribute('data-line-key');
-      var delta = changeBtn.getAttribute('data-change') === 'minus' ? -1 : 1;
-      var newQty = getLineQuantity(lineKey) + delta;
+      const lineKey = row.getAttribute('data-line-key');
+      const delta = changeBtn.getAttribute('data-change') === 'minus' ? -1 : 1;
+      const newQty = getLineQuantity(lineKey) + delta;
       return updateLineQuantity(lineKey, newQty);
     }
 
-    var removeBtn = event.target.closest('[data-cart-remove]');
+    const removeBtn = event.target.closest('[data-cart-remove]');
     if (removeBtn) {
       event.preventDefault();
-      var key = removeBtn.getAttribute('data-line-key');
+      let key = removeBtn.getAttribute('data-line-key');
       if (!key) {
-        var parentRow = removeBtn.closest('[data-line-key]');
+        const parentRow = removeBtn.closest('[data-line-key]');
         if (parentRow) key = parentRow.getAttribute('data-line-key');
       }
       if (!key) return;
       return updateLineQuantity(key, 0);
     }
-  }
+  };
 
-  var qtyChangeTimeout;
-
-  function handleCartInput(event) {
-    var input = event.target.closest('[data-cart-qty-input]');
+  const handleCartInput = (event) => {
+    const input = event.target.closest('[data-cart-qty-input]');
     if (!input) return;
-    var root = getCartRoot();
+    const root = getCartRoot();
     if (!root || !root.contains(input)) return;
-    var lineKey = input.getAttribute('data-line-key');
+    const lineKey = input.getAttribute('data-line-key');
     if (!lineKey) return;
-    var value = Number(input.value);
+
+    let value = Number(input.value);
     if (!Number.isFinite(value) || value < 0) value = 0;
     syncLineInputs(lineKey, value);
 
     clearTimeout(qtyChangeTimeout);
-    qtyChangeTimeout = setTimeout(function () {
+    qtyChangeTimeout = setTimeout(() => {
       updateLineQuantity(lineKey, value);
     }, 300);
-  }
+  };
 
-  function handleCartSubmit(event) {
-    var form = event.target.closest('[data-cart-form]');
+  const handleCartSubmit = (event) => {
+    const form = event.target.closest('[data-cart-form]');
     if (!form) return;
+
+    let submitter = null;
+    if (event.submitter && event.submitter.form === form) {
+      submitter = event.submitter;
+    } else if (document.activeElement && document.activeElement.form === form) {
+      submitter = document.activeElement;
+    }
+    const bypassAjax = submitter && (
+      submitter.getAttribute('name') === 'checkout' ||
+      submitter.hasAttribute('data-cart-bypass')
+    );
+    if (bypassAjax) return;
+
     event.preventDefault();
     if (cartBusy) return;
 
-    var updates = {};
-    form.querySelectorAll('[data-cart-qty-input]').forEach(function (input) {
-      var key = input.getAttribute('data-line-key');
+    const updates = {};
+    form.querySelectorAll('[data-cart-qty-input]').forEach((input) => {
+      const key = input.getAttribute('data-line-key');
       if (!key || typeof updates[key] !== 'undefined') return;
-      var value = Math.max(0, Number(input.value) || 0);
+      const value = Math.max(0, Number(input.value) || 0);
       updates[key] = value;
     });
 
@@ -286,41 +285,38 @@
     toggleCartLoading(true);
 
     updateCart(updates)
-      .then(function () {
-        return refreshCartSection();
-      })
-      .catch(function (error) {
+      .then(refreshCartSection)
+      .catch((error) => {
         console.error(error);
         window.location.reload();
       })
-      .finally(function () {
+      .finally(() => {
         cartBusy = false;
         toggleCartLoading(false);
       });
-  }
+  };
 
-  function initCartDelegates() {
+  const initCartDelegates = () => {
     document.addEventListener('click', handleCartClick);
     document.addEventListener('change', handleCartInput);
     document.addEventListener('submit', handleCartSubmit);
-  }
+  };
 
-  document.addEventListener('DOMContentLoaded', function () {
+  document.addEventListener('DOMContentLoaded', () => {
     refreshCount();
     initCartDelegates();
   });
 
+  // Public API
   window.ShopCart = {
-    add: add,
-    change: change,
-    remove: function (id) {
-      return change({ id: id, quantity: 0 });
-    },
+    add,
+    change,
+    remove: (id) => change({ id, quantity: 0 }),
     clear: clearCart,
     update: updateCart,
-    getCart: getCart,
-    refreshCount: refreshCount,
-    fetchSections: fetchSections,
-    renderSection: renderSection
+    getCart,
+    refreshCount,
+    fetchSections,
+    renderSection
   };
 })();
