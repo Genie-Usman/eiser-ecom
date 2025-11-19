@@ -24,8 +24,8 @@
         "util_2_link": "shopify://pages/order-tracking",
         "util_3_label": "Contact us",
         "util_3_link": "shopify://pages/contact",
-        "wishlist_enabled": false,
-        "wishlist_link": ""
+        "wishlist_enabled": true,
+        "wishlist_link": "shopify://pages/wishlist"
       }
     }
   },
