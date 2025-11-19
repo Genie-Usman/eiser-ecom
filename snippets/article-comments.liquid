@@ -8,41 +8,6 @@
     {% endif %}
     <h3 class="mb-10 text-lg font-semibold text-[#2A2A2A]">{{ cc_str }} Comments</h3>
     <div class="space-y-10">
-      {% comment %} 
-                Previous comment logic with avatar metafields - commented out 
-                {% assign avatars = article.metafields.custom.avatars.value | parse_json %} 
-                {% for c in article.comments %}
-                {% assign comment_id = c.id | append: '' %}
-                {% assign avatar_url = avatars[comment_id] %}
-                <div class="flex gap-4 py-6">
-                <div class="h-14 w-14 shrink-0 overflow-hidden rounded-full bg-[#EEF2FF]">
-                {% if avatar_url %}
-                <img src="{{ avatar_url }}" alt="{{ c.author | escape }}" class="h-full w-full object-cover" loading="lazy" width="56" height="56">
-                {% elsif customer and c.email == customer.email and customer.metafields.custom.image %}
-                {% if customer.metafields.custom.image.value %}
-                <img src="{{ customer.metafields.custom.image.value | image_url: width: 112 }}" alt="{{ c.author | escape }}" class="h-full w-full object-cover" loading="lazy" width="56" height="56">
-                {% else %}
-                <img src="{{ customer.metafields.custom.image | image_url: width: 112 }}" alt="{{ c.author | escape }}" class="h-full w-full object-cover" loading="lazy" width="56" height="56">
-                {% endif %}
-                {% else %}
-                <div class="grid h-full w-full place-items-center text-sm font-semibold text-[#2A2A2A]">
-                {{ c.author | slice: 0, 1 | upcase }}
-                </div>
-                {% endif %}
-                </div>
-                <div class="flex-1">
-                <p class="text-sm leading-6 text-[#666666]">{{ c.content }}</p>
-                <div class="mt-2 flex items-center justify-between">
-                <div class="text-xs text-[#9a9a9a]">
-                <span class="mr-3 text-sm font-semibold text-[#2A2A2A]">{{ c.author }}</span>
-                {{ c.created_at | date: "%B %d, %Y at %I:%M %p" }}
-                </div>
-                <button type="button" class="reply-link text-xs uppercase tracking-wider text-[#2A2A2A] transition-colors duration-200 hover:text-[#71cd13]" data-author="{{ c.author | escape }}">Reply</button>
-                </div>
-                </div>
-                </div> 
-                {% endfor %}
-            {% endcomment %}
 
       {% assign comment_images = 'c1.png|c2.png|c3.png' | split: '|' %}
       {% assign comment_index = 0 %}
@@ -54,7 +19,7 @@
         <div class="flex gap-5">
           <div class="h-16 w-16 shrink-0 overflow-hidden rounded-full">
             <img
-              src="{{ 'blog/' | append: avatar_image | asset_url }}"
+              src="{{ avatar_image | asset_url }}"
               alt="{{ c.author | escape }}"
               class="h-full w-full object-cover"
               loading="lazy"

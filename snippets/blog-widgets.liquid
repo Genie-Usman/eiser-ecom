@@ -79,7 +79,7 @@
               height="100">
           {% else %}
             <img
-              src="{{ 'blog/' | append: fallback_path | asset_url }}"
+              src="{{ fallback_path | asset_url }}"
               alt="Recent post"
               class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 ease-in-out"
               loading="lazy"
@@ -135,7 +135,7 @@
               height="80" />
           {% else %}
             <img
-              src="{{ 'instagram/' | append: fallback_name | asset_url }}"
+              src="{{ fallback_name | asset_url }}"
               alt="instagram"
               class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 ease-in-out"
               loading="lazy"
