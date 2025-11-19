@@ -126,7 +126,24 @@
           <!-- Subtotal row -->
           <div class="flex items-center justify-end gap-28 text-sm px-5 py-3 mt-4 ">
             <span class="text-gray-900 font-semibold">Subtotal</span>
-            <span class="text-gray-900 font-semibold">{{ cart.total_price | money }}</span>
+
+            {% if cart.total_price < cart.original_total_price %}
+              <div class="flex flex-col items-end">
+                <span class="line-through text-gray-500">
+                  {{ cart.original_total_price | money }}
+                </span>
+                <span class="text-red-600 font-semibold">
+                  {{ cart.total_price | money }}
+                </span>
+                <span class="text-green-600 text-xs">
+                  You save {{ cart.original_total_price | minus: cart.total_price | money }}
+                </span>
+              </div>
+            {% else %}
+              <span class="text-gray-900 font-semibold">
+                {{ cart.total_price | money }}
+              </span>
+            {% endif %}
           </div>
           <!-- Shipping options (UI only) -->
           <div class="mt-7 border-t border-gray-300 pt-5 px-5">
