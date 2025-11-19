@@ -258,7 +258,7 @@
                 <div class="flex gap-5">
                   <div class="w-16 h-16 rounded-full overflow-hidden shrink-0">
                     <img
-                      src="{{ '/' | append: review_image | asset_url }}"
+                      src="{{ review_image | asset_url }}"
                       alt="Reviewer"
                       class="w-full h-full object-cover"
                       loading="lazy"
@@ -343,7 +343,7 @@
                   <div class="flex items-start gap-4">
                     <div class="w-16 h-16 rounded-full overflow-hidden shrink-0">
                       <img
-                        src="{{ '/' | append: review_image | asset_url }}"
+                        src="{{ review_image | asset_url }}"
                         alt="Reviewer"
                         class="w-full h-full object-cover"
                         loading="lazy"
