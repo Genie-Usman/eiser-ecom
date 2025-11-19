@@ -57,7 +57,7 @@
       {% else %}
         {% assign recent_images = '' | split: '|' %}
       {% endif %}
-      {% assign fallback_images = 'cat-post/cat-post-1.jpg|cat-post/cat-post-2.jpg|cat-post/cat-post-3.jpg|popular-post/post1.jpg|popular-post/post2.jpg|popular-post/post3.jpg' | split: '|' %}
+      {% assign fallback_images = 'cat-post-1.jpg|cat-post-2.jpg|cat-post-3.jpg|popular-post/post1.jpg|popular-post/post2.jpg|popular-post/post3.jpg' | split: '|' %}
       {% for i in (0..5) %}
         {% if section and section.settings %}
           {% assign custom_image = recent_images[i] %}
