@@ -1,0 +1,284 @@
+{% assign liquid_date = 'now' | date: '%s' %}
+{% assign liquid_date = liquid_date | plus: 0 %}
+{% assign app_enabled = shop.metafields.appid_2922505.app_enabled %}
+{% assign is_dev_mode = shop.metafields.appid_2922505.is_dev_mode %}
+{% assign last_updated = shop.metafields.appid_2922505.time_updated %}{% assign threedays_later = last_updated| plus: 259200  %}
+{% if (liquid_date < threedays_later and app_enabled != 'N') and ((is_dev_mode == '0' or is_dev_mode == blank) or (is_dev_mode == '1' and theme.role != 'main')) %}
+{% assign af_cart_json = cart | json %}
+{% assign af_customer_id = customer.id %}
+{% assign kd_upsells = shop.metafields.appid_2922505.upsells.value  %} 
+{% assign kd_features_json = shop.metafields.appid_2922505.kd_features_json.value %}
+{% assign _kd_path = '' %}
+{% assign _kd_page = '0' %}
+{% if request.path contains '/products/' %} 
+  {% assign _kd_path = 'product' %}
+  {% assign _kd_page = '1' %}
+{% elsif request.path contains '/cart' %}
+   {% assign _kd_path = 'cart' %}
+   {% assign _kd_page = '3' %}
+{% endif %}
+
+{% capture cart_list %}{% for item in cart.items %}{{ item.product_id | strip }}{% if forloop.last == false %},{% endif%}{% endfor %}{% endcapture %}
+
+{% capture qty_list %}{% for item in cart.items %}{{ item.product_id | strip }}|{{ item.quantity | strip }}{% if forloop.last == false %},{% endif%}{% endfor %}{% endcapture %}
+
+{% assign _kd_qty_array = qty_list | split: ',' %}
+
+{% assign _kd_cart_array = cart_list | split: ',' %}
+  
+{% assign _kd_productId = product.id | split: ','%}
+
+{% if _kd_path == "cart"  %}
+    {% assign _kd_productId = cart_list | split: ','%}
+    {% capture cart_prod_collection_list %}
+     {% for item in cart.items %}
+         {% assign _product_details = all_products[{{item.product.handle}}] %}
+           {{ item.product_id | strip }} =>
+        {% for _collection in _product_details.collections %}
+              {{ _collection.id }}
+            {% if forloop.last == false %} , {% endif%}
+        {% endfor %}   
+    {% if forloop.last == false %} | {% endif%}
+     {% endfor %}
+  {% endcapture %}
+  {% assign _kd_cart_prod_collection_list = cart_prod_collection_list | split: '|' %}
+ 
+{% elsif _kd_path == "product" %}
+   {% capture cart_prod_collection_list %}
+       {{ product.id }} =>
+       {% for item in product.collections %}          
+                {{ item.id }}  
+            {% if forloop.last == false %} , {% endif%}
+       {% endfor %} |
+  {% endcapture %}
+    {% assign _kd_cart_prod_collection_list = cart_prod_collection_list | split: '|' %}
+{% endif %}
+  
+{% if shop.metafields.appid_2922505.upsell_enabled.value == "Y" and kd_features_json.upsell == "Y" %}
+     {% capture _kd_upsell_final %}
+       {% for item in kd_upsells %}           
+           {% unless forloop.index < 50  %} {% continue %} {% endunless %}
+           {%- if isUniqueUpsell contains item.product_id and forloop.first == true -%} 
+               {% continue %}
+           {% else %} 
+             {% assign isUniqueUpsell = item.product_id | append: ','%} 
+           {% endif %} 
+           {% if item.triggered_on == _kd_page and item.display_for == '1' %}
+                   {%- if item.check_cart_product == '1' and cart_list contains item.product_id -%} {% continue %} {% endif %}
+                   {% assign itemQty  = item.quantity | strip | plus: 0  %}
+                   {% assign newQty = itemQty %}                   
+                   {% for qty_arr in _kd_qty_array %} 
+                          {% assign _cart_qty_single = qty_arr | split: '|' %}                       
+                          {% assign only_qty = _cart_qty_single[1] | strip | plus: 0  %}                         
+                          {% assign only_prod = _cart_qty_single[0] | strip %}                         
+                           {%- if item.qty_selector == "1" and only_prod == item.product_id and itemQty > 0 and  only_qty >= itemQty  -%}
+                                {% assign processFurther = 0 %} {% break %}
+                            {% elsif item.qty_selector == "1" and only_prod == item.product_id and itemQty > 0 and only_qty < itemQty %}
+                                 {% assign newQty = itemQty | minus : only_qty %}  {% break %}  
+                           {% endif %}
+                    {% endfor %}                    
+                    {%- if processFurther == 0 %} {% continue %} {% endif %}             
+             
+                   {% assign _upsell_selected_variant = item.variants | split: ',' %} 
+                   {% for currentItem in _kd_productId %} 
+                      {%- if currentItem == item.product_id and _kd_path == 'product' -%} {% continue %} {% endif %}
+                          {% assign _upsell_product_details = all_products[{{item.product_handle}}] %} 
+                          {% capture item_product_variant %} 
+                              {% for variant in _upsell_product_details.variants %} 
+                                {% assign variantId = variant.id | append: "" %} 
+                                {%- if _upsell_selected_variant contains variantId  and variant.available == true -%}
+                                      {"id" : "{{ variant.id }}" , "option1" : "{{ variant.title | replace: '"', '\"' }}" , "title" : "{{ variant.title | replace: '"', '\"' }}" ,"price" : "{{ variant.price | money_without_currency }}" },
+                                {% endif %} 
+                                {% endfor %}
+                            {% endcapture %} 
+                            {% assign item_product_variant = item_product_variant | strip %}
+                            {% if item_product_variant.size == 0 %} {% continue %} {% endif %} 
+                            { "id" : "{{ _upsell_product_details.id }}" , "tags" : "{{ _upsell_product_details.tags }}" ,
+                              "title" : "{{ _upsell_product_details.title | replace: '"', '\"' }}" , "description" : "{{ item.description | replace: '"', '\"' }}" ,
+                              "qty_limit" : "{{ newQty }}" , "qty_selector" : "{{ item.qty_selector }}" , "badge_text" : "{{ item.badge_text }}" ,
+                              "badge_txt_color" : "{{ item.badge_txt_color }}" , "badge_bg_color": "{{ item.badge_bg_color }}" ,
+                              "check_cart_product" : "{{ item.check_cart_product }}",
+                              "image" : "{{ _upsell_product_details.images[0] | img_url : '100x' }}" ,
+                              "variants" : [{{ item_product_variant | remove_last : ',' }}] }, 
+                    {% endfor %}
+             {% elsif item.triggered_on == _kd_page and item.display_for == '2' %}
+                       {%- if item.check_cart_product == '1' and cart_list contains item.product_id -%} {% continue %} {% endif %}
+                       {% assign processFurther = 1 %}       
+                       {% assign itemQty  = item.quantity | strip | plus: 0  %}
+                       {% assign newQty = itemQty %}                   
+                       {% for qty_arr in _kd_qty_array %} 
+                                {% assign _cart_qty_single = qty_arr | split: '|' %}                       
+                                {% assign only_qty = _cart_qty_single[1] | strip | plus: 0  %}                         
+                                {% assign only_prod = _cart_qty_single[0] | strip %}                         
+                                 {%- if item.qty_selector == "1" and only_prod == item.product_id and itemQty > 0 and  only_qty >= itemQty  -%}
+                                      {% assign processFurther = 0 %} {% break %}
+                                  {% elsif item.qty_selector == "1" and only_prod == item.product_id and itemQty > 0 and only_qty < itemQty %}
+                                       {% assign newQty = itemQty | minus : only_qty %}  {% break %}  
+                                 {% endif %}
+                          {% endfor %}                    
+                        {%- if processFurther == 0 %} {% continue %} {% endif %}
+             
+                       {% assign prodIds = item.available_for %} 
+                       {% assign variantIds = item.available_for_variants %} 
+                       {% for currentItem in _kd_productId %} 
+                          {% assign currentItemId  = currentItem | strip   %}                         
+                          {% unless prodIds contains currentItemId %} {% continue %} {% endunless %}
+                           {% assign _upsell_selected_variant = item.variants | split: ',' %}
+                           {% assign _upsell_product_details = all_products[{{item.product_handle}}] %}
+                           {% capture item_product_variant %} 
+                               {% for variant in _upsell_product_details.variants %}
+                                 {% assign variantId = variant.id | append: "" %} 
+                                  {%- if _upsell_selected_variant contains variantId and  variant.available == true -%} 
+                                      {"id" : "{{ variant.id }}" , "option1" : "{{ variant.title | replace: '"', '\"' }}" , "title" : "{{ variant.title | replace: '"', '\"' }}" ,"price" : "{{ variant.price | money_without_currency }}" }, 
+                                  {% endif %} 
+                                {% endfor %} 
+                            {% endcapture %} 
+                            {% assign item_product_variant = item_product_variant | strip  %}
+                            {% if item_product_variant.size == 0 %} {% continue %} {% endif %}
+                           { "id" : "{{ _upsell_product_details.id }}" , "tags" : "{{ _upsell_product_details.tags }}" ,
+                            "title" : "{{ _upsell_product_details.title | replace: '"', '\"' }}" , "description" : "{{ item.description | replace: '"', '\"' }}" ,
+                            "qty_limit" : "{{ newQty }}" , "qty_selector" : "{{ item.qty_selector }}" ,
+                            "badge_text" : "{{ item.badge_text }}" , "badge_txt_color" : "{{ item.badge_txt_color }}" ,
+                            "badge_bg_color": "{{ item.badge_bg_color }}" , "check_cart_product" : "{{ item.check_cart_product }}", 
+                             "image" : "{{ _upsell_product_details.images[0] | img_url : '100x' }}" ,
+                            "variants" : [{{ item_product_variant  | remove_last : ',' }}] },
+                        {% endfor %}
+            {% elsif item.triggered_on == _kd_page and item.display_for == '3' %}
+               {%- if item.check_cart_product == '1' and cart_list contains item.product_id -%} {% continue %} {% endif %}
+               {% assign collectionIds = item.available_for | append:"" %}              
+               {% for currentItem in _kd_productId %}   
+                  {% assign currentItemId = currentItem |  strip %}                  
+                  {% assign processFurther = 1 %}       
+                  {% assign itemQty  = item.quantity | strip | plus: 0  %}
+                  {% assign newQty = itemQty %}                   
+                  {% for qty_arr in _kd_qty_array %} 
+                          {% assign _cart_qty_single = qty_arr | split: '|' %}                       
+                          {% assign only_qty = _cart_qty_single[1] | strip | plus: 0  %}                         
+                          {% assign only_prod = _cart_qty_single[0] | strip %}                         
+                           {%- if item.qty_selector == "1" and only_prod == item.product_id and itemQty > 0 and  only_qty >= itemQty  -%}
+                                {% assign processFurther = 0 %} {% break %}
+                            {% elsif item.qty_selector == "1" and only_prod == item.product_id and itemQty > 0 and only_qty < itemQty %}
+                                 {% assign newQty = itemQty | minus : only_qty %}  {% break %}  
+                           {% endif %}
+                    {% endfor %}                    
+                   {%- if processFurther == 0 %} {% continue %} {% endif %}
+                   
+                   {% assign _upsell_selected_variant = item.variants | split: ',' %}                  
+                   {% for upsell_collection in _kd_cart_prod_collection_list %}                     
+                      {% assign currentCollectionDetails = upsell_collection | split: '=>' %}   
+                      {% assign currentCollectionId = currentCollectionDetails[1] | split: ',' %}   
+                      {% assign currentProduct = currentCollectionDetails[0] | strip  %}                        
+                      {% if currentProduct == '' %} {% continue %} {% endif %}                       
+                      {% for singleCollection in currentCollectionId %}  
+                         {% assign individualCollection = singleCollection | strip %} 
+                         {% if individualCollection == '' %} {% continue %} {% endif %} 
+                          {% unless collectionIds contains individualCollection  %} {% continue %} {% endunless %} 
+                            {% assign _upsell_product_details = all_products[{{item.product_handle}}] %}  
+                            {% assign upsellProdId = _upsell_product_details.id | strip %}  
+                            {% if upsellProdId == currentItemId and item.check_cart_product == '1'  %} {% continue %} {% endif %}
+                                 {% capture item_product_variant %} 
+                                     {% for variant in _upsell_product_details.variants %}
+                                         {% assign variantId = variant.id | append: "" %} 
+                                         {%- if _upsell_selected_variant contains variantId and  variant.available == true -%} 
+                                              {"id" : "{{ variant.id }}" , "option1" : "{{ variant.title | replace: '"', '\"' }}" , "title" : "{{ variant.title | replace: '"', '\"' }}" ,"price" : "{{ variant.price | money_without_currency }}" },                                  
+                                          {% endif %} 
+                                      {% endfor %}
+                                  {% endcapture %} 
+                                  {% assign item_product_variant = item_product_variant | strip  %}
+                                  {% if item_product_variant.size == 0 %} {% continue %} {% endif %} 
+                                  { "id" : "{{ _upsell_product_details.id }}" , "tags" : "{{ _upsell_product_details.tags }}" ,
+                                    "title" : "{{ _upsell_product_details.title | replace: '"', '\"' }}" , "description" : "{{ item.description | replace: '"', '\"' }}" ,
+                                    "qty_limit" : "{{ newQty }}" , "qty_selector" : "{{ item.qty_selector }}" ,
+                                    "badge_text" : "{{ item.badge_text }}" , "badge_txt_color" : "{{ item.badge_txt_color }}" ,
+                                    "badge_bg_color": "{{ item.badge_bg_color }}" , "check_cart_product" : "{{ item.check_cart_product }}",
+                                     "image" : "{{ _upsell_product_details.images[0] | img_url : '100x' }}" ,
+                                    "variants" : [{{ item_product_variant | remove_last : ',' }}] }, 
+                            {% endfor %} 
+                   {% endfor %} 
+                {% endfor %}
+            {% endif %} 
+      {% endfor %}
+    {% endcapture %}
+{% endif %}
+{% assign _kd_upsell_final = _kd_upsell_final | strip |remove_last : ','  %} 
+{% assign _kd_upsell_final = _kd_upsell_final | append: ']' | prepend : '['  %} 
+<script>
+urlParam = function(name){
+	var results = new RegExp('[\?&]' + name + '=([^&#]*)').exec(window.location.href);
+	if (results == null){
+	   return null;
+	}
+	else {
+	   return decodeURI(results[1]) || 0;
+	}
+}
+window.af_custom_id = '{{ af_customer_id }}';
+window.af_cd_cart_obj = {{af_cart_json}};
+var sessionId = (localStorage.getItem('afkd_sessionId') != null && typeof localStorage.getItem('afkd_sessionId') != 'undefined' && localStorage.getItem('afkd_sessionId') != 'undefined') ? localStorage.getItem('afkd_sessionId') : '';
+var passkey = (localStorage.getItem('afkd_passkey') != null && typeof localStorage.getItem('afkd_passkey') != 'undefined' && localStorage.getItem('afkd_passkey') != 'undefined') ? localStorage.getItem('afkd_passkey') : '';
+if(urlParam('PHPSESSID') != null) {
+	sessionId = "&PHPSESSID="+urlParam("PHPSESSID");
+	localStorage.setItem('afkd_sessionId',sessionId);
+} 
+if(urlParam('passkey') != null) {
+	passkey = "&passkey="+urlParam("passkey");
+	localStorage.setItem('afkd_passkey',passkey);
+}
+</script>
+<script>
+var _kd_productId = [{{product.id}}];
+var _kd_prodPrice = '{{ product.price  }}';
+var _kd_cartJson  = {{cart | json}};
+var _kd_collectionUpsell = {{ product.collections | json}};
+var _kd_collection = [];
+var _kd_inCart = [];
+
+ if(_kd_collectionUpsell){
+    _kd_collectionUpsell.forEach(function (item) { 
+       _kd_collection.push(item.id);
+    });
+}
+
+if(_kd_cartJson.items){
+  _kd_cartJson.items.forEach(function (item) { 
+     _kd_inCart.push(item.product_id);
+  });
+}
+
+if (window.location.pathname == '/cart') {
+  _kd_productId = _kd_inCart;
+  _kd_prodPrice = '{{ cart.total_price  }}';
+}
+
+_kd_productId = _kd_productId.toString();
+_kd_inCart = _kd_inCart.toString();
+
+ var _kd = {};
+_kd.productId = _kd_productId;
+_kd.prodPrice = _kd_prodPrice;
+_kd.inCart = _kd_inCart;  
+_kd.collection = _kd_collection;
+_kd.upsell_all = '{{ shop.metafields.appid_2922505.upsells }}';
+_kd.upsell_show = {{ _kd_upsell_final | json }};
+_kd.is_upsell = 1;
+if(_kd.upsell_show.length < 3 ){
+   _kd.is_upsell = 0;
+}
+
+window.kd_upsell = _kd;
+
+  var script = document.createElement("script");
+  script.defer = true;
+  script.type = "text/javascript";
+  script.src = "https://cd.anglerfox.com/app/script/load_script.php?v={{last_updated}}&shop={{ shop.permanent_domain }}"  +  sessionId + passkey;
+  document.head.appendChild(script);
+
+</script>
+{% endif %}
+<script>
+  function KDStrikeoutSubtotal(subtotalSelector){
+    var subTotalHtml = `{{cart.total_price|money}}`.replace('"', '\"');
+    var newTotalHtml = `{{cart.total_price|minus :10 |money}}`.replace('"', '\"');
+    document.querySelector(subtotalSelector).innerHTML = "<del class='af_del_overwrite'>"+ subTotalHtml + "</del> " + newTotalHtml;
+  }
+</script>
