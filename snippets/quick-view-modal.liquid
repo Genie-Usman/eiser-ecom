@@ -1,43 +1,3 @@
-<div id="quickview-overlay" class="fixed inset-0 bg-black/50 hidden z-40"></div>
-<div id="quickview-modal" class="fixed inset-0 hidden z-50 items-start justify-center overflow-y-auto">
-  <div class="mt-16 w-full max-w-4xl bg-white shadow-2xl border border-gray-200">
-    <div class="flex justify-between items-center px-5 py-3 border-b border-gray-200">
-      <h3 id="qv-title" class="text-lg font-semibold text-[#2A2A2A]">Product</h3>
-      <button
-        type="button"
-        class="text-gray-500 hover:text-black"
-        data-qv-close
-        aria-label="Close">✕</button>
-    </div>
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 p-5">
-      <div id="qv-media" class="w-full">
-        <img
-          id="qv-image"
-          class="w-full h-auto object-contain"
-          src="{{ 'quick-view-placeholder.svg' | asset_url }}"
-          alt=""
-          width="600"
-          height="600">
-      </div>
-      <div id="qv-info" class="space-y-3">
-        <p id="qv-price" class="text-2xl font-bold text-[#71CD14]"></p>
-        <div id="qv-compare" class="text-gray-400"></div>
-        <p id="qv-desc" class="text-sm leading-relaxed text-[#797979]"></p>
-        <div class="flex gap-3 pt-3">
-          <a
-            id="qv-view"
-            href="#"
-            class="inline-flex h-10 px-6 items-center justify-center border border-[#71cd13] bg-[#71cd13] hover:bg-transparent text-sm font-semibold uppercase tracking-wide rounded transition-colors duration-200 text-white hover:text-[#71cd13]">View details</a>
-          <button
-            id="qv-add"
-            type="button"
-            class="inline-flex h-10 px-6 items-center justify-center border border-[#71cd13] cursor-pointer text-[#71cd13] text-sm font-semibold uppercase tracking-wide rounded transition-colors duration-200 hover:bg-[#71cd13] hover:text-white">Add to cart</button>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
 <script>
   (function(){
     function getWishlist(){
@@ -61,6 +21,8 @@
         btn.classList.toggle('pointer-events-none', inList);
       });
     }
+    
+    // --- Modal Elements ---
     var overlay = document.getElementById('quickview-overlay');
     var modal = document.getElementById('quickview-modal');
     var titleEl = document.getElementById('qv-title');
@@ -72,9 +34,22 @@
     var addEl = document.getElementById('qv-add');
     var currentVariantId = null;
   
+    // --- UPDATED money FUNCTION FOR RELIABILITY ---
     function money(cents){
-      try { return new Intl.NumberFormat('{{ localization.country.iso_code | default: "US" }}-{{ localization.language.iso_code | default: "en" }}', { style: 'currency', currency: '{{ cart.currency.iso_code }}' }).format(cents/100); }
-      catch(e){ return 'Rs.' + (cents/100).toFixed(2); }
+      // Use Shopify global variables if available, otherwise use safer defaults
+      var currencyCode = (window.Shopify && window.Shopify.currency) ? window.Shopify.currency.active : 'USD';
+      var locale = 'en-US';
+      var fallbackSymbol = 'Rs.'; // Default fallback symbol based on your previous code
+
+      try { 
+        return new Intl.NumberFormat(locale, { 
+          style: 'currency', 
+          currency: currencyCode 
+        }).format(cents/100); 
+      }
+      catch(e){ 
+        return fallbackSymbol + (cents/100).toFixed(2); 
+      }
     }
   
     function openModal(){
@@ -88,6 +63,12 @@
       modal.classList.add('hidden');
       modal.classList.remove('flex');
       document.body.style.overflow = '';
+      // Reset button state on close
+      if (addEl) {
+        addEl.textContent = 'Add to cart';
+        addEl.disabled = false;
+        addEl.classList.remove('opacity-50', 'pointer-events-none');
+      }
     }
     [overlay, modal.querySelector('[data-qv-close]')].forEach(function(el){
       if (el) el.addEventListener('click', function(e){
@@ -101,41 +82,111 @@
       return await res.json();
     }
   
+    // --- UPDATED onQuickView FUNCTION ---
     async function onQuickView(handle){
       try{
         var p = await fetchProduct(handle);
+        
+        // 1. Update Basic Info
         titleEl.textContent = p.title;
-        var img = (p.images && p.images.length) ? p.images[0] : null;
-        imgEl.src = img || '';
-        imgEl.alt = p.title;
+        viewEl.href = p.url || ('/products/' + handle);
+        descEl.textContent = (p.description || '').replace(/<[^>]*>?/gm,'').substring(0, 240);
+        
+        // 2. Variant & Price Handling
+        var defaultVariant = null;
+        var isAvailable = false;
+        
         if (p.variants && p.variants.length){
-          var v = p.variants.find(function(x){ return x.available; }) || p.variants[0];
-          currentVariantId = v.id;
-          priceEl.textContent = money(v.price);
-          compareEl.innerHTML = (v.compare_at_price && v.compare_at_price > v.price) ? '<del>'+ money(v.compare_at_price) +'</del>' : '';
+          // Find the first available variant, otherwise use the first variant
+          defaultVariant = p.variants.find(function(x){ return x.available; }) || p.variants[0];
+          isAvailable = defaultVariant && defaultVariant.available;
+          
+          currentVariantId = defaultVariant ? defaultVariant.id : null;
+          
+          priceEl.textContent = defaultVariant ? money(defaultVariant.price) : 'Sold Out';
+          compareEl.innerHTML = (defaultVariant && defaultVariant.compare_at_price > defaultVariant.price) ? 
+                                  '<del>'+ money(defaultVariant.compare_at_price) +'</del>' : '';
+          
+          // Update media
+          var img = defaultVariant.featured_image ? defaultVariant.featured_image.src : ((p.images && p.images.length) ? p.images[0] : null);
+          imgEl.src = img || '';
+          imgEl.alt = p.title;
+          
         } else {
           currentVariantId = null;
-          priceEl.textContent = '';
+          priceEl.textContent = 'Sold Out';
           compareEl.textContent = '';
         }
-        descEl.textContent = (p.description || '').replace(/<[^>]*>?/gm,'').substring(0, 240);
-        viewEl.href = p.url || ('/products/' + handle);
+
+        // 3. Update Add to Cart Button State
+        if (isAvailable) {
+          addEl.textContent = "Add to cart";
+          addEl.disabled = false;
+          addEl.classList.remove('opacity-50', 'pointer-events-none');
+        } else {
+          addEl.textContent = "Sold Out";
+          addEl.disabled = true;
+          addEl.classList.add('opacity-50', 'pointer-events-none');
+        }
+
+        // 4. ATTACH/RE-ATTACH THE ADD TO CART HANDLER
         addEl.onclick = function(){
-          if (!currentVariantId) return;
+          if (!currentVariantId || addEl.disabled) return;
+          
+          // Temporary button state change to indicate loading
+          addEl.textContent = "Adding...";
+          addEl.disabled = true;
+
           var addPromise;
           if (window.ShopCart && typeof window.ShopCart.add === 'function') {
             addPromise = window.ShopCart.add({ id: currentVariantId, quantity: 1 });
           } else {
-            addPromise = fetch('/cart/add.js', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ id: currentVariantId, quantity: 1 }) })
-              .then(function(r){ if (!r.ok) throw new Error('Request failed'); return r.json(); })
-              .then(function(){ try { window.dispatchEvent(new CustomEvent('cart:updated')); } catch(err) {} });
+            addPromise = fetch('/cart/add.js', { 
+                  method:'POST', 
+                  headers:{'Content-Type':'application/json'}, 
+                  body: JSON.stringify({ id: currentVariantId, quantity: 1 }) 
+                })
+                .then(function(r){ 
+                  if (!r.ok) {
+                    // Check for detailed error description from Shopify
+                    return r.json().then(function(err) { throw new Error(err.description || 'Request failed'); });
+                  }
+                  return r.json(); 
+                })
+                .then(function(){ 
+                  try { window.dispatchEvent(new CustomEvent('cart:updated')); } catch(err) {} 
+                });
           }
+          
           Promise.resolve(addPromise)
-            .then(function(){ closeModal(); })
-            .catch(function(){ /* swallow */ });
+            .then(function(){ 
+              // Revert button state and close modal on success
+              addEl.textContent = "Added!";
+              closeModal(); 
+              // Show toast notification
+              try { window.dispatchEvent(new CustomEvent('toast:show', { detail: { message: 'Item added to cart' } })); } catch(err) {}
+            })
+            .catch(function(error){ 
+              console.error("Add to cart error:", error);
+              // Revert button text and re-enable on failure
+              addEl.textContent = "Error!";
+              addEl.disabled = false;
+              addEl.classList.remove('opacity-50', 'pointer-events-none');
+              
+              // Show error toast notification
+              try { 
+                window.dispatchEvent(new CustomEvent('toast:show', { detail: { message: error.message || 'Could not add to cart' } })); 
+              } catch(err) {}
+            });
         };
+        
+        // 5. Open Modal
         openModal();
-      }catch(e){}
+      }catch(e){
+        console.error("Quickview Load Error:", e);
+        closeModal();
+        try { window.dispatchEvent(new CustomEvent('toast:show', { detail: { message: 'Could not load product details.' } })); } catch(err) {}
+      }
     }
   
     document.addEventListener('click', function(e){
@@ -171,14 +222,22 @@
             addPromise = window.ShopCart.add({ id: Number(vid), quantity: 1 });
           } else {
             addPromise = fetch('/cart/add.js', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ id: Number(vid), quantity: 1 }) })
-              .then(function(r){ if (!r.ok) throw new Error('Request failed'); return r.json(); })
+              .then(function(r){ 
+                if (!r.ok) {
+                  return r.json().then(function(err) { throw new Error(err.description || 'Request failed'); });
+                }
+                return r.json(); 
+              })
               .then(function(){ try { window.dispatchEvent(new CustomEvent('cart:updated')); } catch(err) {} });
           }
           Promise.resolve(addPromise)
             .then(function(){
               try { window.dispatchEvent(new CustomEvent('toast:show', { detail: { message: 'Added to cart' } })); } catch(err) {}
             })
-            .catch(function(){});
+            .catch(function(error){
+              console.error("Quick add error:", error);
+              try { window.dispatchEvent(new CustomEvent('toast:show', { detail: { message: error.message || 'Could not add to cart' } })); } catch(err) {}
+            });
         }
       }
     }, true);
