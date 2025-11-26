@@ -10,9 +10,11 @@
   assign card_image = image | default: card_product.featured_image
   assign quick_variant = card_product.selected_or_first_available_variant
   assign link_overlay = wrap_link | default: false
+  
+  assign product_form_id = 'quick-add-' | append: section.id | append: card_product.id
 %}
 
-<div class="flex flex-col bg-white border border-gray-200 group relative overflow-hidden">
+<div class="product-card grid-view-item flex flex-col bg-white border border-gray-200 group relative overflow-hidden" data-product-id="{{ card_product.id }}">
   <div class="relative overflow-hidden bg-white">
     {% if card_image %}
       <img
@@ -35,8 +37,9 @@
         aria-label="{{ card_title | escape }}"></a>
     {% endif %}
 
-    <div class="h-12 absolute bottom-0 left-1/2 -translate-x-1/2 w-[80%] bg-[#BDE399] flex items-center justify-center gap-6 py-3 opacity-0 group-hover:opacity-100 z-10 transform translate-y-full group-hover:translate-y-0 transition-all duration-300">
+    <div class="h-12 absolute bottom-0 left-1/2 -translate-x-1/2 w-[80%] bg-[#BDE399] flex items-center justify-center gap-6 py-3 opacity-0 group-hover:opacity-100 z-20 transform translate-y-full group-hover:translate-y-0 transition-all duration-300">
       {% if card_product %}
+        
         <button
           type="button"
           class="w-9 h-9 bg-white rounded-full flex items-center justify-center text-black transition-colors duration-400 hover:bg-[#71cd13]"
@@ -45,6 +48,7 @@
           data-product-handle="{{ card_product.handle }}">
           {% render 'icon-eye' %}
         </button>
+
         <button
           type="button"
           class="w-9 h-9 bg-white rounded-full flex items-center justify-center text-black transition-colors duration-400 hover:bg-[#71cd13]"
@@ -53,16 +57,22 @@
           data-product-handle="{{ card_product.handle }}">
           {% render 'icon-heart' %}
         </button>
+
         {% if quick_variant %}
-          <button
-            type="button"
-            class="w-9 h-9 bg-white rounded-full flex items-center justify-center text-black transition-colors duration-400 hover:bg-[#71cd13]"
-            aria-label="Add {{ card_title }} to cart"
-            data-quick-add
-            data-variant-id="{{ quick_variant.id }}">
-            {% render 'icon-cart' %}
-          </button>
+          {% form 'product', card_product, id: product_form_id, class: 'product-card__form flex' %}
+            <input type="hidden" name="id" value="{{ quick_variant.id }}">
+            <button
+              type="submit"
+              name="add"
+              class="w-9 h-9 bg-white rounded-full flex items-center justify-center text-black transition-colors duration-400 hover:bg-[#71cd13]"
+              aria-label="Add {{ card_title }} to cart"
+              data-quick-add
+              data-variant-id="{{ quick_variant.id }}">
+              {% render 'icon-cart' %}
+            </button>
+          {% endform %}
         {% endif %}
+
       {% endif %}
     </div>
   </div>

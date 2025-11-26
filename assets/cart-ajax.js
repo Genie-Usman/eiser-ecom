@@ -25,6 +25,67 @@
     });
   };
 
+  const dispatchCartEvents = () => {
+    try { window.dispatchEvent(new CustomEvent('cart:updated')); } catch(err) {}
+    try { window.dispatchEvent(new CustomEvent('cart:refresh')); } catch(err) {}
+  };
+
+  const refreshCartCount = () =>
+    fetch('/cart.js')
+      .then(r => r.json())
+      .then(d => {
+        updateBadge(d.item_count);
+        return d;
+      })
+      .catch(() => {});
+
+  const getRootUrl = () => {
+    if (window.routes && typeof window.routes.root_url === 'string') return window.routes.root_url || '';
+    if (window.Shopify && window.Shopify.routes && typeof window.Shopify.routes.root_url === 'string') return window.Shopify.routes.root_url || '';
+    return '';
+  };
+
+  const buildSectionsUrl = (sectionId) => {
+    const rootUrl = getRootUrl();
+    const hasQuery = rootUrl.includes('?');
+    const prefix = rootUrl || '';
+    const joiner = hasQuery ? '&' : '?';
+    return `${prefix}${joiner}sections=${encodeURIComponent(sectionId)}`;
+  };
+
+  const refreshCartDrawer = () => {
+    const root = document.querySelector(SELECTORS.root);
+    if (!root) return Promise.resolve();
+    const sectionId = getSectionId(root);
+    const sectionsUrl = buildSectionsUrl(sectionId);
+
+    return fetch(sectionsUrl)
+      .then(r => r.json())
+      .then(data => {
+        const html = data && data[sectionId];
+        if (!html) return;
+        renderSection(root, html);
+        root.__enhanced = false;
+        enhanceCartRoot(root);
+      })
+      .catch(err => {
+        console.error('Cart drawer refresh failed', err);
+      });
+  };
+
+  const refreshCartUI = () => Promise.all([refreshCartDrawer(), refreshCartCount()]);
+
+  const handleCartResponse = (response) => {
+    if (!response.ok) {
+      return response.json()
+        .then(err => {
+          const message = err && (err.description || err.message);
+          throw new Error(message || 'Request failed');
+        });
+    }
+    return response.json();
+  };
+
   const setFeedback = (root, message, type) => {
     const feedback = q(SELECTORS.feedback, root);
     if (!feedback) return;
@@ -184,6 +245,34 @@
   document.addEventListener('DOMContentLoaded', () => {
     const roots = document.querySelectorAll(SELECTORS.root);
     roots.forEach(enhanceCartRoot);
-    fetch('/cart.js').then(r=>r.json()).then(d => updateBadge(d.item_count));
+    refreshCartCount();
   });
+
+  const ShopCartAPI = {
+    add(payload) {
+      return fetch('/cart/add.js', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify(payload || {})
+      })
+        .then(handleCartResponse)
+        .then(data => {
+          refreshCartUI().finally(dispatchCartEvents);
+          return data;
+        });
+    },
+    clear() {
+      return fetch('/cart/clear.js', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' }
+      })
+        .then(handleCartResponse)
+        .then(data => {
+          refreshCartUI().finally(dispatchCartEvents);
+          return data;
+        });
+    }
+  };
+
+  window.ShopCart = Object.assign({}, window.ShopCart, ShopCartAPI);
 })();

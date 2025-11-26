@@ -1,5 +1,78 @@
+<div
+  id="quickview-overlay"
+  class="fixed inset-0 z-[60] hidden flex items-center justify-center bg-black/40 px-4 py-8 backdrop-blur-sm">
+  <div
+    id="quickview-modal"
+    class="relative hidden w-full max-w-5xl overflow-hidden rounded-2xl bg-white shadow-2xl transition-all duration-200">
+    <button
+      type="button"
+      class="absolute right-4 top-4 z-10 inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/70 text-gray-500 hover:text-gray-900"
+      data-qv-close
+      aria-label="{{ 'general.accessibility.close' | t }}">
+      {% render 'icon-close' %}
+    </button>
+    <div class="grid gap-0 md:grid-cols-2">
+      <div class="flex items-center justify-center bg-gray-50 p-6 md:p-10">
+        <img
+          id="qv-image"
+          src="{{ 'quick-view-placeholder.svg' | asset_url }}"
+          alt=""
+          class="max-h-[420px] w-full object-contain"
+          loading="lazy"
+          width="600"
+          height="600" />
+      </div>
+      <div class="flex flex-col gap-4 p-6 md:p-10">
+        <p class="text-xs font-semibold uppercase tracking-[0.3em] text-gray-500">
+          {{ 'products.quick_view.heading' | t }}
+        </p>
+        <h3 id="qv-title" class="text-2xl font-semibold leading-tight text-[#2A2A2A]"></h3>
+        <div class="flex items-center gap-4">
+          <span id="qv-price" class="text-xl font-semibold text-[#2A2A2A]"></span>
+          <span id="qv-compare" class="text-sm text-gray-400"></span>
+        </div>
+        <p id="qv-desc" class="text-sm leading-relaxed text-gray-600">
+          {{ 'products.quick_view.description_fallback' | t }}
+        </p>
+        <div class="mt-auto flex flex-wrap gap-3 pt-2">
+          <a
+            id="qv-view"
+            href="#"
+            class="rounded border border-[#2A2A2A] px-5 py-3 text-xs font-semibold uppercase tracking-wide text-[#2A2A2A] transition-colors duration-200 hover:bg-[#2A2A2A] hover:text-white">
+            {{ 'products.quick_view.view_product' | t }}
+          </a>
+          <button
+            id="qv-add"
+            type="button"
+            class="rounded bg-[#71cd13] px-6 py-3 text-xs font-semibold uppercase tracking-wide text-white transition-colors duration-200 hover:bg-[#5fa610]">
+            {{ 'products.quick_view.add_to_cart' | t }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script>
   (function(){
+    var qvStrings = {
+      addToCart: {{ 'products.quick_view.add_to_cart' | t | json }},
+      soldOut: {{ 'products.quick_view.sold_out' | t | json }},
+      adding: {{ 'products.quick_view.adding' | t | json }},
+      added: {{ 'products.quick_view.added' | t | json }},
+      error: {{ 'products.quick_view.error' | t | json }},
+      descriptionFallback: {{ 'products.quick_view.description_fallback' | t | json }},
+      toastAdded: {{ 'products.quick_view.toast_added' | t | json }},
+      wishlistAdded: {{ 'products.quick_view.wishlist_added' | t | json }},
+      cartError: {{ 'products.quick_view.cart_error' | t | json }},
+      loadError: {{ 'products.quick_view.load_error' | t | json }}
+    };
+
+    function announceCartChange(){
+      try { window.dispatchEvent(new CustomEvent('cart:updated')); } catch(err) {}
+      try { window.dispatchEvent(new CustomEvent('cart:refresh')); } catch(err) {}
+    }
+
     function getWishlist(){
       try{
         var raw = localStorage.getItem('wishlist_handles') || '[]';
@@ -33,6 +106,7 @@
     var viewEl = document.getElementById('qv-view');
     var addEl = document.getElementById('qv-add');
     var currentVariantId = null;
+    var quickViewReady = overlay && modal && titleEl && imgEl && priceEl && compareEl && descEl && viewEl && addEl;
   
     // --- UPDATED money FUNCTION FOR RELIABILITY ---
     function money(cents){
@@ -53,28 +127,33 @@
     }
   
     function openModal(){
+      if (!quickViewReady) return;
       overlay.classList.remove('hidden');
       modal.classList.remove('hidden');
-      modal.classList.add('flex');
       document.body.style.overflow = 'hidden';
     }
     function closeModal(){
+      if (!quickViewReady) return;
       overlay.classList.add('hidden');
       modal.classList.add('hidden');
-      modal.classList.remove('flex');
       document.body.style.overflow = '';
       // Reset button state on close
       if (addEl) {
-        addEl.textContent = 'Add to cart';
+        addEl.textContent = qvStrings.addToCart;
         addEl.disabled = false;
         addEl.classList.remove('opacity-50', 'pointer-events-none');
       }
     }
-    [overlay, modal.querySelector('[data-qv-close]')].forEach(function(el){
-      if (el) el.addEventListener('click', function(e){
-        if (e.target === overlay || e.currentTarget.hasAttribute('data-qv-close')) closeModal();
+    if (overlay) {
+      overlay.addEventListener('click', function(e){
+        if (e.target === overlay) closeModal();
       });
-    });
+    }
+    if (modal) {
+      modal.querySelectorAll('[data-qv-close]').forEach(function(el){
+        el.addEventListener('click', function(){ closeModal(); });
+      });
+    }
   
     async function fetchProduct(handle){
       var res = await fetch('/products/' + handle + '.js', { credentials: 'same-origin' });
@@ -84,13 +163,15 @@
   
     // --- UPDATED onQuickView FUNCTION ---
     async function onQuickView(handle){
+      if (!quickViewReady) return;
       try{
         var p = await fetchProduct(handle);
         
         // 1. Update Basic Info
         titleEl.textContent = p.title;
         viewEl.href = p.url || ('/products/' + handle);
-        descEl.textContent = (p.description || '').replace(/<[^>]*>?/gm,'').substring(0, 240);
+        var desc = (p.description || '').replace(/<[^>]*>?/gm,'').trim();
+        descEl.textContent = desc ? desc.substring(0, 240) : qvStrings.descriptionFallback;
         
         // 2. Variant & Price Handling
         var defaultVariant = null;
@@ -120,11 +201,11 @@
 
         // 3. Update Add to Cart Button State
         if (isAvailable) {
-          addEl.textContent = "Add to cart";
+          addEl.textContent = qvStrings.addToCart;
           addEl.disabled = false;
           addEl.classList.remove('opacity-50', 'pointer-events-none');
         } else {
-          addEl.textContent = "Sold Out";
+          addEl.textContent = qvStrings.soldOut;
           addEl.disabled = true;
           addEl.classList.add('opacity-50', 'pointer-events-none');
         }
@@ -134,7 +215,7 @@
           if (!currentVariantId || addEl.disabled) return;
           
           // Temporary button state change to indicate loading
-          addEl.textContent = "Adding...";
+          addEl.textContent = qvStrings.adding;
           addEl.disabled = true;
 
           var addPromise;
@@ -154,28 +235,28 @@
                   return r.json(); 
                 })
                 .then(function(){ 
-                  try { window.dispatchEvent(new CustomEvent('cart:updated')); } catch(err) {} 
                 });
           }
           
           Promise.resolve(addPromise)
             .then(function(){ 
               // Revert button state and close modal on success
-              addEl.textContent = "Added!";
+              addEl.textContent = qvStrings.added;
+              announceCartChange();
               closeModal(); 
               // Show toast notification
-              try { window.dispatchEvent(new CustomEvent('toast:show', { detail: { message: 'Item added to cart' } })); } catch(err) {}
+              try { window.dispatchEvent(new CustomEvent('toast:show', { detail: { message: qvStrings.toastAdded } })); } catch(err) {}
             })
             .catch(function(error){ 
               console.error("Add to cart error:", error);
               // Revert button text and re-enable on failure
-              addEl.textContent = "Error!";
+              addEl.textContent = qvStrings.error;
               addEl.disabled = false;
               addEl.classList.remove('opacity-50', 'pointer-events-none');
               
               // Show error toast notification
               try { 
-                window.dispatchEvent(new CustomEvent('toast:show', { detail: { message: error.message || 'Could not add to cart' } })); 
+                window.dispatchEvent(new CustomEvent('toast:show', { detail: { message: error.message || qvStrings.cartError } })); 
               } catch(err) {}
             });
         };
@@ -185,13 +266,14 @@
       }catch(e){
         console.error("Quickview Load Error:", e);
         closeModal();
-        try { window.dispatchEvent(new CustomEvent('toast:show', { detail: { message: 'Could not load product details.' } })); } catch(err) {}
+        try { window.dispatchEvent(new CustomEvent('toast:show', { detail: { message: qvStrings.loadError } })); } catch(err) {}
       }
     }
   
     document.addEventListener('click', function(e){
       var btn = e.target.closest('[data-quickview]');
       if (btn){
+        if (!quickViewReady) return;
         e.preventDefault();
         var handle = btn.getAttribute('data-product-handle');
         if (handle) onQuickView(handle);
@@ -208,7 +290,7 @@
           setWishlist(list);
           if (wish.classList) wish.classList.add('text-[#71cd13]');
           try { window.dispatchEvent(new CustomEvent('wishlist:updated', { detail: { handle: h, list: list } })); } catch(err) {}
-          try { window.dispatchEvent(new CustomEvent('toast:show', { detail: { message: 'Added to wishlist' } })); } catch(err) {}
+          try { window.dispatchEvent(new CustomEvent('toast:show', { detail: { message: qvStrings.wishlistAdded } })); } catch(err) {}
           refreshWishlistButtons();
         }catch(err){}
       }
@@ -227,16 +309,16 @@
                   return r.json().then(function(err) { throw new Error(err.description || 'Request failed'); });
                 }
                 return r.json(); 
-              })
-              .then(function(){ try { window.dispatchEvent(new CustomEvent('cart:updated')); } catch(err) {} });
+              });
           }
           Promise.resolve(addPromise)
             .then(function(){
-              try { window.dispatchEvent(new CustomEvent('toast:show', { detail: { message: 'Added to cart' } })); } catch(err) {}
+              announceCartChange();
+              try { window.dispatchEvent(new CustomEvent('toast:show', { detail: { message: qvStrings.toastAdded } })); } catch(err) {}
             })
             .catch(function(error){
               console.error("Quick add error:", error);
-              try { window.dispatchEvent(new CustomEvent('toast:show', { detail: { message: error.message || 'Could not add to cart' } })); } catch(err) {}
+              try { window.dispatchEvent(new CustomEvent('toast:show', { detail: { message: error.message || qvStrings.cartError } })); } catch(err) {}
             });
         }
       }

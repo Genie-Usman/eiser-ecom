@@ -8,6 +8,11 @@
  * ------------------------------------------------------------
  */
 {
+  "general": {
+    "accessibility": {
+      "close": "Close"
+    }
+  },
   "404": {
     "title": "404",
     "not_found": "Page not found.",
@@ -50,6 +55,22 @@
     "title": "This shop is private",
     "password": "Password",
     "enter": "Enter"
+  },
+  "products": {
+    "quick_view": {
+      "heading": "Quick view",
+      "view_product": "View product",
+      "add_to_cart": "Add to cart",
+      "sold_out": "Sold out",
+      "adding": "Adding...",
+      "added": "Added!",
+      "error": "Error!",
+      "wishlist_added": "Added to wishlist",
+      "toast_added": "Added to cart",
+      "cart_error": "Could not add to cart",
+      "load_error": "Could not load product details.",
+      "description_fallback": "No description available."
+    }
   },
   "tracking": {
     "heading": "Order tracking",

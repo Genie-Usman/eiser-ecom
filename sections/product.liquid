@@ -431,6 +431,10 @@
         var statusEl = productForm.querySelector('[data-add-status]');
         var qtyInput = productForm.querySelector('input[name="quantity"]');
         var variantSelector = productForm.querySelector('select[name="id"], input[name="id"]');
+        function announceCartChange(){
+          try { window.dispatchEvent(new CustomEvent('cart:updated')); } catch(err) {}
+          try { window.dispatchEvent(new CustomEvent('cart:refresh')); } catch(err) {}
+        }
 
         function showStatus(message, tone) {
           if (!statusEl) return;
@@ -475,13 +479,13 @@
               .then(function(response) {
                 if (!response.ok) throw new Error('Request failed');
                 return response.json();
-              })
-              .then(function(){ try { window.dispatchEvent(new CustomEvent('cart:updated')); } catch(err) {} });
+              });
           }
 
           Promise.resolve(request)
             .then(function(){
               showStatus('Added to cart', 'success');
+              announceCartChange();
             })
             .catch(function(){
               showStatus('Could not add to cart', 'error');
