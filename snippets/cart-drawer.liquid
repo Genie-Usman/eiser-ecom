@@ -1,0 +1,217 @@
+{% comment %} 
+  Cart Drawer Component
+   
+  This snippet renders a sliding cart drawer that displays cart items, 
+  allows quantity updates, discount code application, and checkout.
+   
+  Usage: {% render 'cart-drawer', section_id: section.id %} 
+{% endcomment %}
+
+<div
+  x-data="{ open: false }"
+  x-cloak
+  @cart-open.window="open = true">
+
+  <button
+    type="button"
+    @click="open = true"
+    class="header__icon relative cursor-pointer inline-flex items-center justify-center p-2 text-base hover:text-[#71cd13]"
+    aria-haspopup="dialog"
+    :aria-expanded="open.toString()">
+    <span class="sr-only">Open cart</span>
+    {% render 'icon-cart' %}
+    <sup class="absolute -top-1 -right-1 bg-[#71cd13] text-white text-[11px] rounded-full min-w-[18px] h-[18px] px-1 flex items-center justify-center leading-none{% if cart.item_count == 0 %} hidden{% endif %}" data-cart-count>
+      {{ cart.item_count }}
+    </sup>
+  </button>
+
+  <div
+    x-show="open"
+    x-transition
+    x-cloak
+    class="fixed inset-0 bg-black/40 z-40"
+    @click="open = false"></div>
+
+  <aside
+    x-show="open"
+    x-transition:enter="transition transform duration-300"
+    x-transition:enter-start="translate-x-full"
+    x-transition:enter-end="translate-x-0"
+    x-transition:leave="transition transform duration-300"
+    x-transition:leave-start="translate-x-0"
+    x-transition:leave-end="translate-x-full"
+    x-cloak
+    class="fixed right-0 top-0 h-full w-96 bg-white shadow-xl z-50">
+
+    <div class="flex justify-between items-center px-4 py-2 border-b">
+      <h2 class="text-lg font-semibold">Your Cart</h2>
+      <button @click="open = false" class="p-2 cursor-pointer">{% render 'icon-close' %}</button>
+    </div>
+
+    <div
+      class="p-2 h-full"
+      data-cart-root
+      data-section-id="{{ section_id }}">
+
+      <div class="overflow-y-auto h-[calc(100%-60px)]">
+        {% if cart.item_count == 0 %}
+          <div class="w-full h-full flex flex-col items-center justify-center text-center py-10">
+            <p class="text-gray-700 text-base mb-4">Your cart is empty.</p>
+            <a href="{{ routes.all_products_collection_url }}" class="px-4 py-2 bg-gray-200 rounded text-sm hover:bg-gray-300">
+              Continue Shopping
+            </a>
+          </div>
+        {% else %}
+
+          <form
+            action="{{ routes.cart_url }}"
+            method="post"
+            class="mt-6 grid lg:grid-cols-12 gap-8"
+            data-cart-form>
+
+            <div class="lg:col-span-12">
+              <div class="hidden md:grid grid-cols-12 text-xs font-medium border-b border-gray-200 uppercase tracking-wide text-[#797979] px-1 pb-1">
+                <div class="col-span-7">Product</div>
+                <div class="col-span-2 text-right">Total</div>
+              </div>
+
+              <div class="max-h-[300px] overflow-y-auto divide-y divide-gray-200 md:border-t-0">
+                {% for item in cart.items %}
+                  <div
+                    class="px-1 py-2 grid grid-cols-12 items-center gap-5 cart-line"
+                    data-line-key="{{ item.key }}"
+                    data-variant-id="{{ item.variant_id }}">
+
+                    <a href="{{ item.url }}" class="col-span-2 block w-24 h-24 bg-white border border-gray-200 rounded overflow-hidden shrink-0">
+                      {% if item.image %}
+                        {{ item.image | image_url: width: 200 | image_tag: class: 'w-full h-full object-contain' }}
+                      {% endif %}
+                    </a>
+
+                    <div class="col-span-5 min-w-0 space-y-1 ml-10">
+                      <a href="{{ item.url }}" class="text-[#797979] text-xs line-clamp-2 ml-1">{{ item.product.title }}</a>
+                      {% if item.variant.title != 'Default Title' %}
+                        <p class="mt-0.5 text-xs text-[#797979]">{{ item.variant.title }}</p>
+                      {% endif %}
+
+                      <div class="hidden md:block font-medium text-xs text-left ml-1 text-[#2A2A2A] unit-price">{{ item.final_price | money }}</div>
+
+                      <div class="relative w-20">
+                        <input
+                          type="number"
+                          min="0"
+                          value="{{ item.quantity }}"
+                          class="cart-qty-input w-full h-[30px] rounded-md font-semibold border border-[#e7e7e7] bg-white pl-3 text-[12px] leading-none text-gray-900 text-left outline-none appearance-none"
+                          data-line-key="{{ item.key }}">
+
+                        <div class="absolute inset-y-0 right-0 w-[21px] flex flex-col border-l border-[#e7e7e7]">
+                          <button type="button" class="flex-1 grid place-content-center qty-plus hover:bg-gray-100">
+                            {% render 'icon-chevron-up' %}
+                          </button>
+                          <button type="button" class="flex-1 grid place-content-center qty-minus hover:bg-gray-100">
+                            {% render 'icon-chevron-down' %}
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="col-span-2 text-right text-gray-900 text-sm font-medium line-total">
+                      {{ item.final_line_price | money }}
+                    </div>
+
+                    <button
+                      type="button"
+                      class="ml-10 block text-[11px] uppercase tracking-wide text-rose-600 hover:text-rose-700"
+                      data-cart-remove>
+                      {% render 'icon-trash' %}
+                    </button>
+                  </div>
+                {% endfor %}
+              </div>
+
+              <div class="fixed bottom-1">
+                <div class="mt-4">
+                  <div class="my-5 grid px-5 md:grid-cols-1 gap-3 items-center">
+
+                    <div class="flex flex-col items-end gap-2" data-cart-discount-container>
+
+
+                      <div class="flex items-center gap-3 w-full justify-end" data-cart-discount-group>
+                        <div
+                          class="flex items-center gap-2 bg-[#eafce3] border border-[#71CD14] text-[#2A2A2A] text-xs font-medium rounded-md py-2 px-4"
+                          data-cart-discount-pill
+                          style="{% if cart.discount_applications.size == 0 %}display: none;{% endif %}">
+
+
+                          <span data-cart-discount-pill-text class="font-bold text-xs">
+                            {{ cart.discount_applications.first.title }}
+                          </span>
+
+                          <button
+                            type="button"
+                            aria-label="Remove coupon"
+                            data-cart-remove-discount>
+                            <span class="text-[#71CD14] hover:text-rose-700 cursor-pointer">{% render 'icon-tag' %}</span>
+                          </button>
+                        </div>
+                        <input
+                          data-cart-discount-input
+                          class="h-10 w-30 border border-[#CCCCCC] rounded text-[#2A2A2A] px-3 text-sm focus:border-[#71CD14] outline-none transition-colors"
+                          placeholder="Coupon Code"
+                          aria-label="Discount code">
+                        <button
+                          type="button"
+                          data-cart-apply
+                          class="h-10 cursor-pointer uppercase font-medium px-6 bg-[#71CD14] text-white rounded text-xs hover:bg-[#65b812] transition-colors">
+                          Apply
+                        </button>
+                      </div>
+
+                      <p data-cart-discount-feedback class="text-xs hidden text-right font-medium"></p>
+                    </div>
+
+                  </div>
+                </div>
+
+                <div class="flex items-center justify-between px-3 gap-5 text-xs mt-1">
+                  <span class="text-gray-900 font-semibold">Subtotal</span>
+                  <div class="flex flex-col items-end">
+                    <span data-cart-subtotal class="text-gray-900 text-lg font-semibold">
+                      {{ cart.total_price | money }}
+                    </span>
+
+                    {% if cart.total_discount > 0 %}
+                      <span class="text-[#71CD14] text-xs">
+                        Savings: -{{ cart.total_discount | money }}</span>
+                    {% endif %}
+                  </div>
+                </div>
+
+                <div class="mt-1 px-5 border-t border-gray-300 pt-4 pb-2">
+                  <div class="flex flex-row justify-between gap-2">
+                    <button
+                      @click="open = false"
+                      type="button"
+                      class="bg-[#F6F6F6] hover:text-[#0056B3] text-[#2A2A2A] text-xs flex items-center justify-center font-medium rounded-sm cursor-pointer py-1 px-4 h-[44px]">
+                      Continue Shopping
+                    </button>
+
+                    <button
+                      type="submit"
+                      name="checkout"
+                      class="flex-1 h-[44px] bg-[#71cd13] text-white hover:bg-[#65b812] transition-colors duration-300 ease-in text-xs font-medium rounded-sm cursor-pointer py-1 px-5">
+                      Proceed to Checkout
+                    </button>
+                  </div>
+                </div>
+
+              </div>
+
+
+            </div>
+          </form>
+        {% endif %}
+      </div>
+    </div>
+  </aside>
+</div>

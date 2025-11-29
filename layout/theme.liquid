@@ -26,7 +26,8 @@
     {% sections 'footer-group' %}
 
     <script src="{{ 'cart-ajax.js' | asset_url }}" defer></script>
-    {% render 'quick-view-modal' %}
+    <script src="{{ 'quickview-modal.js' | asset_url }}" defer></script>
+    {% comment %} {% render 'quickview' %} {% endcomment %}
     {% render 'ui-toast' %}
   </body>
 </html>

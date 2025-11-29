@@ -1,0 +1,445 @@
+{% layout none %}
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+
+<style>
+  .swiper { width: 100%; height: 100%; }
+  .swiper-slide { display: flex; align-items: center; justify-content: center; background: transparent; }
+  
+  /* Gusto-style Navigation Arrows */
+  .qv-nav-btn {
+    width: 45px; height: 45px;
+    background: white;
+    border-radius: 50%;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+    display: flex; align-items: center; justify-content: center;
+    color: #333;
+    z-index: 50;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    opacity: 1; 
+    transform: translateY(-50%) scale(0.9);
+  }
+  .qv-nav-btn:hover { background: black; color: white; }
+
+  /* Thumbnail Active State */
+  .qv-thumb-swiper .swiper-slide { 
+    opacity: 0.5; 
+    transition: all 0.2s; 
+    border: 1px solid transparent; 
+    cursor: pointer; 
+    border-radius: 0px;
+  }
+  .qv-thumb-swiper .swiper-slide-thumb-active { 
+    opacity: 1; 
+    border: 1px solid #000; 
+  }
+  
+  /* Spinner Animation */
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .qv-spinner { animation: spin 1s linear infinite; }
+</style>
+
+<div id="qv-wrapper-{{ product.id }}" class="qv-root font-sans text-[#2A2A2A] relative z-9999">
+  
+  <div class="relative flex w-full h-full bg-white shadow-2xl overflow-hidden flex-col md:flex-row max-h-[90vh] md:max-h-[600px] max-w-[1060px] pointer-events-auto">
+    
+    <button type="button" onclick="closeQuickView()" class="absolute right-4 top-4 z-50 p-2 text-gray-400 hover:text-black transition-colors cursor-pointer">
+      {% render 'icon-close' %}
+    </button>
+
+    <div class="w-full md:w-1/2 relative pl-2 flex flex-col top-8 select-none">
+
+      <div class="relative w-full h-[400px] group">
+        <div class="swiper qv-main-swiper">
+          <div class="swiper-wrapper">
+            {% for media in product.media %}
+              <div class="swiper-slide">
+                <img src="{{ media | image_url: width: 1000 }}" 
+                     alt="{{ product.title }}" 
+                     class="max-w-full max-h-full object-cover mix-blend-multiply"
+                     width="inherit"
+                     height="inherit">
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+        
+        <div id="qv-prev-btn" class="qv-nav-btn absolute top-1/2 left-2 mx-7">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
+        </div>
+        <div id="qv-next-btn" class="qv-nav-btn absolute top-1/2 right-2 mx-7">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+        </div>
+      </div>
+
+      <div class="w-full h-[70px] mt-4 px-9">
+        <div class="swiper qv-thumb-swiper">
+          <div class="swiper-wrapper">
+            {% for media in product.media %}
+              <div class="swiper-slide">
+                <img src="{{ media | image_url: width: 100 }}" class="w-full h-full object-cover mix-blend-multiply" width="inherit" height="inherit" >
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="w-full md:w-1/2 bg-white pr-8 pt-8 pb-8 md:pb-10 md:pl-3 md:pr-10 md:pt-8 flex flex-col overflow-visible relative z-20">
+
+     {% for tag in product.tags %}
+          {% if tag contains 'New' or tag contains 'new' %}
+            <span class="bg-[#1D5904] w-12 mb-2 text-white text-[12px] font-bold px-2 py-1 uppercase">New</span>
+          {% endif %}
+        {% endfor %}
+      
+      <h2 class="text-3xl font-bold text-gray-900 mb-2 leading-tight tracking-tight">{{ product.title }}</h2>
+      
+      <div class="flex items-center gap-3 mb-6">
+        <span id="qv-price-display" class="text-lg font-semibold text-gray-900">{{ product.price | money }}</span>
+        {% if product.compare_at_price_max > product.price %}
+          <span id="qv-compare-display" class="text-base text-gray-400 line-through">{{ product.compare_at_price_max | money }}</span>
+          <span class="bg-[#C63E2C] text-white text-[10px] font-bold px-2 py-1 uppercase">Sale</span>
+        {% endif %}
+      </div>
+
+      <form id="qv-form" class="grow">
+        <input type="hidden" name="id" id="qv-variant-id" value="{{ product.selected_or_first_available_variant.id }}">
+
+        {% for option in product.options_with_values %}
+          <div class="mb-6">
+            <label class="block text-sm font-bold text-gray-900 mb-2">
+              {{ option.name }}: <span id="qv-opt-val-{{ forloop.index0 }}" class="font-normal text-sm text-gray-900">{{ option.selected_value }}</span>
+            </label>
+
+            <div class="flex flex-wrap gap-3">
+              {% assign is_color = false %}
+              {% if option.name == 'Color' or option.name == 'Colour' %}
+                {% assign is_color = true %}
+              {% endif %}
+
+              {% for value in option.values %}
+                {% if is_color %}
+                  {% assign swatch_style = "" %}
+                  {% if value.swatch.image %}
+                    {% assign image_url = value.swatch.image | image_url: width: 80 %}
+                    {% assign swatch_style = "background-image: url('" | append: image_url | append: "'); background-size: cover; background-position: center;" %}
+                  {% elsif value.swatch.color %}
+                    {% assign swatch_style = "background-color: " | append: value.swatch.color | append: ";" %}
+                  {% else %}
+                    {% assign handle_color = value | handle %}
+                    {% assign texture_url = handle_color | append: '.png' | file_url %}
+                    {% assign swatch_style = "background-color: " | append: handle_color | append: "; background-image: url('" | append: texture_url | append: "');" %}
+                  {% endif %}
+                  
+                  {% assign slide_index = 0 %}
+                  {% for v in product.variants %}
+                    {% if v.option1 == value or v.option2 == value or v.option3 == value %}
+                      {% if v.featured_media %}
+                        {% assign slide_index = v.featured_media.position | minus: 1 %}
+                        {% break %}
+                      {% endif %}
+                    {% endif %}
+                  {% endfor %}
+
+                  <div class="relative group/swatch flex justify-center">
+                    <div class="absolute bottom-full mb-2 hidden group-hover/swatch:block whitespace-nowrap z-50">
+                        <div class="relative bg-gray-900 text-white text-[11px] font-medium py-1 px-2 rounded shadow-lg transform translate-x-0">
+                            {{ value }}
+                            <div class="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
+                        </div>
+                    </div>
+
+                    <div class="w-8 h-8 mt-2 rounded-full border border-gray-300 cursor-pointer bg-cover bg-center transition-all hover:border-gray-400 qv-swatch {% if option.selected_value == value %}ring-1 ring-offset-2 ring-gray-900 border-gray-400{% endif %}"
+                         data-value="{{ value }}"
+                         data-index="{{ forloop.parentloop.index0 }}"
+                         data-slide-index="{{ slide_index }}"
+                         onclick="qvSelect(this, true)"
+                         style="{{ swatch_style }}">
+                    </div>
+                  </div>
+
+                {% else %}
+                  <div class="px-4 py-2 border border-gray-200 text-xs font-bold text-gray-600 cursor-pointer hover:border-black transition-all qv-btn {% if option.selected_value == value %}bg-black text-white border-black{% endif %}"
+                       data-value="{{ value }}"
+                       data-index="{{ forloop.parentloop.index0 }}"
+                       onclick="qvSelect(this, false)">
+                    {{ value }}
+                  </div>
+                {% endif %}
+              {% endfor %}
+            </div>
+          </div>
+        {% endfor %}
+
+        {% comment %} Quantity {% endcomment %}
+        <div class="mb-8">
+          <label class="block text-sm font-bold text-gray-900 mb-2">Quantity</label>
+          <div class="mt-3">
+            <div class="flex items-center w-[110px] border border-gray-200 h-10 bg-white">
+              <button type="button" onclick="qvUpdateQty(-1)" class="ml-2 flex items-center justify-center text-gray-500 hover:text-black transition-colors cursor-pointer">{% render 'icon-minus' %}</button>
+              <input type="number" id="qv-qty-input" value="1" readonly class="w-full h-full text-center border-none p-0 ml-2 text-sm font-medium focus:ring-0 outline-none text-gray-900 appearance-none bg-transparent">
+              <button type="button" onclick="qvUpdateQty(1)" class="mr-2 flex items-center justify-center text-gray-500 hover:text-black transition-colors text-xl cursor-pointer">{% render 'icon-plus' %}</button>
+            </div>
+          </div>
+        </div>
+
+        {% comment %} Buttons {% endcomment %}
+        <div class="mt-auto">
+          <div class="space-y-3">
+            <button type="button" id="qv-add-btn" onclick="qvAddToCart()" 
+              class="group relative w-full flex items-center justify-center overflow-hidden bg-[#EDEDED] py-4 px-6 text-xs font-bold uppercase tracking-widest text-gray-900 transition-all duration-300 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed">
+              
+              <span class="absolute inset-0 h-full w-full origin-left scale-x-0 bg-gray-600 transition-transform duration-300 ease-out group-hover:scale-x-100"></span>
+              <span class="absolute inset-0 h-full w-full origin-left scale-x-0 bg-gray-900 transition-transform duration-300 ease-out delay-150 group-hover:scale-x-100"></span>
+
+              <span id="qv-add-btn-text" class="relative z-10 transition-colors duration-300 group-hover:text-white">
+                Add to Cart
+              </span>
+
+              <span id="qv-add-btn-spinner" class="absolute inset-0 flex items-center justify-center hidden z-20 text-black">
+                {% render 'icon-spinner' %}
+              </span>
+            </button>
+            
+            <button type="button" id="qv-buy-btn" onclick="qvBuyNow()" class="w-full bg-[#5a31f4] hover:bg-[#4820d4] flex flex-row justify-center items-center gap-1 text-white font-bold py-4 px-6 text-sm transition-all duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed">
+              Buy with <span class="font-extrabold tracking-tighter">{% render 'icon-shop' %}</span>
+            </button>
+          </div>
+        
+          <div class="text-center mt-1">
+             <a href="#" class="text-[14px] font-semibold underline text-gray-500 hover:text-black decoration-gray-300">More Payment Options</a>
+          </div>
+        </div>
+      </form>
+
+      <div class="mt-6 pt-4 space-y-3">
+  <a href="{{ product.url }}" class="group inline-flex items-center gap-1 text-[13px] font-bold uppercase tracking-widest text-gray-900 pb-1 hover:opacity-100 transition-opacity">
+    
+    <span class="relative z-10">
+      View full details
+
+      <span class="absolute bottom-0 left-0 h-px w-full bg-gray-900 transform origin-right scale-x-100 transition-transform duration-300 ease-out group-hover:scale-x-0"></span>
+      <span class="absolute bottom-0 left-0 h-px w-full bg-gray-900 transform origin-left scale-x-0 transition-transform duration-300 ease-out delay-300 group-hover:scale-x-100"></span>
+    </span>
+
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="ml-1 relative z-10">
+      <path d="M5 12h14M12 5l7 7-7 7"/>
+    </svg>
+  </a>
+</div>
+
+    </div>
+  </div>
+
+  <script type="application/json" id="qv-product-json">
+    {{ product | json }}
+  </script>
+  
+  <script>
+    (function(){
+      var qvProduct = JSON.parse(document.getElementById('qv-product-json').innerHTML);
+      var qvSwiperInstance = null;
+
+      // --- 1. SELECTION LOGIC ---
+      window.qvSelect = function(el, isColor) {
+        
+        // FIX: Find the main container (.flex-wrap) instead of just the immediate parent
+        // This ensures we can find sibling swatches even if they are inside their own wrapper divs
+        var container = el.closest('.flex-wrap');
+
+        // UI Updates - Loop through all swatches in the container
+        container.querySelectorAll('.qv-swatch, .qv-btn').forEach(e => {
+          e.classList.remove('ring-1', 'ring-offset-2', 'ring-gray-900', 'border-gray-400', 'bg-black', 'text-white', 'border-black');
+          if(isColor) {
+             if(e.classList.contains('qv-swatch')) e.classList.add('border-gray-300');
+          } else {
+             if(e.classList.contains('qv-btn')) e.classList.add('bg-white', 'text-gray-600', 'border-gray-200');
+          }
+        });
+
+        if(isColor) {
+          el.classList.remove('border-gray-300');
+          el.classList.add('ring-1', 'ring-offset-2', 'ring-gray-900', 'border-gray-400');
+        } else {
+          el.classList.remove('bg-white', 'text-gray-600', 'border-gray-200');
+          el.classList.add('bg-black', 'text-white', 'border-black');
+        }
+        
+        var idx = el.getAttribute('data-index');
+        document.getElementById('qv-opt-val-'+idx).textContent = el.getAttribute('data-value');
+
+        if(isColor && qvSwiperInstance) {
+          var slideIndex = parseInt(el.getAttribute('data-slide-index'));
+          if(!isNaN(slideIndex)) {
+            // Check if loop is enabled before calling slideToLoop
+            if (qvSwiperInstance.params.loop) {
+              qvSwiperInstance.slideToLoop(slideIndex);
+            } else {
+              qvSwiperInstance.slideTo(slideIndex);
+            }
+          }
+        }
+
+        var selected = [];
+        document.querySelectorAll('#qv-form .flex-wrap').forEach(grp => {
+          var active = grp.querySelector('.ring-gray-900, .bg-black'); 
+          if(active) selected.push(active.getAttribute('data-value'));
+        });
+
+        var variant = qvProduct.variants.find(v => {
+          return v.options.every((o, i) => o === selected[i]);
+        });
+
+        var btn = document.getElementById('qv-add-btn');
+        var btnTextSpan = document.getElementById('qv-add-btn-text'); 
+        var buyBtn = document.getElementById('qv-buy-btn'); 
+        var price = document.getElementById('qv-price-display');
+        var compare = document.getElementById('qv-compare-display');
+
+        if(variant) {
+          document.getElementById('qv-variant-id').value = variant.id;
+          price.textContent = (variant.price / 100).toLocaleString('en-US', {style:'currency', currency:'Rs'});
+          
+          if(compare) {
+             if(variant.compare_at_price > variant.price) compare.textContent = (variant.compare_at_price / 100).toLocaleString('en-US', {style:'currency', currency:'Rs'});
+             else compare.textContent = '';
+          }
+
+          if(variant.available) {
+            btnTextSpan.innerText = 'ADD TO CART';
+            btn.disabled = false; btn.classList.remove('opacity-50', 'cursor-not-allowed');
+            if(buyBtn) { buyBtn.disabled = false; buyBtn.classList.remove('opacity-50', 'cursor-not-allowed'); }
+          } else {
+            btnTextSpan.innerText = 'SOLD OUT';
+            btn.disabled = true; btn.classList.add('opacity-50', 'cursor-not-allowed');
+            if(buyBtn) { buyBtn.disabled = true; buyBtn.classList.add('opacity-50', 'cursor-not-allowed'); }
+          }
+        } else {
+          btnTextSpan.innerText = 'UNAVAILABLE';
+          btn.disabled = true;
+          if(buyBtn) { buyBtn.disabled = true; buyBtn.classList.add('opacity-50', 'cursor-not-allowed'); }
+        }
+      };
+
+      // --- 2. ACTION LOGIC ---
+      window.qvUpdateQty = function(d) {
+        var inp = document.getElementById('qv-qty-input');
+        var v = parseInt(inp.value) + d;
+        if(v > 0) inp.value = v;
+      };
+
+      window.qvAddToCart = function() {
+        var btn = document.getElementById('qv-add-btn');
+        var btnText = document.getElementById('qv-add-btn-text');
+        var btnSpinner = document.getElementById('qv-add-btn-spinner');
+        
+        if(btn.disabled) return;
+        
+        if(btnText) btnText.classList.add('opacity-0'); 
+        if(btnSpinner) btnSpinner.classList.remove('hidden');
+        
+        var id = document.getElementById('qv-variant-id').value;
+        var qty = document.getElementById('qv-qty-input').value;
+
+        fetch(window.Shopify.routes.root + 'cart/add.js', {
+          method: 'POST', 
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({ 'items': [{ id: id, quantity: qty }] })
+        })
+        .then(res => res.json())
+        .then(data => {
+          if(data.items || data.id) { 
+            document.documentElement.dispatchEvent(new CustomEvent('cart:refresh', { bubbles: true, detail: data }));
+            setTimeout(() => { closeQuickView(); }, 800);
+          } else {
+            console.error(data);
+            if(btnText) {
+                btnText.innerText = 'ERROR';
+                btnText.classList.remove('opacity-0');
+            }
+            if(btnSpinner) btnSpinner.classList.add('hidden');
+          }
+        })
+        .catch(err => { 
+            console.error(err); 
+            if(btnText) {
+                btnText.innerText = 'ERROR';
+                btnText.classList.remove('opacity-0');
+            }
+            if(btnSpinner) btnSpinner.classList.add('hidden');
+        });
+      };
+
+      window.qvBuyNow = function() {
+        var btn = document.getElementById('qv-buy-btn');
+        if(btn.disabled) return;
+        
+        btn.disabled = false;
+        
+        var id = document.getElementById('qv-variant-id').value;
+        var qty = document.getElementById('qv-qty-input').value;
+        
+        fetch(window.Shopify.routes.root + 'cart/add.js', {
+          method: 'POST', headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({ 'items': [{ id: id, quantity: qty }] })
+        })
+        .then(res => res.json())
+        .then(data => {
+          if(data.items || data.id) { 
+            window.location.href = '/checkout';
+          } else {
+            btn.disabled = false;
+            console.error(data);
+          }
+        })
+        .catch(err => { 
+            btn.disabled = false; 
+            console.error(err); 
+        });
+      };
+
+      // --- 3. SWIPER INIT ---
+      function initSwiperSafe() {
+        if (typeof Swiper !== 'undefined') {
+          
+          var slideCount = document.querySelectorAll('.qv-main-swiper .swiper-slide').length;
+          var mainLoop = slideCount > 1;
+          var thumbLoop = slideCount > 5;
+
+          var thumbSwiper = new Swiper(".qv-thumb-swiper", {
+            loop: thumbLoop,
+            spaceBetween: 10,
+            slidesPerView: 5,
+            freeMode: true,
+            watchSlidesProgress: true,
+            observer: true,
+            observeParents: true,
+          });
+
+          qvSwiperInstance = new Swiper('.qv-main-swiper', {
+            loop: mainLoop,
+            spaceBetween: 0,
+            navigation: {
+              nextEl: '#qv-next-btn',
+              prevEl: '#qv-prev-btn',
+            },
+            thumbs: {
+              swiper: thumbSwiper,
+            },
+            observer: true, 
+            observeParents: true,
+          });
+
+        } else {
+          setTimeout(initSwiperSafe, 100);
+        }
+      }
+
+      initSwiperSafe();
+
+    })();
+  </script>
+</div>
