@@ -2,16 +2,36 @@
   "sections": {
     "swiper-slider": {
       "type": "sheatera-hero-slider",
-      "settings": {}
-    },
-    "main": {
-      "type": "checkout-page",
+      "blocks": {
+        "slide_1": {
+          "type": "slide",
+          "settings": {
+            "bg_color": "#e8f5e9"
+          }
+        },
+        "slide_2": {
+          "type": "slide",
+          "settings": {
+            "bg_color": "#fcfbf9"
+          }
+        },
+        "slide_3": {
+          "type": "slide",
+          "settings": {
+            "bg_color": "#fcfbf9"
+          }
+        }
+      },
+      "block_order": [
+        "slide_1",
+        "slide_2",
+        "slide_3"
+      ],
       "settings": {}
     }
   },
   "order": [
-    "swiper-slider",
-    "main"
+    "swiper-slider"
   ]
 }
 
