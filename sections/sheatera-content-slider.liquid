@@ -1,0 +1,128 @@
+<link rel="stylesheet" href="{{ 'splide.min.css' | asset_url }}">
+<script src="{{ 'splide.min.js' | asset_url }}" defer></script>
+
+<style>
+  .splide__pagination__page.is-active {
+    background: #d4a373;
+    transform: scale(1.2);
+  }
+  .splide__pagination {
+    bottom: -2.5em !important;
+  }
+  .splide__arrow {
+    display: none !important;
+  }
+</style>
+
+<div class="py-16 bg-[#fcfbf9]">
+  <div class="max-w-7xl mx-auto px-4">
+    {% if section.settings.title != blank %}
+      <div class="text-center mb-10 relative">
+        <h2 class="text-3xl md:text-4xl inline-block relative px-4 italic text-gray-800">
+          {{ section.settings.title }}
+        </h2>
+      </div>
+    {% endif %}
+
+    <section
+      id="splide-{{ section.id }}"
+      class="splide"
+      aria-label="Blog Slider">
+      <div class="splide__track">
+        <ul class="splide__list">
+          {% assign blog = blogs[section.settings.news_blog] %}
+          {% if blog != blank and blog.articles_count > 0 %}
+            {% for article in blog.articles limit: section.settings.post_limit %}
+              <li class="splide__slide h-auto pb-4">
+                <div class="h-full flex flex-col mx-2 group">
+                  <a href="{{ article.url }}" class="block h-full">
+                    <div class="relative w-full aspect-4/3 overflow-hidden mb-4">
+                      {% if article.image %}
+                        {{ article.image | image_url: width: 600 | image_tag: class: 'w-full h-full object-cover', alt: article.image.alt }}
+                      {% else %}
+                        {{ 'image' | placeholder_svg_tag: 'w-full h-full object-cover bg-gray-200' }}
+                      {% endif %}
+                    </div>
+
+                    <div class="text-center px-2">
+                      <h3 class="text-lg md:text-xl text-gray-900 font-sans leading-tight group-hover:text-gray-600 transition-colors">
+                        {{ article.title }}
+                      </h3>
+                    </div>
+                  </a>
+                </div>
+              </li>
+            {% endfor %}
+          {% else %}
+            {% for i in (1..4) %}
+              <li class="splide__slide h-auto pb-4">
+                <div class="h-full flex flex-col mx-2">
+                  <div class="w-full aspect-4/3 bg-gray-200 mb-4"></div>
+                  <div class="text-center px-2">
+                    <h3 class="text-lg md:text-xl text-gray-900 font-sans leading-tight">Example Blog Post {{ i }}</h3>
+                  </div>
+                </div>
+              </li>
+            {% endfor %}
+          {% endif %}
+        </ul>
+      </div>
+    </section>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    new Splide('#splide-{{ section.id }}', {
+      type   : 'loop',
+      perPage: {{ section.settings.per_page }},
+      gap: '1rem',
+      padding: '0', 
+      focus: 'center',
+      arrows: false,
+      breakpoints: {
+        1024: { perPage: 2, padding: '2rem' },
+        640 : { perPage: 1, padding: '2rem' },
+      },
+    }).mount();
+  });
+</script>
+
+{% schema %}
+  {
+    "name": "Blog Slider (Splide)",
+    "settings": [
+      {
+        "type": "text",
+        "id": "title",
+        "label": "Heading",
+        "default": "What's BUZZIN"
+      }, {
+        "type": "blog",
+        "id": "news_blog",
+        "label": "Select Blog"
+      }, {
+        "type": "range",
+        "id": "post_limit",
+        "min": 3,
+        "max": 12,
+        "step": 1,
+        "label": "Number of posts",
+        "default": 4
+      }, {
+        "type": "range",
+        "id": "per_page",
+        "min": 1,
+        "max": 4,
+        "step": 1,
+        "label": "Posts per row (Desktop)",
+        "default": 3
+      }
+    ],
+    "presets": [
+      {
+        "name": "Blog Slider (Splide)"
+      }
+    ]
+  }
+{% endschema %}

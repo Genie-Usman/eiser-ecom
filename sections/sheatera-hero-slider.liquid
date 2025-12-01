@@ -1,5 +1,5 @@
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
-<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js" defer></script>
+<link rel="stylesheet" href="{{ 'swiper-bundle.min.css' | asset_url }}">
+<script src="{{ 'swiper-bundle.min.js' | asset_url }}" defer></script>
 
 
 <style>
@@ -80,8 +80,7 @@
             "id": "bg_color",
             "label": "Background Color",
             "default": "#e8f5e9"
-          },
-          {
+          }, {
             "type": "image_picker",
             "id": "bg_image",
             "label": "Slide Image"

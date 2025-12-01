@@ -1,0 +1,235 @@
+<!-- Load Assets -->
+<link rel="stylesheet" href="{{ 'slick.min.css' | asset_url }}">
+<link rel="stylesheet" href="{{ 'slick-theme.min.css' | asset_url }}">
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+
+<script src="{{ 'jquery-3.6.0.min.js' | asset_url }}"></script>
+<script src="{{ 'slick.min.js' | asset_url }}" defer></script>
+
+<style>
+
+  /* Slick Arrows Customization */
+  .custom-arrows {
+    display: flex;
+    gap: 10px;
+  }
+  .custom-arrow {
+    width: 40px;
+    height: 40px;
+    border: 1px solid #333;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: white;
+    font-size: 14px;
+  }
+  .custom-arrow:hover {
+    background: #333;
+    color: white;
+  }
+
+  /* Card Styling */
+  .product-card {
+    background-color: #e8e4dc;
+    /* Beige background from image */
+  }
+
+  /* Pagination Dots (Sticks) */
+  .slick-dots {
+    bottom: -10px;
+  }
+  .slick-dots li {
+    width: 30px;
+    height: 4px;
+    margin: 0 4px;
+  }
+  .slick-dots li button {
+    width: 30px;
+    height: 4px;
+    padding: 0;
+  }
+  .slick-dots li button:before {
+    content: '';
+    width: 30px;
+    height: 4px;
+    background-color: #d1d1d1;
+    opacity: 1;
+    border-radius: 2px;
+  }
+  .slick-dots li.slick-active button:before {
+    background-color: #333;
+  }
+</style>
+
+<div class="max-w-[1400px] mx-auto pt-16 pb-8 px-4 relative">
+
+  <!-- Header & Arrows -->
+  <div class="flex justify-between items-end mb-8 px-2">
+    <div></div>
+
+    <!-- Custom Arrows Container -->
+    <div class="custom-arrows">
+      <div class="custom-arrow prev-slide-{{ section.id }}">
+        <i class="fas fa-chevron-left"></i>
+      </div>
+      <div class="custom-arrow next-slide-{{ section.id }}">
+        <i class="fas fa-chevron-right"></i>
+      </div>
+    </div>
+  </div>
+
+  <div class="slick-collections-{{ section.id }} -mx-4 pb-7">
+    {% for block in section.blocks %}
+      {% assign collection = collections[block.settings.collection] %}
+      <div class="px-4 h-full">
+        <div class="product-card h-full flex flex-col transition-shadow duration-300 hover:shadow-xl">
+
+          <!-- Image Area -->
+          <div class="relative w-full aspect-square bg-white p-4 flex items-center justify-center overflow-hidden">
+            <a href="{{ collection.url | default: '#' }}" class="block w-full h-full">
+              {% if block.settings.custom_image != blank %}
+                {{ block.settings.custom_image | image_url: width: 600 | image_tag: class: 'w-full h-full object-contain hover:scale-105 transition-transform duration-500' }}
+              {% elsif collection.image != blank %}
+                {{ collection.image | image_url: width: 600 | image_tag: class: 'w-full h-full object-contain hover:scale-105 transition-transform duration-500' }}
+              {% else %}
+                {{ 'product-1' | placeholder_svg_tag: 'w-full h-full object-contain opacity-50' }}
+              {% endif %}
+            </a>
+          </div>
+
+          <!-- Content Area -->
+          <div class="p-6 flex flex-col items-center text-center space-y-3">
+
+            <!-- Add To Button -->
+            <a href="{{ collection.url | default: '#' }}" class="w-full bg-black text-white py-3 px-4 font-bold uppercase text-sm tracking-widest flex items-center justify-center gap-2 hover:bg-gray-800 transition-colors">
+              <span>Add to</span>
+              <i class="fas fa-shopping-bag"></i>
+            <!-- Icon placeholder -->
+            </a>
+
+            <!-- Reviews -->
+            <div class="flex items-center gap-2 text-xs text-gray-600 mt-2">
+              <div class="flex text-gray-800">
+                <i class="fas fa-heart"></i>
+                <i class="fas fa-heart"></i>
+                <i class="fas fa-heart"></i>
+                <i class="fas fa-heart"></i>
+                <i class="fas fa-heart"></i>
+              </div>
+              <span>{{ block.settings.reviews_count }} reviews</span>
+            </div>
+
+            <!-- Title -->
+            <h3 class="font-bold text-lg uppercase tracking-wide text-gray-900 leading-tight">
+              <a href="{{ collection.url | default: '#' }}">
+                {{ block.settings.custom_title | default: collection.title | default: "Collection Title" }}
+              </a>
+            </h3>
+
+            <!-- Price -->
+            <div class="font-bold text-gray-900">
+              {{ block.settings.price | default: "$50.00" }}
+            </div>
+
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+</div>
+
+<script>
+  $(document).ready(function(){
+    $('.slick-collections-{{ section.id }}').slick({
+      slidesToShow: {{ section.settings.slides_desktop }},
+      slidesToScroll: 1,
+      dots: true,
+      arrows: true,
+      prevArrow: $('.prev-slide-{{ section.id }}'),
+      nextArrow: $('.next-slide-{{ section.id }}'),
+      infinite: true,
+      responsive: [
+        { breakpoint: 1024, settings: { slidesToShow: 2 } },
+        { breakpoint: 600, settings: { slidesToShow: 1 } }
+      ]
+    });
+  });
+</script>
+
+{% schema %}
+  {
+    "name": "Collection Slider (Shea)",
+    "settings": [
+      {
+        "type": "range",
+        "id": "slides_desktop",
+        "min": 2,
+        "max": 4,
+        "step": 1,
+        "label": "Slides per row (Desktop)",
+        "default": 4
+      }
+    ],
+    "blocks": [
+      {
+        "type": "collection",
+        "name": "Collection Card",
+        "settings": [
+          {
+            "type": "collection",
+            "id": "collection",
+            "label": "Select Collection"
+          },
+          {
+            "type": "image_picker",
+            "id": "custom_image",
+            "label": "Custom Image"
+          },
+          {
+            "type": "text",
+            "id": "custom_title",
+            "label": "Custom Title",
+            "info": "Overrides collection title"
+          },
+          {
+            "type": "text",
+            "id": "price",
+            "label": "Price",
+            "default": "$50.00"
+          }, {
+            "type": "text",
+            "id": "reviews_count",
+            "label": "Review Count",
+            "default": "5"
+          }
+        ]
+      }
+    ],
+    "presets": [
+      {
+        "name": "Collection Slider (Shea)",
+        "blocks": [
+          {
+            "type": "collection"
+          },
+          {
+            "type": "collection"
+          },
+          {
+            "type": "collection"
+          },
+          {
+            "type": "collection"
+          }, {
+            "type": "collection"
+          }, {
+            "type": "collection"
+          }
+        ]
+      }
+    ]
+  }
+{% endschema %}

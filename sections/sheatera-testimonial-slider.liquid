@@ -1,0 +1,204 @@
+{% comment %} 
+      Library: Flickity
+      Usage: Testimonials / Social Proof
+      Styling: Tailwind CSS 
+{% endcomment %}
+
+<link rel="stylesheet" href="{{ 'flickity.min.css' | asset_url }}">
+<script src="{{ 'flickity.pkgd.min.js' | asset_url }}" defer></script>
+
+<style>
+  /* Flickity Dots Override to match Accent Color */
+  .flickity-page-dots .dot {
+    background: {{ section.settings.accent_color }};
+    opacity: 0.3;
+  }
+  .flickity-page-dots .dot.is-selected {
+    opacity: 1;
+  }
+</style>
+
+<div class="py-16 border-t-4" style="background-color: {{ section.settings.bg_color }}; border-color: {{ section.settings.accent_color }};">
+
+  <div class="text-center mb-10 px-4">
+    <h2 class="text-3xl md:text-4xl font-bold text-gray-800 mb-2 font-serif" style="font-family: 'Times New Roman', serif;">
+      {{ section.settings.heading }}
+    </h2>
+    <p class="text-gray-600 text-lg">
+      {{ section.settings.subheading }}
+    </p>
+  </div>
+
+  <div class="flickity-carousel-{{ section.id }} pb-12 outline-none">
+    {% for block in section.blocks %}
+      <!-- Tailwind Widths for Slide: 85% mobile, 30% desktop -->
+      <div class="w-[85%] md:w-[30%] mr-5 opacity-50 transition-opacity duration-300 [&.is-selected]:opacity-100">
+        <div class="bg-white p-6 rounded-lg text-center border border-gray-200 min-h-[450px] flex flex-col items-center mx-2 h-full shadow-sm">
+
+          {%- assign product = all_products[block.settings.product] -%}
+          {% if product != blank %}
+            <div class="w-40 h-40 mb-4">
+              {% comment %} 
+                                                Fixed: Passed 'alt' explicitly. When chaining image_url | image_tag, 
+                                                the native alt text is lost unless passed manually. 
+                                          {% endcomment %}
+              {{ product.featured_image | image_url: width: 300 | image_tag: class: 'w-full h-full object-contain', alt: product.title }}
+            </div>
+          {% else %}
+            <div class="w-40 h-40 mb-4 bg-gray-50 flex items-center justify-center text-gray-400 text-xs">
+              Product Image
+            </div>
+          {% endif %}
+
+          <div class="text-[#8b0000] text-2xl mb-2 tracking-widest">
+            {% case block.settings.stars %}
+              {% when 5 %}
+                ★★★★★
+              {% when 4 %}
+                ★★★★☆
+              {% when 3 %}
+                ★★★☆☆
+            {% endcase %}
+          </div>
+
+          <div class="flex items-center justify-center gap-2 mb-2">
+            <span class="text-[#d45d00] font-bold text-sm uppercase tracking-wide">
+              {{ block.settings.author }}
+            </span>
+            {% if block.settings.verified %}
+              <span class="bg-[#d45d00] text-white text-[10px] font-bold px-2 py-0.5 rounded-sm uppercase tracking-wider">
+                Verified
+              </span>
+            {% endif %}
+          </div>
+
+          <h4 class="font-bold text-gray-900 mb-2 text-xl leading-tight font-serif">
+            {{ block.settings.title }}
+          </h4>
+
+          <p class="text-gray-700 text-base mb-4 leading-relaxed flex-grow font-serif">
+            {{ block.settings.text }}
+          </p>
+
+          {% if product != blank %}
+            <p class="text-gray-500 text-xs mb-1 line-clamp-1 px-4">
+              {{ product.title }}
+            </p>
+          {% endif %}
+
+          <div class="text-gray-400 text-xs">
+            {{ block.settings.review_date }}
+          </div>
+
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    var flkty = new Flickity('.flickity-carousel-{{ section.id }}', {
+      cellAlign: 'center',
+      contain: true,
+      wrapAround: true,
+      autoPlay: 4000,
+      prevNextButtons: true,
+      pageDots: false,
+      selectedAttraction: 0.01,
+      friction: 0.15
+    });
+  });
+</script>
+
+{% schema %}
+  {
+    "name": "Testimonials (Flickity)",
+    "settings": [
+      {
+        "type": "text",
+        "id": "heading",
+        "label": "Heading",
+        "default": "Hear from our satisfied customers"
+      }, {
+        "type": "text",
+        "id": "subheading",
+        "label": "Subheading",
+        "default": "from 8000+ reviews"
+      }, {
+        "type": "color",
+        "id": "bg_color",
+        "label": "Background Color",
+        "default": "#ffffff"
+      }, {
+        "type": "color",
+        "id": "accent_color",
+        "label": "Accent Color",
+        "default": "#d4a373"
+      }
+    ],
+    "blocks": [
+      {
+        "type": "review",
+        "name": "Review",
+        "settings": [
+          {
+            "type": "product",
+            "id": "product",
+            "label": "Product"
+          },
+          {
+            "type": "range",
+            "id": "stars",
+            "min": 3,
+            "max": 5,
+            "step": 1,
+            "label": "Star Rating",
+            "default": 5
+          },
+          {
+            "type": "text",
+            "id": "title",
+            "label": "Review Title",
+            "default": "Best Product Ever!"
+          },
+          {
+            "type": "textarea",
+            "id": "text",
+            "label": "Review Text",
+            "default": "My skin has never looked better."
+          }, {
+            "type": "text",
+            "id": "author",
+            "label": "Author",
+            "default": "Sarah J."
+          }, {
+            "type": "checkbox",
+            "id": "verified",
+            "label": "Verified Buyer",
+            "default": true
+          }, {
+            "type": "text",
+            "id": "review_date",
+            "label": "Date",
+            "default": "11/24/2025"
+          }
+        ]
+      }
+    ],
+    "presets": [
+      {
+        "name": "Testimonials (Flickity)",
+        "blocks": [
+          {
+            "type": "review"
+          }, {
+            "type": "review"
+          }, {
+            "type": "review"
+          }
+        ]
+      }
+    ]
+  }
+{% endschema %}

@@ -28,10 +28,101 @@
         "slide_3"
       ],
       "settings": {}
+    },
+    "collection-slider": {
+      "type": "sheatera-collection-slider",
+      "blocks": {
+        "coll_1": {
+          "type": "collection",
+          "settings": {
+            "subtitle": "Face Care"
+          }
+        },
+        "coll_2": {
+          "type": "collection",
+          "settings": {
+            "subtitle": "Body Care"
+          }
+        },
+        "coll_3": {
+          "type": "collection",
+          "settings": {
+            "subtitle": "Hair Care"
+          }
+        },
+        "coll_4": {
+          "type": "collection",
+          "settings": {
+            "subtitle": "Face Care"
+          }
+        },
+        "coll_5": {
+          "type": "collection",
+          "settings": {
+            "subtitle": "Body Care"
+          }
+        },
+        "coll_6": {
+          "type": "collection",
+          "settings": {
+            "subtitle": "Hair Care"
+          }
+        }
+      },
+      "block_order": [
+        "coll_1",
+        "coll_2",
+        "coll_3",
+        "coll_4",
+        "coll_5",
+        "coll_6"
+      ],
+      "settings": {
+        "title": "Explore by Category"
+      }
+    },
+    "content-slider": {
+      "type": "sheatera-content-slider",
+      "settings": {
+        "title": "What's BUZZIN"
+      }
+    },
+    "testimonial-slider": {
+      "type": "sheatera-testimonial-slider",
+      "blocks": {
+        "review_1": {
+          "type": "review",
+          "settings": {
+            "author": "Sarah J."
+          }
+        },
+        "review_2": {
+          "type": "review",
+          "settings": {
+            "author": "Mike T."
+          }
+        },
+        "review_3": {
+          "type": "review",
+          "settings": {
+            "author": "Emily R."
+          }
+        }
+      },
+      "block_order": [
+        "review_1",
+        "review_2",
+        "review_3"
+      ],
+      "settings": {
+        "heading": "Hear from our satisfied customers"
+      }
     }
   },
   "order": [
-    "swiper-slider"
+    "swiper-slider",
+    "collection-slider",
+    "content-slider",
+    "testimonial-slider"
   ]
 }
-
