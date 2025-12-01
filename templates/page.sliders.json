@@ -1,3 +1,12 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
 {
   "sections": {
     "swiper-slider": {
@@ -6,19 +15,22 @@
         "slide_1": {
           "type": "slide",
           "settings": {
-            "bg_color": "#e8f5e9"
+            "bg_color": "#e8f5e9",
+            "bg_image": "shopify://shop_images/swiper-hero-slide-1.webp"
           }
         },
         "slide_2": {
           "type": "slide",
           "settings": {
-            "bg_color": "#fcfbf9"
+            "bg_color": "#fcfbf9",
+            "bg_image": "shopify://shop_images/swiper-hero-slide-2.webp"
           }
         },
         "slide_3": {
           "type": "slide",
           "settings": {
-            "bg_color": "#fcfbf9"
+            "bg_color": "#fcfbf9",
+            "bg_image": "shopify://shop_images/swiper-hero-slide-3.webp"
           }
         }
       },
@@ -27,7 +39,9 @@
         "slide_2",
         "slide_3"
       ],
-      "settings": {}
+      "settings": {
+        "autoplay_speed": 5
+      }
     },
     "collection-slider": {
       "type": "sheatera-collection-slider",
@@ -35,37 +49,61 @@
         "coll_1": {
           "type": "collection",
           "settings": {
-            "subtitle": "Face Care"
+            "collection": "frontpage",
+            "custom_image": "shopify://shop_images/beautyrejuvenationcollection.jpg",
+            "custom_title": "Beauty Rejuvenation Collection",
+            "price": "$90.00",
+            "reviews_count": "5"
           }
         },
         "coll_2": {
           "type": "collection",
           "settings": {
-            "subtitle": "Body Care"
+            "collection": "",
+            "custom_image": "shopify://shop_images/Pedicurefootcollection.avif",
+            "custom_title": "Pedicure Foot Collection",
+            "price": "$50.00",
+            "reviews_count": "5"
           }
         },
         "coll_3": {
           "type": "collection",
           "settings": {
-            "subtitle": "Hair Care"
+            "collection": "",
+            "custom_image": "shopify://shop_images/DADSGROOMINGCOLLECTION.avif",
+            "custom_title": "Dad's Grooming Collection",
+            "price": "$74.00",
+            "reviews_count": "5"
           }
         },
         "coll_4": {
           "type": "collection",
           "settings": {
-            "subtitle": "Face Care"
+            "collection": "",
+            "custom_image": "shopify://shop_images/Preciousbabycollection_1.avif",
+            "custom_title": "Precious Baby Collection",
+            "price": "$57.00",
+            "reviews_count": "5"
           }
         },
         "coll_5": {
           "type": "collection",
           "settings": {
-            "subtitle": "Body Care"
+            "collection": "",
+            "custom_image": "shopify://shop_images/Holidaycollection_1.avif",
+            "custom_title": "Holiday Collection",
+            "price": "$85.00",
+            "reviews_count": "5"
           }
         },
         "coll_6": {
           "type": "collection",
           "settings": {
-            "subtitle": "Hair Care"
+            "collection": "",
+            "custom_image": "shopify://shop_images/Image_1.jpg",
+            "custom_title": "Dry Skin Collection",
+            "price": "$76.00",
+            "reviews_count": "5"
           }
         }
       },
@@ -78,44 +116,94 @@
         "coll_6"
       ],
       "settings": {
-        "title": "Explore by Category"
+        "slides_desktop": 4
       }
     },
     "content-slider": {
       "type": "sheatera-content-slider",
       "settings": {
-        "title": "What's BUZZIN"
+        "title": "What's BUZZIN",
+        "news_blog": "news",
+        "post_limit": 4,
+        "per_page": 3
       }
     },
     "testimonial-slider": {
       "type": "sheatera-testimonial-slider",
       "blocks": {
+        "review_rtTCW9": {
+          "type": "review",
+          "settings": {
+            "product": "nike-latest-sneaker",
+            "stars": 5,
+            "title": "Best Product Ever!",
+            "text": "My skin has never looked better.",
+            "author": "Sarah J.",
+            "verified": true,
+            "review_date": "11/24/2025"
+          }
+        },
+        "review_QnAjTt": {
+          "type": "review",
+          "settings": {
+            "product": "the-continental",
+            "stars": 5,
+            "title": "Best Product Ever!",
+            "text": "My skin has never looked better.",
+            "author": "Sarah J.",
+            "verified": true,
+            "review_date": "11/24/2025"
+          }
+        },
         "review_1": {
           "type": "review",
           "settings": {
-            "author": "Sarah J."
+            "product": "adidas-sports-shoe",
+            "stars": 5,
+            "title": "Best Product Ever!",
+            "text": "My skin has never looked better.",
+            "author": "Sarah J.",
+            "verified": true,
+            "review_date": "11/24/2025"
           }
         },
         "review_2": {
           "type": "review",
           "settings": {
-            "author": "Mike T."
+            "product": "example-shoe",
+            "stars": 5,
+            "title": "Best Product Ever!",
+            "text": "My skin has never looked better.",
+            "author": "Mike T.",
+            "verified": true,
+            "review_date": "11/24/2025"
           }
         },
         "review_3": {
           "type": "review",
           "settings": {
-            "author": "Emily R."
+            "product": "latest-mens-sneaker-1",
+            "stars": 5,
+            "title": "Best Product Ever!",
+            "text": "My skin has never looked better.",
+            "author": "Emily R.",
+            "verified": true,
+            "review_date": "11/24/2025"
           }
         }
       },
       "block_order": [
+        "review_rtTCW9",
+        "review_QnAjTt",
         "review_1",
         "review_2",
         "review_3"
       ],
       "settings": {
-        "heading": "Hear from our satisfied customers"
+        "heading": "Hear from our satisfied customers",
+        "subheading": "from 8000+ reviews",
+        "bg_color": "#ffffff",
+        "accent_color": "#d4a373"
       }
     }
   },
