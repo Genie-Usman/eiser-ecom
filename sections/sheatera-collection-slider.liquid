@@ -101,7 +101,7 @@
           </div>
 
           <!-- Content Area -->
-          <div class="p-6 flex flex-col items-center text-center space-y-3">
+          <div class="p-4 flex flex-col items-center text-center space-y-3">
 
             <!-- Add To Button -->
             <a href="{{ collection.url | default: '#' }}" class="w-full bg-black text-white py-3 px-4 font-bold uppercase text-sm tracking-widest flex items-center justify-center gap-2 hover:bg-gray-800 transition-colors">
@@ -123,7 +123,7 @@
             </div>
 
             <!-- Title -->
-            <h3 class="font-bold text-lg uppercase tracking-wide text-gray-900 leading-tight">
+            <h3 class="font-bold text-sm uppercase text-gray-900 leading-tight">
               <a href="{{ collection.url | default: '#' }}">
                 {{ block.settings.custom_title | default: collection.title | default: "Collection Title" }}
               </a>

@@ -1,12 +1,3 @@
-{% comment %} 
-  Cart Drawer Component
-   
-  This snippet renders a sliding cart drawer that displays cart items, 
-  allows quantity updates, discount code application, and checkout.
-   
-  Usage: {% render 'cart-drawer', section_id: section.id %} 
-{% endcomment %}
-
 <div
   x-data="{ open: false }"
   x-cloak
@@ -41,177 +32,318 @@
     x-transition:leave-start="translate-x-0"
     x-transition:leave-end="translate-x-full"
     x-cloak
-    class="fixed right-0 top-0 h-full w-96 bg-white shadow-xl z-50">
+    class="fixed right-0 top-0 h-full w-96 bg-white shadow-xl z-50 flex flex-col">
 
-    <div class="flex justify-between items-center px-4 py-2 border-b">
+    <!-- Header -->
+    <div class="flex justify-between items-center px-4 py-2 border-b shrink-0">
       <h2 class="text-lg font-semibold">Your Cart</h2>
       <button @click="open = false" class="p-2 cursor-pointer">{% render 'icon-close' %}</button>
     </div>
 
     <div
-      class="p-2 h-full"
+      class="flex-1 flex flex-col min-h-0"
       data-cart-root
       data-section-id="{{ section_id }}">
 
-      <div class="overflow-y-auto h-[calc(100%-60px)]">
-        {% if cart.item_count == 0 %}
-          <div class="w-full h-full flex flex-col items-center justify-center text-center py-10">
-            <p class="text-gray-700 text-base mb-4">Your cart is empty.</p>
-            <a href="{{ routes.all_products_collection_url }}" class="px-4 py-2 bg-gray-200 rounded text-sm hover:bg-gray-300">
-              Continue Shopping
-            </a>
-          </div>
-        {% else %}
+      {% if cart.item_count == 0 %}
+        <div class="flex-1 flex flex-col items-center justify-center text-center py-10">
+          <p class="text-gray-700 text-base mb-4">Your cart is empty.</p>
+          <a href="{{ routes.all_products_collection_url }}" class="px-4 py-2 bg-gray-200 rounded text-sm hover:bg-gray-300">
+            Continue Shopping
+          </a>
+        </div>
+      {% else %}
 
+        <!-- Scrollable Content -->
+        <div class="flex-1 overflow-y-auto p-2">
           <form
             action="{{ routes.cart_url }}"
             method="post"
-            class="mt-6 grid lg:grid-cols-12 gap-8"
+            id="CartDrawer-Form"
             data-cart-form>
 
-            <div class="lg:col-span-12">
+            <!-- Items -->
+            <div class="space-y-4">
               <div class="hidden md:grid grid-cols-12 text-xs font-medium border-b border-gray-200 uppercase tracking-wide text-[#797979] px-1 pb-1">
                 <div class="col-span-7">Product</div>
-                <div class="col-span-2 text-right">Total</div>
+                <div class="col-span-5 text-right">Total</div>
               </div>
 
-              <div class="max-h-[300px] overflow-y-auto divide-y divide-gray-200 md:border-t-0">
+              <div class="divide-y divide-gray-200" data-cart-items>
                 {% for item in cart.items %}
                   <div
-                    class="px-1 py-2 grid grid-cols-12 items-center gap-5 cart-line"
+                    class="px-1 py-4 grid grid-cols-12 items-start gap-4 cart-line"
                     data-line-key="{{ item.key }}"
                     data-variant-id="{{ item.variant_id }}">
 
-                    <a href="{{ item.url }}" class="col-span-2 block w-24 h-24 bg-white border border-gray-200 rounded overflow-hidden shrink-0">
+                    <a href="{{ item.url }}" class="col-span-3 block aspect-square bg-white border border-gray-200 rounded overflow-hidden">
                       {% if item.image %}
                         {{ item.image | image_url: width: 200 | image_tag: class: 'w-full h-full object-contain' }}
                       {% endif %}
                     </a>
 
-                    <div class="col-span-5 min-w-0 space-y-1 ml-10">
-                      <a href="{{ item.url }}" class="text-[#797979] text-xs line-clamp-2 ml-1">{{ item.product.title }}</a>
-                      {% if item.variant.title != 'Default Title' %}
-                        <p class="mt-0.5 text-xs text-[#797979]">{{ item.variant.title }}</p>
-                      {% endif %}
-
-                      <div class="hidden md:block font-medium text-xs text-left ml-1 text-[#2A2A2A] unit-price">{{ item.final_price | money }}</div>
-
-                      <div class="relative w-20">
-                        <input
-                          type="number"
-                          min="0"
-                          value="{{ item.quantity }}"
-                          class="cart-qty-input w-full h-[30px] rounded-md font-semibold border border-[#e7e7e7] bg-white pl-3 text-[12px] leading-none text-gray-900 text-left outline-none appearance-none"
-                          data-line-key="{{ item.key }}">
-
-                        <div class="absolute inset-y-0 right-0 w-[21px] flex flex-col border-l border-[#e7e7e7]">
-                          <button type="button" class="flex-1 grid place-content-center qty-plus hover:bg-gray-100">
-                            {% render 'icon-chevron-up' %}
-                          </button>
-                          <button type="button" class="flex-1 grid place-content-center qty-minus hover:bg-gray-100">
-                            {% render 'icon-chevron-down' %}
-                          </button>
-                        </div>
+                    <div class="col-span-9 flex flex-col gap-1">
+                      <div class="flex justify-between">
+                        <a href="{{ item.url }}" class="text-[#2A2A2A] text-sm font-medium line-clamp-2">{{ item.product.title }}</a>
+                        <div class="text-right text-sm font-semibold" data-cart-line-price>{{ item.final_line_price | money }}</div>
                       </div>
-                    </div>
 
-                    <div class="col-span-2 text-right text-gray-900 text-sm font-medium line-total">
-                      {{ item.final_line_price | money }}
-                    </div>
 
-                    <button
-                      type="button"
-                      class="ml-10 block text-[11px] uppercase tracking-wide text-rose-600 hover:text-rose-700"
-                      data-cart-remove>
-                      {% render 'icon-trash' %}
-                    </button>
+                      <div class="flex items-center justify-between mt-2">
+                        <div class="relative w-20">
+                          <input
+                            type="number"
+                            min="0"
+                            value="{{ item.quantity }}"
+                            class="cart-qty-input w-full h-[30px] rounded-md font-semibold border border-[#e7e7e7] bg-white pl-3 text-[12px] leading-none text-gray-900 text-left outline-none appearance-none"
+                            data-line-key="{{ item.key }}">
+
+                          <div class="absolute inset-y-0 right-0 w-[21px] flex flex-col border-l border-[#e7e7e7]">
+                            <button type="button" class="flex-1 grid place-content-center qty-plus hover:bg-gray-100">
+                              {% render 'icon-chevron-up' %}
+                            </button>
+                            <button type="button" class="flex-1 grid place-content-center qty-minus hover:bg-gray-100">
+                              {% render 'icon-chevron-down' %}
+                            </button>
+                          </div>
+                        </div>
+                        {% unless item.product.has_only_default_variant %}
+                          <div
+                            class="relative mt-1 ml-2 block w-[70%]"
+                            x-data="{
+                              open: false,
+                              selected: '{{ item.variant.id }}',
+                              label: '{{ item.variant.title | escape }}',
+                              select(id, name) {
+                                this.selected = id;
+                                this.label = name;
+                                this.open = false;
+                                // Sync with hidden select
+                                const hiddenSelect = this.$refs.hiddenSelect;
+                                hiddenSelect.value = id;
+                                hiddenSelect.dispatchEvent(new Event('change', { bubbles: true }));
+                              }
+                            }"
+                            @click.away="open = false">
+                            
+                            <!-- Trigger -->
+                            <button
+                              type="button"
+                              @click="open = !open"
+                              class="w-full flex items-center justify-between appearance-none rounded border border-gray-300 bg-white py-1.5 pl-3 pr-2 text-xs text-gray-700 hover:border-[#71cd13] transition-colors cursor-pointer focus:outline-none focus:ring-1 focus:ring-[#71cd13]"
+                              :class="{ 'border-[#71cd13] ring-1 ring-[#71cd13]': open }">
+                              <span class="truncate block max-w-[85%]" x-text="label"></span>
+                              <svg class="h-3 w-3 text-gray-500 transition-transform duration-200" :class="{ 'rotate-180': open }" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+                            </button>
+
+                            <!-- Custom Options -->
+                            <div
+                              x-show="open"
+                              x-transition:enter="transition ease-out duration-100"
+                              x-transition:enter-start="transform opacity-0 scale-95"
+                              x-transition:enter-end="transform opacity-100 scale-100"
+                              x-transition:leave="transition ease-in duration-75"
+                              x-transition:leave-start="transform opacity-100 scale-100"
+                              x-transition:leave-end="transform opacity-0 scale-95"
+                              x-cloak
+                              class="absolute z-50 mt-1 w-full bg-white shadow-lg max-h-48 rounded-md py-1 text-xs overflow-auto focus:outline-none border border-gray-100">
+                              {% for variant in item.product.variants %}
+                                <div
+                                  @click="select('{{ variant.id }}', '{{ variant.title | escape }}')"
+                                  class="cursor-pointer select-none relative py-2 pl-3 pr-9 hover:bg-[#eafce3] hover:text-[#71cd13] text-gray-900"
+                                  :class="{ 'text-[#71cd13] bg-[#eafce3] font-medium': selected == '{{ variant.id }}' }"
+                                  {% unless variant.available %}class="opacity-50 cursor-not-allowed bg-gray-50"{% endunless %}>
+                                  <span class="block truncate">
+                                    {{ variant.title }}
+                                  </span>
+                                  <span
+                                    x-show="selected == '{{ variant.id }}'"
+                                    class="absolute inset-y-0 right-0 flex items-center pr-3 text-[#71cd13]">
+                                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                    </svg>
+                                  </span>
+                                </div>
+                              {% endfor %}
+                            </div>
+
+                            <!-- Hidden Native Select for Logic -->
+                            <select
+                              x-ref="hiddenSelect"
+                              class="variant-change-input hidden"
+                              data-line-key="{{ item.key }}"
+                              data-quantity="{{ item.quantity }}">
+                              {% for variant in item.product.variants %}
+                                <option
+                                  value="{{ variant.id }}"
+                                  {% if variant.id == item.variant.id %}selected{% endif %}
+                                  {% unless variant.available %}disabled{% endunless %}>
+                                  {{ variant.title }}
+                                </option>
+                              {% endfor %}
+                            </select>
+                          </div>
+                        {% endunless %}
+                      {% comment %} <button
+                                                                                                                                                type="button"
+                                                                                                                                                class="text-[10px] uppercase tracking-wide text-rose-600 hover:text-rose-700 underline"
+                                                                                                                                                data-cart-remove>
+                                                                                                                                                {% render 'icon-trash' %}
+                                                                                                                                                </button>
+                                                                                                                                    {% endcomment %}
+                      </div>
+
+                    </div>
                   </div>
                 {% endfor %}
               </div>
-
-              <div class="fixed bottom-1">
-                <div class="mt-4">
-                  <div class="my-5 grid px-5 md:grid-cols-1 gap-3 items-center">
-
-                    <div class="flex flex-col items-end gap-2" data-cart-discount-container>
-
-
-                      <div class="flex items-center gap-3 w-full justify-end" data-cart-discount-group>
-                        <div
-                          class="flex items-center gap-2 bg-[#eafce3] border border-[#71CD14] text-[#2A2A2A] text-xs font-medium rounded-md py-2 px-4"
-                          data-cart-discount-pill
-                          style="{% if cart.discount_applications.size == 0 %}display: none;{% endif %}">
-
-
-                          <span data-cart-discount-pill-text class="font-bold text-xs">
-                            {{ cart.discount_applications.first.title }}
-                          </span>
-
-                          <button
-                            type="button"
-                            aria-label="Remove coupon"
-                            data-cart-remove-discount>
-                            <span class="text-[#71CD14] hover:text-rose-700 cursor-pointer">{% render 'icon-tag' %}</span>
-                          </button>
-                        </div>
-                        <input
-                          data-cart-discount-input
-                          class="h-10 w-30 border border-[#CCCCCC] rounded text-[#2A2A2A] px-3 text-sm focus:border-[#71CD14] outline-none transition-colors"
-                          placeholder="Coupon Code"
-                          aria-label="Discount code">
-                        <button
-                          type="button"
-                          data-cart-apply
-                          class="h-10 cursor-pointer uppercase font-medium px-6 bg-[#71CD14] text-white rounded text-xs hover:bg-[#65b812] transition-colors">
-                          Apply
-                        </button>
-                      </div>
-
-                      <p data-cart-discount-feedback class="text-xs hidden text-right font-medium"></p>
-                    </div>
-
-                  </div>
-                </div>
-
-                <div class="flex items-center justify-between px-3 gap-5 text-xs mt-1">
-                  <span class="text-gray-900 font-semibold">Subtotal</span>
-                  <div class="flex flex-col items-end">
-                    <span data-cart-subtotal class="text-gray-900 text-lg font-semibold">
-                      {{ cart.total_price | money }}
-                    </span>
-
-                    {% if cart.total_discount > 0 %}
-                      <span class="text-[#71CD14] text-xs">
-                        Savings: -{{ cart.total_discount | money }}</span>
-                    {% endif %}
-                  </div>
-                </div>
-
-                <div class="mt-1 px-5 border-t border-gray-300 pt-4 pb-2">
-                  <div class="flex flex-row justify-between gap-2">
-                    <button
-                      @click="open = false"
-                      type="button"
-                      class="bg-[#F6F6F6] hover:text-[#0056B3] text-[#2A2A2A] text-xs flex items-center justify-center font-medium rounded-sm cursor-pointer py-1 px-4 h-[44px]">
-                      Continue Shopping
-                    </button>
-
-                    <button
-                      type="submit"
-                      name="checkout"
-                      class="flex-1 h-[44px] bg-[#71cd13] text-white hover:bg-[#65b812] transition-colors duration-300 ease-in text-xs font-medium rounded-sm cursor-pointer py-1 px-5">
-                      Proceed to Checkout
-                    </button>
-                  </div>
-                </div>
-
-              </div>
-
-
             </div>
           </form>
-        {% endif %}
-      </div>
+
+          <!-- Upsells -->
+          <div
+            id="CartDrawer-Upsells"
+            class="mt-8 pt-6 border-t border-gray-100 mb-4"
+            data-url="{{ routes.product_recommendations_url }}?section_id={{ section.id }}&product_id={{ cart.items.first.product_id }}&limit=10">
+            {% if recommendations.performed and recommendations.products_count > 0 %}
+              <h3 class="text-sm font-bold uppercase tracking-wider text-gray-900 mb-4">You might also like</h3>
+              <div class="space-y-3">
+                {% assign shown_count = 0 %}
+                {% for product in recommendations.products %}
+                  {% assign is_in_cart = false %}
+                  {% for item in cart.items %}
+                    {% if item.product_id == product.id %}
+                      {% assign is_in_cart = true %}
+                      {% break %}
+                    {% endif %}
+                  {% endfor %}
+
+                  {% unless is_in_cart %}
+                    {% if shown_count < 3 %}
+                      <div class="flex gap-3 bg-gray-50 p-2 rounded-lg group">
+                        <img
+                          src="{{ product.featured_image | image_url: width: 80 }}"
+                          class="w-16 h-16 object-cover rounded bg-white"
+                          alt="{{ product.title }}"
+                          width="inherit"
+                          height="inherit">
+                        <div class="flex-1 min-w-0">
+                          <p class="text-sm font-medium truncate">{{ product.title }}</p>
+                          <p class="text-xs text-gray-500 mb-2">{{ product.price | money }}</p>
+                          <div class="flex flex-row gap-2">
+                            {% unless product.has_only_default_variant %}
+                              <div class="relative mb-2 block w-full">
+                                <select class="w-full appearance-none rounded border border-gray-300 bg-white py-1 pl-2 pr-8 text-xs text-gray-700 focus:border-[#71cd13] focus:outline-none focus:ring-1 focus:ring-[#71cd13] transition-colors cursor-pointer">
+                                  {% for variant in product.variants %}
+                                    <option
+                                      value="{{ variant.id }}"
+                                      {% if variant.id == product.selected_or_first_available_variant.id %}
+                                      selected{% endif %}
+                                      {% unless variant.available %}
+                                      disabled{% endunless %}>
+                                      {{ variant.title }}
+                                    </option>
+                                  {% endfor %}
+                                </select>
+                                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-500">
+                                  <svg
+                                    class="h-3 w-3"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path
+                                      stroke-linecap="round"
+                                      stroke-linejoin="round"
+                                      stroke-width="2"
+                                      d="M19 9l-7 7-7-7" />
+                                  </svg>
+                                </div>
+                              </div>
+                            {% endunless %}
+                            <button
+                              type="button"
+                              class="text-black mb-2 mr-2 cursor-pointer px-2 hover:text-[#71cd13] transition-colors"
+                              data-cart-add="{{ product.selected_or_first_available_variant.id }}">
+                              {% render 'icon-cart' %}
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                      {% assign shown_count = shown_count | plus: 1 %}
+                    {% endif %}
+                  {% endunless %}
+                {% endfor %}
+              </div>
+            {% endif %}
+          </div>
+        </div>
+
+        <!-- Footer (Fixed at bottom of flex container) -->
+        <div class="border-t border-gray-200 p-4 bg-white shrink-0 z-10" data-cart-footer>
+
+          <!-- Coupon -->
+          <div class="mb-4" data-cart-discount-container>
+            <div class="flex items-center gap-2 justify-end" data-cart-discount-group>
+              <div
+                class="flex items-center gap-2 bg-[#eafce3] border border-[#71CD14] text-[#2A2A2A] text-xs font-medium rounded-md py-2 px-4"
+                data-cart-discount-pill
+                style="{% if cart.discount_applications.size == 0 %}display: none;{% endif %}">
+                <span data-cart-discount-pill-text class="font-bold text-xs">
+                  {{ cart.discount_applications.first.title }}
+                </span>
+                <button
+                  type="button"
+                  aria-label="Remove coupon"
+                  data-cart-remove-discount>
+                  <span class="text-[#71CD14] hover:text-rose-700 cursor-pointer">{% render 'icon-tag' %}</span>
+                </button>
+              </div>
+
+              <input
+                data-cart-discount-input
+                class="h-9 flex-1 border border-[#CCCCCC] rounded text-[#2A2A2A] px-3 text-xs focus:border-[#71CD14] outline-none transition-colors"
+                placeholder="Coupon Code"
+                aria-label="Discount code">
+              <button
+                type="button"
+                data-cart-apply
+                class="h-9 cursor-pointer uppercase font-medium px-4 bg-[#71CD14] text-white rounded text-xs hover:bg-[#65b812] transition-colors">
+                Apply
+              </button>
+            </div>
+            <p data-cart-discount-feedback class="text-xs hidden text-right font-medium mt-1"></p>
+          </div>
+
+          <!-- Subtotal -->
+          <div class="flex items-center justify-between mb-4">
+            <span class="text-gray-900 font-semibold">Subtotal</span>
+            <div class="text-right">
+              <span class="text-gray-900 text-lg font-semibold" data-cart-subtotal>{{ cart.total_price | money }}</span>
+              {% if cart.total_discount > 0 %}
+                <p class="text-[#71CD14] text-xs">Savings: -{{ cart.total_discount | money }}</p>
+              {% endif %}
+            </div>
+          </div>
+
+          <!-- Buttons -->
+          <div class="flex gap-2">
+            <button
+              @click="open = false"
+              type="button"
+              class="flex-1 bg-[#F6F6F6] hover:bg-gray-100 text-[#2A2A2A] text-xs font-medium rounded py-3">
+              Continue Shopping
+            </button>
+            <button
+              type="submit"
+              form="CartDrawer-Form"
+              name="checkout"
+              class="flex-1 bg-[#71cd13] hover:bg-[#65b812] text-white text-xs font-medium rounded py-3 transition-colors">
+              Checkout
+            </button>
+          </div>
+        </div>
+
+      {% endif %}
     </div>
   </aside>
 </div>

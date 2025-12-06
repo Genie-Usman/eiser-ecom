@@ -1,14 +1,13 @@
 {% comment %} 
-      Library: Flickity
-      Usage: Testimonials / Social Proof
-      Styling: Tailwind CSS 
+        Library: Flickity
+        Usage: Testimonials / Social Proof
+        Styling: Tailwind CSS 
 {% endcomment %}
 
 <link rel="stylesheet" href="{{ 'flickity.min.css' | asset_url }}">
 <script src="{{ 'flickity.pkgd.min.js' | asset_url }}" defer></script>
 
 <style>
-  /* Flickity Dots Override to match Accent Color */
   .flickity-page-dots .dot {
     background: {{ section.settings.accent_color }};
     opacity: 0.3;
@@ -38,10 +37,6 @@
           {%- assign product = all_products[block.settings.product] -%}
           {% if product != blank %}
             <div class="w-40 h-40 mb-4">
-              {% comment %} 
-                                                Fixed: Passed 'alt' explicitly. When chaining image_url | image_tag, 
-                                                the native alt text is lost unless passed manually. 
-                                          {% endcomment %}
               {{ product.featured_image | image_url: width: 300 | image_tag: class: 'w-full h-full object-contain', alt: product.title }}
             </div>
           {% else %}

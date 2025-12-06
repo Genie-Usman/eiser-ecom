@@ -3,49 +3,54 @@
   assign in_stock = current_variant.available
 %}
 
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+
 <section class="py-10 md:pb-14 md:mt-5">
   <div class="container mx-auto md:px-20 px-4">
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-6">
       <!-- Gallery -->
       <div class="lg:col-span-6">
-        <div id="pd-{{ section.id }}" class="relative">
-          {% if product.media.size > 0 %}
-            <div id="carousel-{{ section.id }}" class="relative">
-              <div class="overflow-hidden bg-white relative">
-                <div class="flex transition-transform duration-500 ease-out" data-track>
-                  {% for media in product.media %}
-                    <div class="w-full shrink-0 aspect-4/5 flex items-center justify-center bg-white">
-                      {% if forloop.first %}
-                        {{ media | media_tag: image_size: '1200x', class: 'w-full h-full object-contain', loading: 'eager', widths: '600,900,1200' }}
-                      {% else %}
-                        {{ media | media_tag: image_size: '1200x', class: 'w-full h-full object-contain', loading: 'lazy', widths: '600,900,1200' }}
-                      {% endif %}
-                    </div>
-                  {% endfor %}
-                </div>
-              </div>
-              <!-- Overlaid thumbnails (exclude first media) -->
-              <ol class="absolute right-8 bottom-17 grid grid-flow-col auto-cols-[56px] gap-3" data-thumbs>
-                {% for media in product.media %}
-                  {% unless forloop.first %}
-                    <li>
-                      <button
-                        type="button"
-                        class="group relative overflow-hidden aspect-square bg-white border border-gray-200 focus:outline-none"
-                        data-slide-to="{{ forloop.index0 }}"
-                        data-active="false">
-                        {{ media | media_tag: image_size: '300x', class: 'w-full h-full object-contain pointer-events-none' }}
-                        <span class="absolute inset-0 bg-transparent group-data-[active=true]:bg-red-500/60"></span>
-                      </button>
-                    </li>
-                  {% endunless %}
-                {% endfor %}
-              </ol>
+        <media-gallery class="gallery-container relative block" data-layout="slider">
+          <!-- Main Slider -->
+          <div class="swiper gallery-main aspect-4/5 bg-gray-100 rounded-lg overflow-hidden">
+            <div class="swiper-wrapper" id="main-slider-wrapper">
+              <!-- JS injects slides -->
             </div>
-          {% else %}
-            <div class="aspect-4/5 bg-gray-50 border border-gray-200 rounded"></div>
-          {% endif %}
-        </div>
+          </div>
+
+          <!-- Thumbnail Slider -->
+          <div class="swiper gallery-thumbs absolute top-2 bottom-0 right-4 z-10 w-auto max-w-[calc(100%-2rem)] transition-all duration-300 ease-in-out">
+            <div class="swiper-wrapper" id="thumb-slider-wrapper">
+              <!-- JS injects thumbs -->
+            </div>
+          </div>
+
+          <!-- Hidden JSON Data -->
+          <script type="application/json" id="ProductMediaJSON">
+                [
+                    {% for media in product.media %}
+                        {
+                            "id": {{ media.id }},
+                            "media_type": "{{ media.media_type }}",
+                            {% if media.media_type == 'video' %}
+                                {% assign video_source = media.sources | where: "format", "mp4" | first %}
+                                "src": "{{ video_source.url | default: media.sources[0].url }}",
+                            {% elsif media.media_type == 'external_video' %}
+                                {% if media.host == 'youtube' %}
+                                    "src": "https://www.youtube.com/embed/{{ media.external_id }}?enablejsapi=1",
+                                {% elsif media.host == 'vimeo' %}
+                                    "src": "https://player.vimeo.com/video/{{ media.external_id }}",
+                                {% endif %}
+                            {% else %}
+                                "src": "{{ media | image_url: width: 1200 }}",
+                            {% endif %}
+                            "preview_image": "{{ media.preview_image | image_url: width: 300 }}",
+                            "alt": {{ media.alt | json }}
+                        }{% unless forloop.last %},{% endunless %}
+                    {% endfor %}
+                ]
+          </script>
+        </media-gallery>
       </div>
 
       <!-- Info -->
@@ -53,7 +58,7 @@
         <div class="s_product_text">
           <h1 class="text-[24px] md:text-[26px] font-medium text-gray-900 leading-tight">{{ product.title | escape }}</h1>
 
-          <div class="mt-2 flex items-center gap-4">
+          <div class="mt-2 flex items-center gap-4" id="price-{{ section.id }}">
             <p class="text-[#71CD14] text-[22px] font-bold">{{ current_variant.price | money }}</p>
             {% if current_variant.compare_at_price > current_variant.price %}
               <p class="text-gray-400 line-through">{{ current_variant.compare_at_price | money }}</p>
@@ -70,7 +75,7 @@
               {% endif %}
             </li>
 
-            <li class="text-[#797979]">
+            <li class="text-[#797979]" id="availability-{{ section.id }}">
               <span class="text-[#555555]">Availability&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:</span>
               {% if in_stock %}
                 <span class="text-[#7fad39]">In stock</span>
@@ -95,30 +100,81 @@
               , id: form_id
               , class: 'space-y-6'
               , data-product-form: true %}
-              {% if product.has_only_default_variant == false %}
-                <label for="variant-id-{{ section.id }}" class="sr-only">Variant</label>
+              <variant-selector data-url="{{ product.url }}" data-section="{{ section.id }}">
+                <!-- Master Select (Hidden) -->
                 <select
-                  id="variant-id-{{ section.id }}"
+                  id="MasterVariantSelect"
                   name="id"
-                  class="w-full border border-gray-300 rounded px-3 py-2 text-sm">
+                  class="hidden">
                   {% for variant in product.variants %}
                     <option
                       value="{{ variant.id }}"
+                      {% for option in variant.options %}
+                      data-option-{{ forloop.index0 }}
+                      ="{{ option }}"
+                      {% endfor %}
                       {% if variant == current_variant %}
                       selected{% endif %}
-                      {% if variant.available == false %}
-                      disabled{% endif %}>
-                      {{ variant.title }}{% if variant.available == false %}
-                        — Sold out{% endif %}
+                      {% unless variant.available %}
+                      disabled{% endunless %}>
+                      {{ variant.title }}
                     </option>
                   {% endfor %}
                 </select>
-              {% else %}
-                <input
-                  type="hidden"
-                  name="id"
-                  value="{{ current_variant.id }}">
-              {% endif %}
+
+                {% for option in product.options_with_values %}
+                  <fieldset
+                    class="mb-4"
+                    data-option-index="{{ forloop.index0 }}"
+                    data-option-name="{{ option.name }}">
+                    <legend class="text-sm font-semibold uppercase tracking-wide text-gray-500 mb-3">{{ option.name }}</legend>
+                    <div class="flex flex-wrap gap-3" id="{{ option.name }}FieldSet">
+                      {% for value in option.values %}
+                        <label class="cursor-pointer">
+                          <input
+                            type="radio"
+                            name="{{ option.name }}"
+                            value="{{ value }}"
+                            class="peer sr-only"
+                            {% if option.selected_value == value %}
+                            checked{% endif %}>
+                          {% if option.name == 'Color' %}
+                            {% assign swatch_style = "" %}
+                            {% if value.swatch.image %}
+                              {% assign image_url = value.swatch.image | image_url: width: 80 %}
+                              {% assign swatch_style = "background-image: url('" | append: image_url | append: "'); background-size: cover; background-position: center;" %}
+                            {% elsif value.swatch.color %}
+                              {% assign swatch_style = "background-color: " | append: value.swatch.color | append: ";" %}
+                            {% else %}
+                              {% assign handle_color = value | handle %}
+                              {% assign texture_url = handle_color | append: '.png' | file_url %}
+                              {% assign swatch_style = "background-color: " | append: handle_color | append: "; background-image: url('" | append: texture_url | append: "');" %}
+                            {% endif %}
+
+                            <div class="relative group/swatch">
+                              <!-- Tooltip -->
+                              <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover/swatch:block whitespace-nowrap z-50 pointer-events-none">
+                                <div class="relative bg-gray-900 text-white text-[11px] font-medium py-1 px-2 rounded shadow-lg">
+                                  {{ value }}
+                                  <div class="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
+                                </div>
+                              </div>
+
+                              <!-- Swatch -->
+                              <span class="block w-8 h-8 rounded-full border border-gray-300 cursor-pointer bg-cover bg-center transition-all hover:border-gray-400 peer-checked:ring-1 peer-checked:ring-offset-2 peer-checked:ring-gray-900 peer-checked:border-gray-400" style="{{ swatch_style }}"></span>
+                            </div>
+                          {% else %}
+                            <!-- Other Style (Simple Box) -->
+                            <span class="px-4 py-2 border border-gray-300 rounded peer-checked:bg-black peer-checked:text-white peer-checked:border-black transition block min-w-[3rem] text-center">
+                              {{ value }}
+                            </span>
+                          {% endif %}
+                        </label>
+                      {% endfor %}
+                    </div>
+                  </fieldset>
+                {% endfor %}
+              </variant-selector>
 
               <div class="mt-4 flex flex-col items-stretch gap-4">
                 <div class="flex items-center gap-6">
@@ -155,9 +211,15 @@
 
                   <button
                     type="submit"
-                    class="inline-flex items-center justify-center h-10 px-7 bg-[#71CD14] hover:bg-transparent border border-[#71CD14] hover:text-[#71CD14] uppercase transition-all duration-400 cursor-pointer ease-in-out text-white text-xs font-medium rounded"
-                    data-add-to-cart>
-                    Add to cart
+                    class="inline-flex items-center justify-center h-10 px-7 bg-[#71CD14] hover:bg-transparent border border-[#71CD14] hover:text-[#71CD14] uppercase transition-all duration-400 cursor-pointer ease-in-out text-white text-xs font-medium rounded disabled:opacity-50 disabled:cursor-not-allowed"
+                    data-add-to-cart
+                    {% unless current_variant.available %}
+                    disabled{% endunless %}>
+                    {% if current_variant.available %}
+                      Add to cart
+                    {% else %}
+                      Sold Out
+                    {% endif %}
                   </button>
                   <div class="flex items-center gap-2">
                     <button
@@ -211,36 +273,33 @@
           <div class="overflow-x-auto">
             <table class="min-w-full text-left text-sm">
               <tbody class="divide-y divide-gray-200">
-                <tr>
-                  <td class="py-5 pl-10 font-medium text-[#797979]">Width</td>
-                  <td class="py-2 text-[#797979]">{{ product.metafields.custom.width | default: '—' }}</td>
-                </tr>
-                <tr>
-                  <td class="py-5 pl-10 font-medium text-[#797979]">Height</td>
-                  <td class="py-2 text-[#797979]">{{ product.metafields.custom.height | default: '—' }}</td>
-                </tr>
-                <tr>
-                  <td class="py-5 pl-10 font-medium text-[#797979]">Depth</td>
-                  <td class="py-2 text-[#797979]">{{ product.metafields.custom.depth | default: '—' }}</td>
-                </tr>
-                <tr>
-                  <td class="py-5 pl-10 font-medium text-[#797979]">Weight</td>
-                  <td class="py-2 text-[#797979]">{{ product.metafields.custom.weight | default: '—' }}</td>
-                </tr>
-                <tr>
-                  <td class="py-5 pl-10 font-medium text-[#797979]">Quality Checking</td>
-                  <td class="py-2 text-[#797979]">
-                    {{ product.metafields.custom.quality_checking | default: '—' }}
-                  </td>
-                </tr>
-                <tr>
-                  <td class="py-5 pl-10 font-medium text-[#797979]">Freshness Duration</td>
-                  <td class="py-2 text-[#797979]">{{ product.metafields.custom.freshness_duration | default: '—' }}</td>
-                </tr>
-                <tr>
-                  <td class="py-5 pl-10 font-medium text-[#797979]">Each Box Contains</td>
-                  <td class="py-2 text-[#797979]">{{ product.metafields.custom.eaxh_box_contains | default: '—' }}</td>
-                </tr>
+                {% if product.metafields.custom.tech_specs_list.value != blank %}
+
+                  {% for item in product.metafields.custom.tech_specs_list.value %}
+                    <tr>
+                      <td class="py-5 pl-10 font-medium text-[#797979]">
+                        {% if item.icon != blank %}
+                          {{ item.icon | image_url: width: 20 | image_tag: class: 'inline-block mr-2 align-middle object-contain', loading: 'lazy' }}
+                        {% endif %}
+                        {{ item.label }}
+                      </td>
+                      <td class="py-2 text-[#797979]">
+                        {{ item.value | newline_to_br }}
+                      </td>
+                    </tr>
+                  {% endfor %}
+
+                {% else %}
+
+                  <tr>
+                    <td class="py-5 pl-10 font-medium text-[#797979]">Status</td>
+                    <td class="py-2 text-[#797979]">No specs linked. Check Product Metafields.</td>
+                  </tr>
+                  <tr>
+                    <td class="py-5 pl-10 font-medium text-[#797979]">Width</td>
+                    <td class="py-2 text-[#797979]">{{ product.metafields.custom.width | default: '—' }}</td>
+                  </tr>
+                {% endif %}
               </tbody>
             </table>
           </div>
@@ -401,6 +460,79 @@
   </div>
 
   <style>
+    /* User Modeling CSS */
+    .variant-option.selected {
+      ring: 2px solid #000;
+      background-color: #f3f4f6;
+      border-color: #000;
+    }
+
+    /* Swiper Fixes */
+    .swiper {
+      width: 100%;
+      height: 100%;
+    }
+    .swiper-slide {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: #fff;
+    }
+    .swiper-slide img,
+    .swiper-slide video {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      border-radius: 8px;
+    }
+
+    .gallery-thumbs {
+      box-sizing: border-box;
+      padding: 0;
+      background: transparent;
+    }
+    .gallery-thumbs .swiper-slide {
+      width: 60px !important;
+      /* Force small size */
+      height: 60px !important;
+      opacity: 1;
+      /* Always visible */
+      cursor: pointer;
+      transition: all 0.2s;
+      border-radius: 10px;
+      overflow: hidden;
+      margin-right: 10px !important;
+      /* Spacing */
+    }
+    .gallery-thumbs .swiper-slide img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .gallery-thumbs .swiper-slide-thumb-active {
+      border: 2px solid #71CD14;
+      /* Brand color border */
+    }
+
+    /* Dynamic positioning for video */
+    media-gallery.video-active .gallery-thumbs {
+      bottom: 6rem !important;
+      /* ~96px, clears video controls */
+    }
+
+    /* Accessibility: Visually hide elements but keep accessible */
+    .visually-hidden {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
     /* Hide native number input controls; we use our own chevrons */
     #qty-{{ section.id }}::-webkit-outer-spin-button,
     #qty-{{ section.id }}::-webkit-inner-spin-button {
@@ -495,52 +627,6 @@
             });
         });
       }
-
-      // Carousel: loop through main images; sync red shade on thumbnails
-      var carousel = document.getElementById('carousel-{{ section.id }}');
-      if (carousel) {
-        var track = carousel.querySelector('[data-track]');
-        var slides = track ? track.children : [];
-        var thumbs = carousel.querySelectorAll('[data-slide-to]');
-        var hover = false;
-        function normalize(i){
-          if (!slides.length) return 0;
-          return (i % slides.length + slides.length) % slides.length;
-        }
-        function setThumbActive(index){
-          // thumbs exclude the first (main) image; map slide index to thumb index (index-1)
-          thumbs.forEach(function(t){ t.dataset.active = 'false'; });
-          if (index > 0 && thumbs[index - 1]) {
-            thumbs[index - 1].dataset.active = 'true';
-          }
-        }
-        var idx = 0;
-        function go(i){
-          if (!track || !slides.length) return;
-          idx = normalize(i);
-          track.style.transform = 'translateX(' + (-idx * 100) + '%)';
-          setThumbActive(idx);
-        }
-        // autoplay (shorter duration)
-        var timer = null;
-        function startTimer(){
-          if (timer) clearInterval(timer);
-          timer = setInterval(function(){ if (!hover) go(idx + 1); }, 2000);
-        }
-        carousel.addEventListener('mouseenter', function(){ hover = true; });
-        carousel.addEventListener('mouseleave', function(){ hover = false; });
-        // clicking thumbs replaces main image and keeps loop running
-        thumbs.forEach(function(t){
-          t.addEventListener('click', function(e){
-            e.preventDefault();
-            var k = parseInt(t.getAttribute('data-slide-to'), 10) || 0;
-            go(k);
-            startTimer();
-          });
-        });
-        go(0);
-        startTimer();
-      }
     
       // Quantity controls
       var minus = document.querySelector('[data-qty-minus="qty-{{ section.id }}"]');
@@ -579,6 +665,9 @@
     })();
   </script>
 </section>
+<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+<script src="{{ 'product-gallery.js' | asset_url }}" defer></script>
+<script src="{{ 'variant-selector.js' | asset_url }}" defer></script>
 
 {% schema %}
   {
