@@ -191,14 +191,20 @@
         {% comment %} Buttons {% endcomment %}
         <div class="mt-auto">
           <div class="space-y-3">
+            {% assign current_variant = product.selected_or_first_available_variant %}
             <button type="button" id="qv-add-btn" onclick="qvAddToCart()" 
-              class="group relative w-full flex items-center justify-center overflow-hidden bg-[#EDEDED] py-4 px-6 text-xs font-bold uppercase tracking-widest text-gray-900 transition-all duration-300 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed">
+              class="group relative w-full flex items-center justify-center overflow-hidden bg-[#EDEDED] py-4 px-6 text-xs font-bold uppercase tracking-widest text-gray-900 transition-all duration-300 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed {% unless current_variant.available %}opacity-50 cursor-not-allowed{% endunless %}"
+              {% unless current_variant.available %}disabled{% endunless %}>
               
               <span class="absolute inset-0 h-full w-full origin-left scale-x-0 bg-gray-600 transition-transform duration-300 ease-out group-hover:scale-x-100"></span>
               <span class="absolute inset-0 h-full w-full origin-left scale-x-0 bg-gray-900 transition-transform duration-300 ease-out delay-150 group-hover:scale-x-100"></span>
 
               <span id="qv-add-btn-text" class="relative z-10 transition-colors duration-300 group-hover:text-white">
-                Add to Cart
+                {% if current_variant.available %}
+                  Add to Cart
+                {% else %}
+                  Out Of Stock
+                {% endif %}
               </span>
 
               <span id="qv-add-btn-spinner" class="absolute inset-0 flex items-center justify-center hidden z-20 text-black">
@@ -206,7 +212,9 @@
               </span>
             </button>
             
-            <button type="button" id="qv-buy-btn" onclick="qvBuyNow()" class="w-full bg-[#5a31f4] hover:bg-[#4820d4] flex flex-row justify-center items-center gap-1 text-white font-bold py-4 px-6 text-sm transition-all duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed">
+            <button type="button" id="qv-buy-btn" onclick="qvBuyNow()" 
+              class="w-full bg-[#5a31f4] hover:bg-[#4820d4] flex flex-row justify-center items-center gap-1 text-white font-bold py-4 px-6 text-sm transition-all duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed {% unless current_variant.available %}opacity-50 cursor-not-allowed{% endunless %}"
+              {% unless current_variant.available %}disabled{% endunless %}>
               Buy with <span class="font-extrabold tracking-tighter">{% render 'icon-shop' %}</span>
             </button>
           </div>
@@ -312,17 +320,29 @@
 
           if(variant.available) {
             btnTextSpan.innerText = 'ADD TO CART';
-            btn.disabled = false; btn.classList.remove('opacity-50', 'cursor-not-allowed');
-            if(buyBtn) { buyBtn.disabled = false; buyBtn.classList.remove('opacity-50', 'cursor-not-allowed'); }
+            btn.disabled = false; 
+            btn.classList.remove('opacity-50', 'cursor-not-allowed');
+            if(buyBtn) { 
+              buyBtn.disabled = false; 
+              buyBtn.classList.remove('opacity-50', 'cursor-not-allowed'); 
+            }
           } else {
-            btnTextSpan.innerText = 'SOLD OUT';
-            btn.disabled = true; btn.classList.add('opacity-50', 'cursor-not-allowed');
-            if(buyBtn) { buyBtn.disabled = true; buyBtn.classList.add('opacity-50', 'cursor-not-allowed'); }
+            btnTextSpan.innerText = 'Out Of Stock';
+            btn.disabled = true; 
+            btn.classList.add('opacity-50', 'cursor-not-allowed');
+            if(buyBtn) { 
+              buyBtn.disabled = true; 
+              buyBtn.classList.add('opacity-50', 'cursor-not-allowed'); 
+            }
           }
         } else {
           btnTextSpan.innerText = 'UNAVAILABLE';
           btn.disabled = true;
-          if(buyBtn) { buyBtn.disabled = true; buyBtn.classList.add('opacity-50', 'cursor-not-allowed'); }
+          btn.classList.add('opacity-50', 'cursor-not-allowed');
+          if(buyBtn) { 
+            buyBtn.disabled = true; 
+            buyBtn.classList.add('opacity-50', 'cursor-not-allowed'); 
+          }
         }
       };
 
