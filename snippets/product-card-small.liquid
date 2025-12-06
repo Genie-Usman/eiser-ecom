@@ -10,15 +10,15 @@
   assign card_image = image | default: card_product.featured_image
   assign quick_variant = card_product.selected_or_first_available_variant
   assign link_overlay = wrap_link | default: false
-  
+
   assign product_form_id = 'quick-add-' | append: section.id | append: card_product.id
 %}
 
 <div class="product-card grid-view-item flex flex-col bg-white border border-gray-200 group relative overflow-hidden" data-product-id="{{ card_product.id }}">
-  <div class="relative overflow-hidden bg-white">
+  <div class="relative overflow-hidden bg-[#EFF2F1] aspect-square flex items-center justify-center">
     {% if card_image %}
       <img
-        class="w-full h-auto object-contain"
+        class="w-full h-full object-contain"
         src="{{ card_image | image_url: width: 600 }}"
         alt="{{ card_image.alt | escape }}"
         loading="lazy"
@@ -39,7 +39,7 @@
 
     <div class="h-12 absolute bottom-0 left-1/2 -translate-x-1/2 w-[80%] bg-[#BDE399] flex items-center justify-center gap-6 py-3 opacity-0 group-hover:opacity-100 z-20 transform translate-y-full group-hover:translate-y-0 transition-all duration-300">
       {% if card_product %}
-        
+
         <button
           type="button"
           class="w-9 h-9 bg-white rounded-full flex items-center justify-center text-black transition-colors duration-400 hover:bg-[#71cd13]"
@@ -59,8 +59,14 @@
         </button>
 
         {% if quick_variant %}
-          {% form 'product', card_product, id: product_form_id, class: 'product-card__form flex' %}
-            <input type="hidden" name="id" value="{{ quick_variant.id }}">
+          {% form 'product'
+            , card_product
+            , id: product_form_id
+            , class: 'product-card__form flex' %}
+            <input
+              type="hidden"
+              name="id"
+              value="{{ quick_variant.id }}">
             <button
               type="submit"
               name="add"

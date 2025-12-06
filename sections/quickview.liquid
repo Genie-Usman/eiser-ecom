@@ -108,71 +108,73 @@
       <form id="qv-form" class="grow">
         <input type="hidden" name="id" id="qv-variant-id" value="{{ product.selected_or_first_available_variant.id }}">
 
-        {% for option in product.options_with_values %}
-          <div class="mb-6">
-            <label class="block text-sm font-bold text-gray-900 mb-2">
-              {{ option.name }}: <span id="qv-opt-val-{{ forloop.index0 }}" class="font-normal text-sm text-gray-900">{{ option.selected_value }}</span>
-            </label>
+        {% unless product.has_only_default_variant %}
+          {% for option in product.options_with_values %}
+            <div class="mb-6">
+              <label class="block text-sm font-bold text-gray-900 mb-2">
+                {{ option.name }}: <span id="qv-opt-val-{{ forloop.index0 }}" class="font-normal text-sm text-gray-900">{{ option.selected_value }}</span>
+              </label>
 
-            <div class="flex flex-wrap gap-3">
-              {% assign is_color = false %}
-              {% if option.name == 'Color' or option.name == 'Colour' %}
-                {% assign is_color = true %}
-              {% endif %}
+              <div class="flex flex-wrap gap-3">
+                {% assign is_color = false %}
+                {% if option.name == 'Color' or option.name == 'Colour' %}
+                  {% assign is_color = true %}
+                {% endif %}
 
-              {% for value in option.values %}
-                {% if is_color %}
-                  {% assign swatch_style = "" %}
-                  {% if value.swatch.image %}
-                    {% assign image_url = value.swatch.image | image_url: width: 80 %}
-                    {% assign swatch_style = "background-image: url('" | append: image_url | append: "'); background-size: cover; background-position: center;" %}
-                  {% elsif value.swatch.color %}
-                    {% assign swatch_style = "background-color: " | append: value.swatch.color | append: ";" %}
-                  {% else %}
-                    {% assign handle_color = value | handle %}
-                    {% assign texture_url = handle_color | append: '.png' | file_url %}
-                    {% assign swatch_style = "background-color: " | append: handle_color | append: "; background-image: url('" | append: texture_url | append: "');" %}
-                  {% endif %}
-                  
-                  {% assign slide_index = 0 %}
-                  {% for v in product.variants %}
-                    {% if v.option1 == value or v.option2 == value or v.option3 == value %}
-                      {% if v.featured_media %}
-                        {% assign slide_index = v.featured_media.position | minus: 1 %}
-                        {% break %}
-                      {% endif %}
+                {% for value in option.values %}
+                  {% if is_color %}
+                    {% assign swatch_style = "" %}
+                    {% if value.swatch.image %}
+                      {% assign image_url = value.swatch.image | image_url: width: 80 %}
+                      {% assign swatch_style = "background-image: url('" | append: image_url | append: "'); background-size: cover; background-position: center;" %}
+                    {% elsif value.swatch.color %}
+                      {% assign swatch_style = "background-color: " | append: value.swatch.color | append: ";" %}
+                    {% else %}
+                      {% assign handle_color = value | handle %}
+                      {% assign texture_url = handle_color | append: '.png' | file_url %}
+                      {% assign swatch_style = "background-color: " | append: handle_color | append: "; background-image: url('" | append: texture_url | append: "');" %}
                     {% endif %}
-                  {% endfor %}
+                    
+                    {% assign slide_index = 0 %}
+                    {% for v in product.variants %}
+                      {% if v.option1 == value or v.option2 == value or v.option3 == value %}
+                        {% if v.featured_media %}
+                          {% assign slide_index = v.featured_media.position | minus: 1 %}
+                          {% break %}
+                        {% endif %}
+                      {% endif %}
+                    {% endfor %}
 
-                  <div class="relative group/swatch flex justify-center">
-                    <div class="absolute bottom-full mb-2 hidden group-hover/swatch:block whitespace-nowrap z-50">
-                        <div class="relative bg-gray-900 text-white text-[11px] font-medium py-1 px-2 rounded shadow-lg transform translate-x-0">
-                            {{ value }}
-                            <div class="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
-                        </div>
+                    <div class="relative group/swatch flex justify-center">
+                      <div class="absolute bottom-full mb-2 hidden group-hover/swatch:block whitespace-nowrap z-50">
+                          <div class="relative bg-gray-900 text-white text-[11px] font-medium py-1 px-2 rounded shadow-lg transform translate-x-0">
+                              {{ value }}
+                              <div class="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
+                          </div>
+                      </div>
+
+                      <div class="w-8 h-8 mt-2 rounded-full border border-gray-300 cursor-pointer bg-cover bg-center transition-all hover:border-gray-400 qv-swatch {% if option.selected_value == value %}ring-1 ring-offset-2 ring-gray-900 border-gray-400{% endif %}"
+                           data-value="{{ value }}"
+                           data-index="{{ forloop.parentloop.index0 }}"
+                           data-slide-index="{{ slide_index }}"
+                           onclick="qvSelect(this, true)"
+                           style="{{ swatch_style }}">
+                      </div>
                     </div>
 
-                    <div class="w-8 h-8 mt-2 rounded-full border border-gray-300 cursor-pointer bg-cover bg-center transition-all hover:border-gray-400 qv-swatch {% if option.selected_value == value %}ring-1 ring-offset-2 ring-gray-900 border-gray-400{% endif %}"
+                  {% else %}
+                    <div class="px-4 py-2 border border-gray-200 text-xs font-bold text-gray-600 cursor-pointer hover:border-black transition-all qv-btn {% if option.selected_value == value %}bg-black text-white border-black{% endif %}"
                          data-value="{{ value }}"
                          data-index="{{ forloop.parentloop.index0 }}"
-                         data-slide-index="{{ slide_index }}"
-                         onclick="qvSelect(this, true)"
-                         style="{{ swatch_style }}">
+                         onclick="qvSelect(this, false)">
+                      {{ value }}
                     </div>
-                  </div>
-
-                {% else %}
-                  <div class="px-4 py-2 border border-gray-200 text-xs font-bold text-gray-600 cursor-pointer hover:border-black transition-all qv-btn {% if option.selected_value == value %}bg-black text-white border-black{% endif %}"
-                       data-value="{{ value }}"
-                       data-index="{{ forloop.parentloop.index0 }}"
-                       onclick="qvSelect(this, false)">
-                    {{ value }}
-                  </div>
-                {% endif %}
-              {% endfor %}
+                  {% endif %}
+                {% endfor %}
+              </div>
             </div>
-          </div>
-        {% endfor %}
+          {% endfor %}
+        {% endunless %}
 
         {% comment %} Quantity {% endcomment %}
         <div class="mb-8">

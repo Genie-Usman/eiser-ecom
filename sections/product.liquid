@@ -122,58 +122,60 @@
                   {% endfor %}
                 </select>
 
-                {% for option in product.options_with_values %}
-                  <fieldset
-                    class="mb-4"
-                    data-option-index="{{ forloop.index0 }}"
-                    data-option-name="{{ option.name }}">
-                    <legend class="text-sm font-semibold uppercase tracking-wide text-gray-500 mb-3">{{ option.name }}</legend>
-                    <div class="flex flex-wrap gap-3" id="{{ option.name }}FieldSet">
-                      {% for value in option.values %}
-                        <label class="cursor-pointer">
-                          <input
-                            type="radio"
-                            name="{{ option.name }}"
-                            value="{{ value }}"
-                            class="peer sr-only"
-                            {% if option.selected_value == value %}
-                            checked{% endif %}>
-                          {% if option.name == 'Color' %}
-                            {% assign swatch_style = "" %}
-                            {% if value.swatch.image %}
-                              {% assign image_url = value.swatch.image | image_url: width: 80 %}
-                              {% assign swatch_style = "background-image: url('" | append: image_url | append: "'); background-size: cover; background-position: center;" %}
-                            {% elsif value.swatch.color %}
-                              {% assign swatch_style = "background-color: " | append: value.swatch.color | append: ";" %}
-                            {% else %}
-                              {% assign handle_color = value | handle %}
-                              {% assign texture_url = handle_color | append: '.png' | file_url %}
-                              {% assign swatch_style = "background-color: " | append: handle_color | append: "; background-image: url('" | append: texture_url | append: "');" %}
-                            {% endif %}
+                {% unless product.has_only_default_variant %}
+                  {% for option in product.options_with_values %}
+                    <fieldset
+                      class="mb-4"
+                      data-option-index="{{ forloop.index0 }}"
+                      data-option-name="{{ option.name }}">
+                      <legend class="text-sm font-semibold uppercase tracking-wide text-gray-500 mb-3">{{ option.name }}</legend>
+                      <div class="flex flex-wrap gap-3" id="{{ option.name }}FieldSet">
+                        {% for value in option.values %}
+                          <label class="cursor-pointer">
+                            <input
+                              type="radio"
+                              name="{{ option.name }}"
+                              value="{{ value }}"
+                              class="peer sr-only"
+                              {% if option.selected_value == value %}
+                              checked{% endif %}>
+                            {% if option.name == 'Color' %}
+                              {% assign swatch_style = "" %}
+                              {% if value.swatch.image %}
+                                {% assign image_url = value.swatch.image | image_url: width: 80 %}
+                                {% assign swatch_style = "background-image: url('" | append: image_url | append: "'); background-size: cover; background-position: center;" %}
+                              {% elsif value.swatch.color %}
+                                {% assign swatch_style = "background-color: " | append: value.swatch.color | append: ";" %}
+                              {% else %}
+                                {% assign handle_color = value | handle %}
+                                {% assign texture_url = handle_color | append: '.png' | file_url %}
+                                {% assign swatch_style = "background-color: " | append: handle_color | append: "; background-image: url('" | append: texture_url | append: "');" %}
+                              {% endif %}
 
-                            <div class="relative group/swatch">
-                              <!-- Tooltip -->
-                              <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover/swatch:block whitespace-nowrap z-50 pointer-events-none">
-                                <div class="relative bg-gray-900 text-white text-[11px] font-medium py-1 px-2 rounded shadow-lg">
-                                  {{ value }}
-                                  <div class="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
+                              <div class="relative group/swatch">
+                                <!-- Tooltip -->
+                                <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover/swatch:block whitespace-nowrap z-50 pointer-events-none">
+                                  <div class="relative bg-gray-900 text-white text-[11px] font-medium py-1 px-2 rounded shadow-lg">
+                                    {{ value }}
+                                    <div class="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
+                                  </div>
                                 </div>
-                              </div>
 
-                              <!-- Swatch -->
-                              <span class="block w-8 h-8 rounded-full border border-gray-300 cursor-pointer bg-cover bg-center transition-all hover:border-gray-400 peer-checked:ring-1 peer-checked:ring-offset-2 peer-checked:ring-gray-900 peer-checked:border-gray-400" style="{{ swatch_style }}"></span>
-                            </div>
-                          {% else %}
-                            <!-- Other Style (Simple Box) -->
-                            <span class="px-4 py-2 border border-gray-300 rounded peer-checked:bg-black peer-checked:text-white peer-checked:border-black transition block min-w-[3rem] text-center">
-                              {{ value }}
-                            </span>
-                          {% endif %}
-                        </label>
-                      {% endfor %}
-                    </div>
-                  </fieldset>
-                {% endfor %}
+                                <!-- Swatch -->
+                                <span class="block w-8 h-8 rounded-full border border-gray-300 cursor-pointer bg-cover bg-center transition-all hover:border-gray-400 peer-checked:ring-1 peer-checked:ring-offset-2 peer-checked:ring-gray-900 peer-checked:border-gray-400" style="{{ swatch_style }}"></span>
+                              </div>
+                            {% else %}
+                              <!-- Other Style (Simple Box) -->
+                              <span class="px-4 py-2 border border-gray-300 rounded peer-checked:bg-black peer-checked:text-white peer-checked:border-black transition block min-w-12 text-center">
+                                {{ value }}
+                              </span>
+                            {% endif %}
+                          </label>
+                        {% endfor %}
+                      </div>
+                    </fieldset>
+                  {% endfor %}
+                {% endunless %}
               </variant-selector>
 
               <div class="mt-4 flex flex-col items-stretch gap-4">
@@ -566,6 +568,7 @@
         function announceCartChange(){
           try { window.dispatchEvent(new CustomEvent('cart:updated')); } catch(err) {}
           try { window.dispatchEvent(new CustomEvent('cart:refresh')); } catch(err) {}
+          try { window.dispatchEvent(new CustomEvent('cart-open')); } catch(err) {}
         }
 
         function showStatus(message, tone) {
@@ -616,7 +619,7 @@
 
           Promise.resolve(request)
             .then(function(){
-              showStatus('Added to cart', 'success');
+              // showStatus('Added to cart', 'success'); // Silenced per user request
               announceCartChange();
             })
             .catch(function(){

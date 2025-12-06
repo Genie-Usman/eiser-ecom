@@ -10,18 +10,23 @@
     color: #fff;
     padding: 10px 14px;
     border-radius: 6px;
-    box-shadow: 0 10px 20px rgba(0,0,0,.12);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, .12);
     opacity: 0;
     transform: translateY(-6px);
-    transition: opacity .18s ease, transform .18s ease;
+    transition: opacity 0.18s ease
+    , transform 0.18s ease;
     font-size: 14px;
   }
   .toast.show {
     opacity: 1;
     transform: translateY(0);
   }
-  .toast--success { background: #065f46; }
-  .toast--info { background: #1f2937; }
+  .toast--success {
+    background: #065f46;
+  }
+  .toast--info {
+    background: #1f2937;
+  }
 </style>
 
 <script>
@@ -47,10 +52,6 @@
       var t = e.detail && e.detail.type || 'success';
       showToast(msg, t);
     });
-    window.addEventListener('cart:updated', function(){
-      showToast('Cart updated', 'info');
-    });
+    // Removed cart:updated listener to prevent redundant toasts
   })();
 </script>
-
-
