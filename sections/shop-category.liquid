@@ -148,130 +148,130 @@
             {% else %}
             {% comment %} Fallback: render default sidebar parts {% endcomment %}
             {% comment %} {% assign sidebar_defaults = 'sidebar_categories|sidebar_brand|sidebar_color|sidebar_price' | split: '|' %}
-                                          {% for _t in sidebar_defaults %}
-                                            {% case _t %}
-                                              {% when 'sidebar_categories' %}
-                                                <div class="p-5 border border-gray-200">
-                                                  <h3 class="ml-2 text-lg font-semibold text-gray-900">{{ section.settings.heading_categories | default: 'Browse Categories' }}</h3>
-                                                  <div class="flex justify-center">
-                                                    <div class="border-b border-[#71CD13] w-55 mt-2 mb-2"></div>
-                                                  </div>
-                                                  {% if collection %}
-                                                    {% for sub_collection in collections %}
-                                                      <label class="flex items-center gap-3 py-3 cursor-pointer group">
-                                                        <input
-                                                          type="radio"
-                                                          name="category"
-                                                          value="{{ sub_collection.handle }}"
-                                                          class="radio-md"
-                                                          data-category-radio
-                                                          data-href="{{ sub_collection.url }}"
-                                                          {% if sub_collection.handle == collection.handle %}
-                                                          checked{% endif %} />
-                                                        <span class="text-[#797979] text-sm group-hover:text-[#71cd13] transition-colors">{{ sub_collection.title }}</span>
-                                                      </label>
-                                                    {% endfor %}
-                                                  {% else %}
-                                                    {% for sub_collection in collections limit: 10 %}
-                                                      <label class="flex items-center gap-3 py-3 cursor-pointer group">
-                                                        <input
-                                                          type="radio"
-                                                          name="category"
-                                                          value="{{ sub_collection.handle }}"
-                                                          class="radio-md"
-                                                          data-category-radio
-                                                          data-href="{{ sub_collection.url }}" />
-                                                        <span class="text-[#797979] text-sm group-hover:text-[#71cd13] transition-colors">{{ sub_collection.title }}</span>
-                                                      </label>
-                                                    {% endfor %}
-                                                  {% endif %}
-                                                </div>
-                                              {% when 'sidebar_brand' %}
-                                                {% if collection.filters.size > 0 %}
-                                                  <div class="space-y-8">
-                                                    {% for filter in collection.filters %}
-                                                      {% case filter.type %}
-                                                        {% when 'list' %}
-                                                          <div class="p-5 border border-gray-200">
-                                                            <h3 class="ml-2 text-lg font-semibold text-gray-900">{{ filter.label | escape }}</h3>
-                                                            <div class="flex justify-center">
-                                                              <div class="border-b border-[#71CD13] w-55 mt-2 mb-2"></div>
-                                                            </div>
-                                                            <div class="space-y-3">
-                                                              {% for value in filter.values %}
-                                                                <label class="flex items-center gap-3 py-1.5 cursor-pointer group">
-                                                                  <input
-                                                                    type="checkbox"
-                                                                    class="radio-md"
-                                                                    data-facet-checkbox
-                                                                    data-url-to-add="{{ value.url_to_add }}"
-                                                                    data-url-to-remove="{{ value.url_to_remove }}"
-                                                                    {% if value.active %}
-                                                                    checked{% endif %}
-                                                                    {% if value.count == 0 and value.active == false %}
-                                                                    disabled{% endif %} />
-                                                                  <span class="text-[#797979] text-sm group-hover:text-[#71cd13] transition-colors">
-                                                                    {{ value.label | escape }}
-                                                                    {% if value.count > 0 %}
-                                                                      <span class="text-xs text-gray-400">({{ value.count }})</span>
-                                                                    {% endif %}
-                                                                  </span>
-                                                                </label>
-                                                              {% endfor %}
-                                                            </div>
-                                                          </div>
-                                                        {% when 'price_range' %}
-                                                          <div class="p-5 border border-gray-200">
-                                                            <h3 class="ml-2 text-lg font-semibold text-gray-900">{{ filter.label | default: section.settings.heading_price | default: 'Price Filter' }}</h3>
-                                                            <div class="flex justify-center">
-                                                              <div class="border-b border-[#71CD13] w-55 mt-2 mb-2"></div>
-                                                            </div>
-                                                            {% assign min_value = 0 %}
-                                                            {% assign max_value = filter.range_max %}
-                                                            {% if filter.min_value.value %}
-                                                              {% assign min_value = filter.min_value.value %}{% endif %}
-                                                            {% if filter.max_value.value %}
-                                                              {% assign max_value = filter.max_value.value %}{% endif %}
-                                                            <div
-                                                              id="price-box"
-                                                              class="range-box"
-                                                              data-max="{{ filter.range_max }}">
-                                                              <div class="range-wrap relative h-2 bg-white rounded">
-                                                                <div class="absolute left-0 right-0 top-0 h-[7px] bg-[#E8F0F2] rounded"></div>
-                                                                <div
-                                                                  id="price-progress"
-                                                                  class="range-progress absolute top-0 h-[7px] bg-transparent rounded"
-                                                                  style="left:0%; width:100%"></div>
-                                                                <input
-                                                                  type="range"
-                                                                  id="price-min"
-                                                                  min="0"
-                                                                  max="{{ filter.range_max }}"
-                                                                  step="1"
-                                                                  value="{{ min_value }}"
-                                                                  class="range-input min z-99">
-                                                                <input
-                                                                  type="range"
-                                                                  id="price-max"
-                                                                  min="0"
-                                                                  max="{{ filter.range_max }}"
-                                                                  step="1"
-                                                                  value="{{ max_value }}"
-                                                                  class="range-input max">
+                                                        {% for _t in sidebar_defaults %}
+                                                          {% case _t %}
+                                                            {% when 'sidebar_categories' %}
+                                                              <div class="p-5 border border-gray-200">
+                                                                <h3 class="ml-2 text-lg font-semibold text-gray-900">{{ section.settings.heading_categories | default: 'Browse Categories' }}</h3>
+                                                                <div class="flex justify-center">
+                                                                  <div class="border-b border-[#71CD13] w-55 mt-2 mb-2"></div>
+                                                                </div>
+                                                                {% if collection %}
+                                                                  {% for sub_collection in collections %}
+                                                                    <label class="flex items-center gap-3 py-3 cursor-pointer group">
+                                                                      <input
+                                                                        type="radio"
+                                                                        name="category"
+                                                                        value="{{ sub_collection.handle }}"
+                                                                        class="radio-md"
+                                                                        data-category-radio
+                                                                        data-href="{{ sub_collection.url }}"
+                                                                        {% if sub_collection.handle == collection.handle %}
+                                                                        checked{% endif %} />
+                                                                      <span class="text-[#797979] text-sm group-hover:text-[#71cd13] transition-colors">{{ sub_collection.title }}</span>
+                                                                    </label>
+                                                                  {% endfor %}
+                                                                {% else %}
+                                                                  {% for sub_collection in collections limit: 10 %}
+                                                                    <label class="flex items-center gap-3 py-3 cursor-pointer group">
+                                                                      <input
+                                                                        type="radio"
+                                                                        name="category"
+                                                                        value="{{ sub_collection.handle }}"
+                                                                        class="radio-md"
+                                                                        data-category-radio
+                                                                        data-href="{{ sub_collection.url }}" />
+                                                                      <span class="text-[#797979] text-sm group-hover:text-[#71cd13] transition-colors">{{ sub_collection.title }}</span>
+                                                                    </label>
+                                                                  {% endfor %}
+                                                                {% endif %}
                                                               </div>
-                                                              <p class="mt-4 text-gray-700 text-base">
-                                                                Price :
-                                                                <span id="price-min-label">{{ cart.currency.symbol }} {{ min_value }}</span>
-                                                                -
-                                                                <span id="price-max-label">{{ cart.currency.symbol }} {{ max_value }}</span>
-                                                              </p>
-                                                            </div>
-                                                          </div>
-                                                      {% endcase %}
-                                                    {% endfor %}
-                                                  </div>
-                                                {% endif %}
-                                          {% when 'sidebar_color' %} {% endcomment %}
+                                                            {% when 'sidebar_brand' %}
+                                                              {% if collection.filters.size > 0 %}
+                                                                <div class="space-y-8">
+                                                                  {% for filter in collection.filters %}
+                                                                    {% case filter.type %}
+                                                                      {% when 'list' %}
+                                                                        <div class="p-5 border border-gray-200">
+                                                                          <h3 class="ml-2 text-lg font-semibold text-gray-900">{{ filter.label | escape }}</h3>
+                                                                          <div class="flex justify-center">
+                                                                            <div class="border-b border-[#71CD13] w-55 mt-2 mb-2"></div>
+                                                                          </div>
+                                                                          <div class="space-y-3">
+                                                                            {% for value in filter.values %}
+                                                                              <label class="flex items-center gap-3 py-1.5 cursor-pointer group">
+                                                                                <input
+                                                                                  type="checkbox"
+                                                                                  class="radio-md"
+                                                                                  data-facet-checkbox
+                                                                                  data-url-to-add="{{ value.url_to_add }}"
+                                                                                  data-url-to-remove="{{ value.url_to_remove }}"
+                                                                                  {% if value.active %}
+                                                                                  checked{% endif %}
+                                                                                  {% if value.count == 0 and value.active == false %}
+                                                                                  disabled{% endif %} />
+                                                                                <span class="text-[#797979] text-sm group-hover:text-[#71cd13] transition-colors">
+                                                                                  {{ value.label | escape }}
+                                                                                  {% if value.count > 0 %}
+                                                                                    <span class="text-xs text-gray-400">({{ value.count }})</span>
+                                                                                  {% endif %}
+                                                                                </span>
+                                                                              </label>
+                                                                            {% endfor %}
+                                                                          </div>
+                                                                        </div>
+                                                                      {% when 'price_range' %}
+                                                                        <div class="p-5 border border-gray-200">
+                                                                          <h3 class="ml-2 text-lg font-semibold text-gray-900">{{ filter.label | default: section.settings.heading_price | default: 'Price Filter' }}</h3>
+                                                                          <div class="flex justify-center">
+                                                                            <div class="border-b border-[#71CD13] w-55 mt-2 mb-2"></div>
+                                                                          </div>
+                                                                          {% assign min_value = 0 %}
+                                                                          {% assign max_value = filter.range_max %}
+                                                                          {% if filter.min_value.value %}
+                                                                            {% assign min_value = filter.min_value.value %}{% endif %}
+                                                                          {% if filter.max_value.value %}
+                                                                            {% assign max_value = filter.max_value.value %}{% endif %}
+                                                                          <div
+                                                                            id="price-box"
+                                                                            class="range-box"
+                                                                            data-max="{{ filter.range_max }}">
+                                                                            <div class="range-wrap relative h-2 bg-white rounded">
+                                                                              <div class="absolute left-0 right-0 top-0 h-[7px] bg-[#E8F0F2] rounded"></div>
+                                                                              <div
+                                                                                id="price-progress"
+                                                                                class="range-progress absolute top-0 h-[7px] bg-transparent rounded"
+                                                                                style="left:0%; width:100%"></div>
+                                                                              <input
+                                                                                type="range"
+                                                                                id="price-min"
+                                                                                min="0"
+                                                                                max="{{ filter.range_max }}"
+                                                                                step="1"
+                                                                                value="{{ min_value }}"
+                                                                                class="range-input min z-99">
+                                                                              <input
+                                                                                type="range"
+                                                                                id="price-max"
+                                                                                min="0"
+                                                                                max="{{ filter.range_max }}"
+                                                                                step="1"
+                                                                                value="{{ max_value }}"
+                                                                                class="range-input max">
+                                                                            </div>
+                                                                            <p class="mt-4 text-gray-700 text-base">
+                                                                              Price :
+                                                                              <span id="price-min-label">{{ cart.currency.symbol }} {{ min_value }}</span>
+                                                                              -
+                                                                              <span id="price-max-label">{{ cart.currency.symbol }} {{ max_value }}</span>
+                                                                            </p>
+                                                                          </div>
+                                                                        </div>
+                                                                    {% endcase %}
+                                                                  {% endfor %}
+                                                                </div>
+                                                              {% endif %}
+                                                      {% when 'sidebar_color' %} {% endcomment %}
             {%- comment -%} Filters rendered above {%- endcomment -%}
             {% comment %} {% when 'sidebar_price' %} {% endcomment %}
             {%- comment -%} Filters rendered above {%- endcomment -%}
@@ -659,10 +659,12 @@
       if (! section) return;
       
 
+
       var sectionId = section.getAttribute('data-section-id');
       var dynamic = section.querySelector('[data-collection-dynamic]');
       if (! sectionId || ! dynamic) return;
       
+
 
       var parser = new DOMParser();
       var docClickBound = false;
@@ -675,6 +677,7 @@
       function fetchCollection(url) {
         if (! url) return;
         
+
 
         var fetchId = ++ requestSerial;
 
@@ -694,16 +697,19 @@
             if (! response.ok) 
               throw new Error('Failed to fetch collection');
             
+
             return response.text();
           })
           .then(function(html) {
             if (fetchId !== requestSerial) return;
             
+
             var doc = parser.parseFromString(html, 'text/html');
             var fresh = doc.querySelector('[data-collection-dynamic]');
             if (! fresh) 
               throw new Error('Missing dynamic container');
             
+
             dynamic.innerHTML = fresh.innerHTML;
             window.history.replaceState({}, '', historyUrl);
             section.setAttribute('data-collection-url', requestUrl.pathname);
@@ -712,6 +718,7 @@
           .catch(function(error) {
             if (fetchId !== requestSerial) return;
             
+
             console.error(error);
             window.location.href = url;
           })
@@ -780,6 +787,7 @@
             if (url) 
               fetchCollection(url);
             
+
           });
         });
       }
@@ -798,6 +806,7 @@
         if (! box) return;
         
 
+
         var maxAllowed = parseInt(box.dataset.max || '1000', 10);
         var minInput = dynamic.querySelector('#price-min');
         var maxInput = dynamic.querySelector('#price-max');
@@ -807,6 +816,7 @@
         var currency = box.getAttribute('data-currency') || '';
         if (! minInput || ! maxInput || ! prog) return;
         
+
 
         function format(value) {
           var prefix = currency
@@ -841,9 +851,11 @@
           if (minLabel) 
             minLabel.textContent = format(minVal);
           
+
           if (maxLabel) 
             maxLabel.textContent = format(maxVal);
           
+
         }
 
         function submitParams() {
@@ -888,6 +900,7 @@
           if (! btn || ! menu) return;
           
 
+
           btn.addEventListener('click', function(event) {
             event.stopPropagation();
             var open = dd.getAttribute('aria-open') === 'true';
@@ -911,6 +924,7 @@
               if (span) 
                 span.textContent = item.textContent.trim();
               
+
               dd.setAttribute('aria-open', 'false');
               btn.setAttribute('aria-expanded', 'false');
             });
@@ -926,6 +940,7 @@
                 if (btn) 
                   btn.setAttribute('aria-expanded', 'false');
                 
+
               });
             }
           });
@@ -948,6 +963,7 @@
           if (btn) 
             btn.textContent = sortLabel;
           
+
           sortDd.querySelectorAll('.dd-item').forEach(function(item) {
             item.classList.toggle('is-active', item.textContent.trim() === sortLabel);
           });
@@ -967,6 +983,7 @@
           if (span) 
             span.textContent = sizeLabel;
           
+
           sizeDd.querySelectorAll('.dd-item').forEach(function(item) {
             item.classList.toggle('is-active', item.textContent.trim() === sizeLabel);
           });

@@ -394,6 +394,38 @@
     });
   };
 
+  const bindGlobalEvents = () => {
+    document.addEventListener('click', e => {
+      const btn = e.target.closest('[data-quick-add]');
+      if (!btn) return;
+
+      e.preventDefault();
+      const variantId = btn.getAttribute('data-variant-id');
+      if (!variantId) return;
+
+      // Visual Feedback
+      const originalContent = btn.innerHTML;
+      btn.disabled = true;
+      btn.innerHTML = `
+        <svg class="animate-spin h-4 w-4 text-[#71cd13]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+      `;
+
+      ShopCart.add({ items: [{ id: Number(variantId), quantity: 1 }] })
+        .then(() => {
+          // Open Drawer
+          window.dispatchEvent(new CustomEvent('cart-open'));
+        })
+        .finally(() => {
+          // Reset Button
+          btn.disabled = false;
+          btn.innerHTML = originalContent;
+        });
+    });
+  };
+
   const initContent = (root) => {
     initUpsells(root);
   };
@@ -426,6 +458,7 @@
   };
 
   document.addEventListener('DOMContentLoaded', () => {
+    bindGlobalEvents();
     const roots = document.querySelectorAll(SELECTORS.root);
     roots.forEach(root => {
       bindEvents(root);
